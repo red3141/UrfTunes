@@ -1,0 +1,40 @@
+General Notes:
+- Songs must be deterministic - randomness is no good.
+  - The same song should always be generated for the same summoner (until the summoner levels up a champion).
+  - Pretty much all procedural music generation techniques use randomness in some way.
+  - To make songs deterministic, we can replace the RNG with champion mastery data.
+  - Randomness is OK for generating white noise.
+
+Options for generation:
+- Markov chains (https://en.wikipedia.org/wiki/Markov_chain)
+  - Stochastic/random music generation based on probability rules.
+  - The next "state" (e.g. pitch, note length) is determined by the previous state, the rules, and a random number.
+  - In our case, random is no good. We could hard-code the rules, then use champion mastery data to simulate the "random numbers" for the state changes.
+  - Or we could use champion mastery data to generate both the rules and the state change decisions.
+- Neural networks
+  - Probably not useful in our case since they require training.
+  - We can only make this work if we pre-train the network and hard-code the trained values.
+- Genetic algorithms
+  - Have the same problem as neural networks because they must be trained.
+  - Probably need human feedback to evolve the algorithm.
+  - Alternatively we could use an "expert system" to provide feedback. The expert system would evaluate music based on hard-coded music theory rules.
+- Cellular Automata (http://tones.wolfram.com/about/how.html)
+  - Kind of like Markov chains, but determines the next state based on a number of previous states.
+  - For this, we would probably generate the rules using champion mastery data.
+
+How should champion mastery data affect the song?
+- Well that's a complicated question. I'm glad you asked.
+- It would be nice if each champion (or at least each role) had a distinct/recognizable sound.
+- We want people's songs to sound different, so it feels like your song belongs to you; it's not almost the same as everyone else's song.
+- However, levelling up one champion should not completely change your song. We want your song to evolve over time, not change in seemingly random ways.
+- There should always be some sound. We don't want new players to have large amounts of dead space in their songs.
+- So how do we do that? Some options (we might take a combination of them):
+  a) Each role controls an instrument (e.g. ADC=Trumpet, Tank=Drums, etc.)
+     Each champion for a given role plays during a pre-defined section of the song (e.g. Draven first, then Ashe, etc.)
+     The volume of each champion is determined by their mastery level.
+     Issues:
+     - This will have dead space sometimes. We'll have to fix that somehow. Maybe shorten the song by cutting dead sections out.
+  b) Rules for music generation will be determined by the champion mastery data.
+     Some champions will tend to create more agressive lines of music, while others will tend to create more peaceful lines.
+     Some champions (like Jinx) will be more likely to break the rules of music theory.
+  c) Have multiple sections, where each section features a different high-mastery-level champion. 

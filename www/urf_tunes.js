@@ -7,7 +7,7 @@ function init() {
     } catch(e) {
         alert('Your browser does not support Urf Tunes; we recommend using Google Chrome.');
     }
-}
+};
 
 function playFrequency(frequency) {
     var oscillator = context.createOscillator();
@@ -16,31 +16,56 @@ function playFrequency(frequency) {
     setInterval(function() { oscillator.frequency.value += 50 * Math.sin(i); i += 0.3;}, 100);
     oscillator.connect(context.destination);
     oscillator.start(0);
-}
+};
 
-var bassDrumOscillator;
-var bassDrumGain;
+// Bass Drum
+function BassDrum(context, pitch, duration) {
+    this.context = context;
+    this.pitch = pitch;
+    this.duration = duration;
+};
 
-function playBassDrum() {
-    if (!bassDrumOscillator) {
-        bassDrumOscillator = context.createOscillator();
-        bassDrumGain = context.createGain();
-        bassDrumGain.gain.value = 0;
-        bassDrumOscillator.connect(bassDrumGain);
-        bassDrumGain.connect(context.destination);
-        bassDrumOscillator.start(now);
-    }
+BassDrum.prototype.init = function() {
+    this.oscillator = this.context.createOscillator();
+    this.gain = this.context.createGain();
+    this.oscillator.connect(this.gain);
+    this.gain.connect(this.context.destination);
+};
+
+BassDrum.prototype.setPitch = function(newPitch) {
+    this.pitch = newPitch;
+};
+
+BassDrum.prototype.setDuration = function(newDuration) {
+    this.duration = newDuration;
+};
+
+BassDrum.prototype.play = function(time) {
+    this.init();
     
+    var endTime = time + this.duration;
+    
+    this.oscillator.frequency.setValueAtTime(this.pitch, time);
+    this.gain.gain.setValueAtTime(1, time);
+    
+    this.oscillator.frequency.exponentialRampToValueAtTime(0.001, endTime);
+    this.gain.gain.exponentialRampToValueAtTime(0.001, endTime);
+    
+    this.oscillator.start(time);
+    this.oscillator.stop(endTime);
+};
+
+function playMeSomeSweetSweetBassDrum() {
+    var bassDrum = new BassDrum(context, 150, 0.5);
     var now = context.currentTime;
-    var duration = 3;
-    
-    bassDrumGain.gain.cancelScheduledValues(0);
-    // Reduce the gain to 0 to avoid a clicking noise when starting the bass drum sound again.
-    bassDrumGain.gain.setValueAtTime(0, now);
-    bassDrumGain.gain.setValueAtTime(1, now + 0.001);
-    bassDrumGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-    bassDrumGain.gain.setValueAtTime(0, now + duration);
-    
-    bassDrumOscillator.frequency.setValueAtTime(150, now);
-    bassDrumOscillator.frequency.exponentialRampToValueAtTime(0.001, now + duration);
-}
+    bassDrum.play(now);
+    bassDrum.play(now + 1);
+    bassDrum.setPitch(300);
+    bassDrum.setDuration(3);
+    bassDrum.play(now + 2);
+    bassDrum.setDuration(0.5)
+    bassDrum.play(now + 3);
+    bassDrum.setPitch(150);
+    bassDrum.play(now + 4);
+    bassDrum.play(now + 5);
+};

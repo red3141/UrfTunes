@@ -3,3 +3,4 @@ procedural music generation, and other topics pertaining to our project.
 
 1) http://www.html5rocks.com/en/tutorials/webaudio/intro/ - An intro to the Web Audio API
 2) http://blog.chrislowis.co.uk/2013/06/05/playing-notes-web-audio-api.html - Explains playing tones with the Web Audio API
+3) https://dev.opera.com/articles/drum-sounds-webaudio/ - Creating synthesized drum sounds in the Web Audio API

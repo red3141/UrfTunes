@@ -9,13 +9,17 @@ function init() {
     }
 };
 
-function playFrequency(frequency) {
+function playFrequency(frequency, startTime, duration) {
+    startTime = startTime || 0;
+    
     var oscillator = context.createOscillator();
     oscillator.frequency.value = frequency;
     var i = 0;
-    setInterval(function() { oscillator.frequency.value += 50 * Math.sin(i); i += 0.3;}, 100);
+    //setInterval(function() { oscillator.frequency.value += 50 * Math.sin(i); i += 0.3;}, 100);
     oscillator.connect(context.destination);
-    oscillator.start(0);
+    oscillator.start(startTime);
+    if (duration)
+        oscillator.stop(startTime + duration);
 };
 
 // Bass Drum

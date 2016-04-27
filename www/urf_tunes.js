@@ -1,4 +1,6 @@
 var context;
+const MAX_GAIN = 3;
+
 window.addEventListener('load', init, false);
 function init() {
     try {
@@ -27,6 +29,7 @@ function BassDrum(context, pitch, duration) {
 
 BassDrum.prototype.init = function() {
     this.oscillator = this.context.createOscillator();
+    this.oscillator.type = 'triangle';
     this.gain = this.context.createGain();
     this.oscillator.connect(this.gain);
     this.gain.connect(this.context.destination);
@@ -40,13 +43,13 @@ BassDrum.prototype.setDuration = function(newDuration) {
     this.duration = newDuration;
 };
 
-BassDrum.prototype.play = function(time) {
+BassDrum.prototype.play = function(time, volume) {
     this.init();
     
     var endTime = time + this.duration;
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.gain.gain.setValueAtTime(1, time);
+    this.gain.gain.setValueAtTime(MAX_GAIN * volume, time);
     
     this.oscillator.frequency.exponentialRampToValueAtTime(0.001, endTime);
     this.gain.gain.exponentialRampToValueAtTime(0.001, endTime);
@@ -56,16 +59,12 @@ BassDrum.prototype.play = function(time) {
 };
 
 function playMeSomeSweetSweetBassDrum() {
-    var bassDrum = new BassDrum(context, 150, 0.5);
+    var bassDrum = new BassDrum(context, 150, 0.6);
     var now = context.currentTime;
-    bassDrum.play(now);
-    bassDrum.play(now + 1);
-    bassDrum.setPitch(300);
-    bassDrum.setDuration(3);
-    bassDrum.play(now + 2);
-    bassDrum.setDuration(0.5)
-    bassDrum.play(now + 3);
-    bassDrum.setPitch(150);
-    bassDrum.play(now + 4);
-    bassDrum.play(now + 5);
+    bassDrum.play(now, 1);
+    bassDrum.play(now + 1, 0.25);
+    bassDrum.play(now + 2, 0.5);
+    bassDrum.play(now + 3, 0.25);
+    bassDrum.play(now + 4, 1);
+    bassDrum.play(now + 5, 0.25);
 };

@@ -1,5 +1,22 @@
 var context;
+
+var masteries = {
+    'braum' : 5,
+    'hecarim' : 0,
+    'malphite' : 5,
+    'masteryi' : 0,
+    'rammus' : 0,
+    'zilean' : 0
+}
+
 const MAX_GAIN = 3;
+const BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
+const BEATS_PER_MINUTE = 110 + 40 + 2 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
+const SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
+const SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
+console.log(SECONDS_PER_BEAT + "   " + SECONDS_PER_BAR);
+
+var songStartTime = 0;
 
 window.addEventListener('load', init, false);
 function init() {
@@ -43,9 +60,10 @@ BassDrum.prototype.setDuration = function(newDuration) {
     this.duration = newDuration;
 };
 
-BassDrum.prototype.play = function(time, volume) {
+BassDrum.prototype.play = function(bars, volume) {
     this.init();
     
+    var time = songStartTime + SECONDS_PER_BAR * bars;
     var endTime = time + this.duration;
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
@@ -58,13 +76,22 @@ BassDrum.prototype.play = function(time, volume) {
     this.oscillator.stop(endTime);
 };
 
-function playMeSomeSweetSweetBassDrum() {
-    var bassDrum = new BassDrum(context, 150, 0.6);
-    var now = context.currentTime;
-    bassDrum.play(now, 1);
-    bassDrum.play(now + 1, 0.25);
-    bassDrum.play(now + 2, 0.5);
-    bassDrum.play(now + 3, 0.25);
-    bassDrum.play(now + 4, 1);
-    bassDrum.play(now + 5, 0.25);
+function playSong() {
+    songStartTime = context.currentTime;
+    
+    // Create the instruments for the song.
+    var bassDrum = new BassDrum(context, 150 + 20 * masteries['braum'], 0.1 + 0.1 * masteries['malphite']);
+    
+    var delta = 0.25;
+    var repeats = 4;
+    var bars = 0;
+    
+    for (var i = 0; i < 4; ++i) {
+        for (var j = 0; j < repeats; ++j) {
+            bassDrum.play(bars, 1);
+            bars += delta;
+        }
+        delta /= 2;
+        repeats *= 2;
+    }
 };

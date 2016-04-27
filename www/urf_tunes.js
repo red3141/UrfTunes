@@ -64,14 +64,14 @@ BassDrum.prototype.setDuration = function(newDuration) {
     this.duration = newDuration;
 };
 
-BassDrum.prototype.play = function(bars, volume) {
+BassDrum.prototype.play = function(bars) {
     this.init();
     
     var time = songStartTime + SECONDS_PER_BAR * bars;
     var endTime = time + this.duration;
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.gain.gain.setValueAtTime(MAX_GAIN * volume, time);
+    this.gain.gain.setValueAtTime(MAX_GAIN, time);
     
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);

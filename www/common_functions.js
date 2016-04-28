@@ -4,8 +4,8 @@ function equals(o1, o2) {
   if (o1 !== o1 && o2 !== o2) return true; // NaN === NaN
   var t1 = typeof o1, t2 = typeof o2, length, key, keySet;
   if (t1 === t2 && t1 === 'object') {
-    if (isArray(o1)) {
-      if (!isArray(o2)) return false;
+    if (Array.isArray(o1)) {
+      if (!Array.isArray(o2)) return false;
       if ((length = o1.length) === o2.length) {
         for (key = 0; key < length; key++) {
           if (!equals(o1[key], o2[key])) return false;
@@ -20,7 +20,7 @@ function equals(o1, o2) {
       return o1.toString() === o2.toString();
     } else {
       if (isScope(o1) || isScope(o2) || isWindow(o1) || isWindow(o2) ||
-        isArray(o2) || isDate(o2) || isRegExp(o2)) return false;
+        Array.isArray(o2) || isDate(o2) || isRegExp(o2)) return false;
       keySet = createMap();
       for (key in o1) {
         if (isFunction(o1[key])) continue;
@@ -34,6 +34,9 @@ function equals(o1, o2) {
       }
       return true;
     }
+  }
+  if (t1 === t2 && t1 === 'number') {
+    return Math.abs(o2 - o1) < 1e-3;
   }
   return false;
 }

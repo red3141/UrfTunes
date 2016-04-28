@@ -1,4 +1,4 @@
-var SongBuilder = (function() {
+var songBuilder = (function() {
     function build()  {
         // Start by building the form of the song (e.g. AABA)
         // A "rule" is a function that determines the probability of getting to each state from the current state.
@@ -38,11 +38,17 @@ var SongBuilder = (function() {
                 return [0.1, 0.8, 0.1];
             return [1];
         }
-        var form = new MarkovChain(formRule, 8);
+        var form = markovChain.build(formRule, 8);
         
-        // Now generate a chord progression
+        var segments = [];
+        for (var i = 0; i < 3; ++i) {
+            segments.push({});
+        }
+        
+        // Generate a chord progression (0=C, 1=Dm, 2=Em, 3=F, etc.)
         var chordRule = function (prevStates) {
             // Data from http://www.hooktheory.com/trends#node=1&key=C
+            // Always start with the root chord (C)
             if (equals(prevStates, []))
                 return [1];
             if (equals(prevStates, [0]))
@@ -86,16 +92,80 @@ var SongBuilder = (function() {
             if (equals(prevStates, [0, 5, 4]))
                 return [0.2, 0.1, 0, 0.7, 0, 0, 0];
         }
-        var chordProgressions = [];
-        var chordProgressionLength = 4;
-        for (var i = 0; i < 3; ++i) {
-            chordProgressions[i] = new MarkovChain(chordRule, chordProgressionLength);
+        for (var i = 0; i < segments.length; ++i) {
+            segments[i].chordProgression = markovChain.build(chordRule, 4);
         }
         
-        // Now generate a sequence of notes for each segment of song (0=A, 1=B, 2=C)
-        var pitchRule = function (state, index, length) {
-            // States are notes in a scale (0=Do, 1=Re, 2=Mi, etc.)
-            switch (state) {
+        // Generate rhythms for each section
+        // TODO: rhythm rule
+        var rhythmRule = function (beat) {
+            switch (beat % 4) {
+                case 0:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 1 }, probability: 0.5 },
+                        { value: { duration: 1.5 }, probability: 0.1 },
+                    ];
+                case 0.5:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 1:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 1.5:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.7 },
+                        { value: { duration: 1.5 }, probability: 0.3 },
+                    ];
+                case 2:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 2.5:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 3:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 3.5:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.5 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.5 },
+                    ];
+                default:
+                    return [
+                        { value: { duration: 1 }, probability: 1 },
+                    ];
+            }
+        }
+        for (var i = 0; i < segments.length; ++i) {
+            segments[i].rhythm = markovChain.buildRhythm(rhythmRule, 16);
+        }
+        
+        // TODO: update rule
+        // Generate a sequence of notes for each segment (0=A, 1=B, 2=C)
+        var pitchRule = function (prevNote, currentBeat, chord) {
+            // prevNote is a numeric value representing a note in a scale (0=Do, 1=Re, 2=Mi, etc.)
+            switch (prevNote) {
                 case 0:
                     return [0.05, 0.3, 0.2, 0.15, 0.1, 0.1, 0.1];
                 case 1:
@@ -112,27 +182,39 @@ var SongBuilder = (function() {
                     return [0.1, 0.1, 0.1, 0.15, 0.2, 0.3, 0.05];
             }
         }
-        var segments = [];
-        var segmentLength = 8;
-        for (var i = 0; i < 3; ++i) {
-            segments[i] = new MarkovChain(pitchRule, segmentLength);
+        for (var i = 0; i < segments.length; ++i) {
+            var segment = segments[i];
+            segment.notes = markovChain.buildNotes(pitchRule, segment.rhythm, segment.chordProgression);
         }
-        var notes = [];
-        for (var i = 0; i < form.states.length; ++i) {
-            var segmentNumber = form.states[i];
-            notes.push.apply(notes, segments[segmentNumber].states);
-        }
-        return notes;
+        
+        // Concatenate notes
+        /*var notes = [];
+        for (var i = 0; i < form.length; ++i) {
+            var segmentNumber = form[i];
+            notes.push.apply(notes, segmentNotes[segmentNumber]);
+        }*/
+        return {
+            form: form,
+            segments: segments,
+        };
     }
     
     function run(song)  {
         // C4-B4
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88];
         var tempo = 120 // beats per minute
-        var quarterNoteDuration = 60 / tempo;
-        for (var i = 0; i < song.length; ++i) {
-            var note = song[i];
-            playFrequency(frequencies[note], quarterNoteDuration * i, quarterNoteDuration);
+        var beatDuration = 60 / tempo;
+        var currentBeat = 0;
+        for (var i = 0; i < song.form.length; ++i) {
+            var segment = song.segments[song.form[i]];
+            for (var j = 0; j < segment.notes.length; ++j) {
+                var rhythm = segment.rhythm[j];
+                if (!rhythm.isRest) {
+                    var note = segment.notes[j];
+                    playFrequency(frequencies[note], currentBeat * beatDuration, rhythm.duration * beatDuration);
+                }
+                currentBeat += rhythm.duration;
+            }
         }
     }
     

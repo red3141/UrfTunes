@@ -165,7 +165,7 @@ var songBuilder = (function() {
         // Generate a sequence of notes for each segment (0=A, 1=B, 2=C)
         var pitchRule = function (prevNote, currentBeat, chord) {
             // prevNote is a numeric value representing a note in a scale (0=Do, 1=Re, 2=Mi, etc.)
-            switch (prevNote) {
+            /*switch (prevNote) {
                 case 0:
                     return [0.05, 0.3, 0.2, 0.15, 0.1, 0.1, 0.1];
                 case 1:
@@ -180,19 +180,77 @@ var songBuilder = (function() {
                     return [0.1, 0.1, 0.1, 0.15, 0.2, 0.05, 0.3];
                 default:
                     return [0.1, 0.1, 0.1, 0.15, 0.2, 0.3, 0.05];
+            }*/
+            // Start with numbers representing the note in the current chord.
+            var stateMap;
+            switch (prevNote) {
+                case 0:
+                case 1:
+                    switch (currentBeat % 4) {
+                        case 0:
+                        case 0.5:
+                        case 2:
+                        case 2.5:
+                            // Ensure that strong beats land on 1, 3, or 5 in the chord
+                            stateMap = [0.6, 0, 0.3, 0, 0.1, 0, 0];
+                        default:
+                            stateMap = [0.3, 0.4, 0.2, 0.1, 0.0, 0.0, 0.0];
+                    }
+                case 2:
+                case 3:
+                    switch (currentBeat % 4) {
+                        case 0:
+                        case 0.5:
+                        case 2:
+                        case 2.5:
+                            // Ensure that strong beats land on 1, 3, or 5 in the chord
+                            stateMap = [0.1, 0, 0.3, 0, 0.6, 0, 0];
+                        default:
+                            stateMap = [0.0, 0.1, 0.2, 0.2, 0.4, 0.1, 0.0];
+                    }
+                case 4:
+                    switch (currentBeat % 4) {
+                        case 0:
+                        case 0.5:
+                        case 2:
+                        case 2.5:
+                            stateMap = [0.0, 0, 0.2, 0, 0.8, 0, 0];
+                        default:
+                            stateMap = [0.0, 0.1, 0.2, 0.3, 0.2, 0.2, 0.0];
+                    }
+                case 5:
+                    switch (currentBeat % 4) {
+                        case 0:
+                        case 0.5:
+                        case 2:
+                        case 2.5:
+                            stateMap = [0.0, 0, 0, 0, 1, 0, 0];
+                        default:
+                            stateMap = [0.0, 0.0, 0.2, 0.3, 0.4, 0.0, 0.1];
+                    }
+                default:
+                    switch (currentBeat % 4) {
+                        case 0:
+                        case 0.5:
+                        case 2:
+                        case 2.5:
+                            stateMap = [0.0, 0, 0.0, 0, 1, 0, 0];
+                        default:
+                            stateMap = [0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.0];
+                    }
             }
+            // Translate the stateMap to actual notes based on the current chord
+            if (chord === 0)
+                return stateMap;
+            var lastPart = stateMap.splice(7 - chord);
+            stateMap.unshift.apply(stateMap, lastPart);
+            return stateMap;
         }
         for (var i = 0; i < segments.length; ++i) {
             var segment = segments[i];
             segment.notes = markovChain.buildNotes(pitchRule, segment.rhythm, segment.chordProgression);
         }
         
-        // Concatenate notes
-        /*var notes = [];
-        for (var i = 0; i < form.length; ++i) {
-            var segmentNumber = form[i];
-            notes.push.apply(notes, segmentNotes[segmentNumber]);
-        }*/
         return {
             form: form,
             segments: segments,
@@ -205,6 +263,9 @@ var songBuilder = (function() {
         var tempo = 120 // beats per minute
         var beatDuration = 60 / tempo;
         var currentBeat = 0;
+        // Add bass
+        
+        // Add melody
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < segment.notes.length; ++j) {

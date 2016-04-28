@@ -15,10 +15,13 @@ function playFrequency(frequency, startTime, duration) {
     startTime = startTime || 0;
     
     var oscillator = context.createOscillator();
+    var gain = this.context.createGain();
+    gain.gain.setValueAtTime(0.35, 0);
     oscillator.frequency.value = frequency;
     var i = 0;
     //setInterval(function() { oscillator.frequency.value += 50 * Math.sin(i); i += 0.3;}, 100);
-    oscillator.connect(context.destination);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
     oscillator.start(startTime);
     if (duration)
         oscillator.stop(startTime + duration);

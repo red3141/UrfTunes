@@ -1,4 +1,5 @@
 var songBuilder = (function() {
+    var measuresPerSegment = 16;
     function build()  {
         // Start by building the form of the song (e.g. AABA)
         // A "rule" is a function that determines the probability of getting to each state from the current state.
@@ -158,7 +159,7 @@ var songBuilder = (function() {
             }
         }
         for (var i = 0; i < segments.length; ++i) {
-            segments[i].rhythm = markovChain.buildRhythm(rhythmRule, 16);
+            segments[i].rhythm = markovChain.buildRhythm(rhythmRule, measuresPerSegment);
         }
         
         // TODO: update rule
@@ -260,12 +261,24 @@ var songBuilder = (function() {
     function run(song)  {
         // C4-B4
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88];
-        var tempo = 120 // beats per minute
+        var tempo = 240 // beats per minute
         var beatDuration = 60 / tempo;
         var currentBeat = 0;
         // Add bass
-        
+        for (var i = 0; i < song.form.length; ++i) {
+            var segment = song.segments[song.form[i]];
+            for (var j = 0; j < measuresPerSegment; ++j) {
+                for (var k = 0; k < segment.chordProgression.length; ++k) {
+                    var chord = segment.chordProgression[k];
+                    // Play the root note of the chord for 1 bar
+                    var frequency = frequencies[chord] / 2;
+                    playFrequency(frequency, currentBeat * beatDuration, 4 * beatDuration);
+                    currentBeat += 4;
+                }
+            }
+        }
         // Add melody
+        currentBeat = 0;
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < segment.notes.length; ++j) {

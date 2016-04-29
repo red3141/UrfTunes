@@ -459,7 +459,9 @@ BassDrum.prototype.play = function(bars) {
     var endTime = time + this.duration;
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.gain.gain.setValueAtTime(MAX_GAIN, time);
+    this.oscillator.frequency.setValueAtTime(this.pitch, time + 0.01);
+    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.exponentialRampToValueAtTime(MAX_GAIN, time + 0.01);
     
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
@@ -631,7 +633,7 @@ function playSong() {
     var sineTooth = new SineTooth(context);
     
     // Megalovania
-    sineTooth.play(0, D4, 1/16);
+    /*sineTooth.play(0, D4, 1/16);
     sineTooth.play(0, A4, 1/16);
     sineTooth.play(1/16, D4, 1/16);
     sineTooth.play(1/16, A4, 1/16);
@@ -668,7 +670,7 @@ function playSong() {
     sineTooth.play(2+11/16, F4, 1/8);
     sineTooth.play(2+13/16, D4, 1/16);
     sineTooth.play(2+14/16, F4, 1/16);
-    sineTooth.play(2+15/16, G4, 1/16);
+    sineTooth.play(2+15/16, G4, 1/16);*/
     
     bassDrum.play(0);
     bassDrum.play(1/16);
@@ -697,7 +699,7 @@ function playSong() {
     
 
     // Increasing speed drum pattern
-    var delta = 0.25;
+    /*var delta = 0.25;
     var repeats = 4;
     var bars = 0;
     
@@ -712,5 +714,5 @@ function playSong() {
         }
         delta /= 2;
         repeats *= 2;
-    }
+    }*/
 };

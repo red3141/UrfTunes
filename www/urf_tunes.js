@@ -26,11 +26,11 @@ const MAX_GAIN = 3;
 const BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
 const BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
-const BEATS_PER_MINUTE = 70 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
+const BEATS_PER_MINUTE = 200 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
 const SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
 const SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
 
-var songStartTime = 0;
+var songStartTime = 2;
 
 window.addEventListener('load', init, false);
 function init() {
@@ -47,7 +47,7 @@ function playFrequency(frequency, startTime, duration) {
     
     var oscillator = context.createOscillator();
     var gain = this.context.createGain();
-    gain.gain.setValueAtTime(0.35, 0);
+    gain.gain.setValueAtTime(0.25, 0);
     oscillator.frequency.value = frequency;
     var i = 0;
     //setInterval(function() { oscillator.frequency.value += 50 * Math.sin(i); i += 0.3;}, 100);
@@ -88,7 +88,7 @@ BassDrum.prototype.play = function(bars) {
     var endTime = time + this.duration;
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.gain.gain.setValueAtTime(MAX_GAIN, time);
+    this.gain.gain.setValueAtTime(0.8, time);
     
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);

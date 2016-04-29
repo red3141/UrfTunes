@@ -102,8 +102,10 @@ var songBuilder = (function() {
             switch (beat % 4) {
                 case 0:
                     return [
-                        { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 1 }, probability: 0.5 },
+                        { value: { duration: 0.5 }, probability: 0.1 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.2 },
+                        { value: { duration: 1, isRest: true }, probability: 0.3 },
                         { value: { duration: 1.5 }, probability: 0.1 },
                     ];
                 case 0.5:
@@ -257,10 +259,6 @@ var songBuilder = (function() {
                     break;
             }
             // Translate the stateMap to actual notes based on the current chord
-            /*if (chord === 0)
-                return stateMap;
-            var lastPart = stateMap.splice(7 - chord);
-            stateMap.unshift.apply(stateMap, lastPart);*/
             for (var i = 0; i < chord; ++i)
                 stateMap.unshift(0);
             return stateMap;
@@ -279,22 +277,32 @@ var songBuilder = (function() {
     function run(song)  {
         // C4-B4
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
-        var tempo = 210 // beats per minute
-        var beatDuration = 60 / tempo;
         var currentBeat = 0;
-        // Add bass
+        // Add bass drum
+        var bassDrum = new BassDrum(context, 75 + 20 * masteries['braum'], 0.1 + 0.1 * masteries['malphite']);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < measuresPerSegment; ++j) {
-                for (var k = 0; k < segment.chordProgression.length; ++k) {
-                    var chord = segment.chordProgression[k];
-                    // Play the root note of the chord for 1 bar
-                    var frequency = frequencies[chord] / 2;
-                    playFrequency(frequency, currentBeat * beatDuration, 4 * beatDuration);
-                    currentBeat += 4;
-                }
+                // Play bass drum on 1 and 3
+                bassDrum.play(currentBeat / BEATS_PER_BAR);
+                bassDrum.play((currentBeat + 2)  / BEATS_PER_BAR);
+                currentBeat += 4;
             }
         }
+        console.log(currentBeat);
+        // Add bass line
+        currentBeat = 0;
+        for (var i = 0; i < song.form.length; ++i) {
+            var segment = song.segments[song.form[i]];
+            for (var j = 0; j < measuresPerSegment; ++j) {
+                var chord = segment.chordProgression[j % segment.chordProgression.length];
+                // Play the root note of the chord for 1 bar
+                var frequency = frequencies[chord] / 2;
+                playFrequency(frequency, currentBeat * SECONDS_PER_BEAT + songStartTime, SECONDS_PER_BAR);
+                currentBeat += BEATS_PER_BAR;
+            }
+        }
+        console.log(currentBeat);
         // Add melody
         currentBeat = 0;
         for (var i = 0; i < song.form.length; ++i) {
@@ -303,11 +311,12 @@ var songBuilder = (function() {
                 var rhythm = segment.rhythm[j];
                 if (!rhythm.isRest) {
                     var note = segment.notes[j];
-                    playFrequency(frequencies[note], currentBeat * beatDuration, rhythm.duration * beatDuration);
+                    playFrequency(frequencies[note], currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
                 }
                 currentBeat += rhythm.duration;
             }
         }
+        console.log(currentBeat);
     }
     
     function buildAndRun()  {

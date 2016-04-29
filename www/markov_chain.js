@@ -78,10 +78,6 @@ var markovChain = (function() {
                 // Use RNG for now
                 // TODO: get rid of RNG and use champion mastery data to decide the next state
                 notes[i] = getNextState(stateMap, Math.random());
-                if (notes[i] == 6 && ((currentBeat % 4) == 0 || (currentBeat % 4) == 2))
-                {
-                    console.log("bleh");
-                }
                 prevNote = notes[i];
                 currentBeat += rhythm[i].duration;
                 if (currentBeat >= 4 - 1e-2) {

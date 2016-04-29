@@ -98,7 +98,6 @@ var songBuilder = (function() {
         }
         
         // Generate rhythms for each section
-        // TODO: rhythm rule
         var rhythmRule = function (beat) {
             switch (beat % 4) {
                 case 0:
@@ -162,29 +161,19 @@ var songBuilder = (function() {
             segments[i].rhythm = markovChain.buildRhythm(rhythmRule, measuresPerSegment);
         }
         
-        // TODO: update rule
         // Generate a sequence of notes for each segment (0=A, 1=B, 2=C)
         var pitchRule = function (prevNote, currentBeat, chord) {
             // prevNote is a numeric value representing a note in a scale (0=Do, 1=Re, 2=Mi, etc.)
-            /*switch (prevNote) {
-                case 0:
-                    return [0.05, 0.3, 0.2, 0.15, 0.1, 0.1, 0.1];
-                case 1:
-                    return [0.2, 0.05, 0.3, 0.15, 0.1, 0.1, 0.1];
-                case 2:
-                    return [0.15, 0.3, 0.05, 0.2, 0.1, 0.1, 0.1];
-                case 3:
-                    return [0.1, 0.15, 0.2, 0.05, 0.3, 0.1, 0.1];
-                case 4:
-                    return [0.1, 0.1, 0.1, 0.2, 0.05, 0.3, 0.15];
-                case 5:
-                    return [0.1, 0.1, 0.1, 0.15, 0.2, 0.05, 0.3];
-                default:
-                    return [0.1, 0.1, 0.1, 0.15, 0.2, 0.3, 0.05];
-            }*/
             // Start with numbers representing the note in the current chord.
             var stateMap;
-            switch (prevNote) {
+            var prevNoteInChord = prevNote - chord;
+            switch (prevNoteInChord) {
+                case -6:
+                case -5:
+                case -4:
+                case -3:
+                case -2:
+                case -1:
                 case 0:
                 case 1:
                     switch (currentBeat % 4) {
@@ -193,10 +182,13 @@ var songBuilder = (function() {
                         case 2:
                         case 2.5:
                             // Ensure that strong beats land on 1, 3, or 5 in the chord
-                            stateMap = [0.6, 0, 0.3, 0, 0.1, 0, 0];
+                            stateMap = [0.6, 0, 0.3, 0, 0.1, 0, 0, 0];
+                            break;
                         default:
-                            stateMap = [0.3, 0.4, 0.2, 0.1, 0.0, 0.0, 0.0];
+                            stateMap = [0.3, 0.4, 0.2, 0.1, 0.0, 0.0, 0.0, 0.0];
+                            break;
                     }
+                    break;
                 case 2:
                 case 3:
                     switch (currentBeat % 4) {
@@ -205,9 +197,11 @@ var songBuilder = (function() {
                         case 2:
                         case 2.5:
                             // Ensure that strong beats land on 1, 3, or 5 in the chord
-                            stateMap = [0.1, 0, 0.3, 0, 0.6, 0, 0];
+                            stateMap = [0.1, 0, 0.3, 0, 0.6, 0, 0, 0];
+                            break;
                         default:
-                            stateMap = [0.0, 0.1, 0.2, 0.2, 0.4, 0.1, 0.0];
+                            stateMap = [0.0, 0.2, 0.2, 0.2, 0.4, 0.0, 0.0, 0.0];
+                            break;
                     }
                 case 4:
                     switch (currentBeat % 4) {
@@ -215,36 +209,60 @@ var songBuilder = (function() {
                         case 0.5:
                         case 2:
                         case 2.5:
-                            stateMap = [0.0, 0, 0.2, 0, 0.8, 0, 0];
+                            stateMap = [0.0, 0, 0.2, 0, 0.8, 0, 0, 0];
+                            break;
                         default:
-                            stateMap = [0.0, 0.1, 0.2, 0.3, 0.2, 0.2, 0.0];
+                            stateMap = [0.0, 0.1, 0.2, 0.3, 0.2, 0.2, 0.0, 0.0];
+                            break;
                     }
+                    break;
                 case 5:
                     switch (currentBeat % 4) {
                         case 0:
                         case 0.5:
                         case 2:
                         case 2.5:
-                            stateMap = [0.0, 0, 0, 0, 1, 0, 0];
+                            stateMap = [0.0, 0, 0, 0, 0.9, 0, 0, 0.1];
+                            break;
                         default:
-                            stateMap = [0.0, 0.0, 0.2, 0.3, 0.4, 0.0, 0.1];
+                            stateMap = [0.0, 0.0, 0.2, 0.3, 0.4, 0.0, 0.1, 0.0];
+                            break;
                     }
+                    break;
+                case 6:
+                    switch (currentBeat % 4) {
+                        case 0:
+                        case 0.5:
+                        case 2:
+                        case 2.5:
+                            stateMap = [0, 0, 0, 0, 0.2, 0, 0, 0.8];
+                            break;
+                        default:
+                            stateMap = [0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.5];
+                            break;
+                    }
+                    break;
                 default:
                     switch (currentBeat % 4) {
                         case 0:
                         case 0.5:
                         case 2:
                         case 2.5:
-                            stateMap = [0.0, 0, 0.0, 0, 1, 0, 0];
+                            stateMap = [0.0, 0, 0.0, 0, 0.2, 0, 0, 0.8];
+                            break;
                         default:
-                            stateMap = [0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.0];
+                            stateMap = [0.0, 0.0, 0.0, 0.0, 0.1, 0.0, 0.6, 0.3];
+                            break;
                     }
+                    break;
             }
             // Translate the stateMap to actual notes based on the current chord
-            if (chord === 0)
+            /*if (chord === 0)
                 return stateMap;
             var lastPart = stateMap.splice(7 - chord);
-            stateMap.unshift.apply(stateMap, lastPart);
+            stateMap.unshift.apply(stateMap, lastPart);*/
+            for (var i = 0; i < chord; ++i)
+                stateMap.unshift(0);
             return stateMap;
         }
         for (var i = 0; i < segments.length; ++i) {
@@ -260,8 +278,8 @@ var songBuilder = (function() {
     
     function run(song)  {
         // C4-B4
-        var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88];
-        var tempo = 240 // beats per minute
+        var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
+        var tempo = 210 // beats per minute
         var beatDuration = 60 / tempo;
         var currentBeat = 0;
         // Add bass

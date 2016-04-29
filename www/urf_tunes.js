@@ -595,13 +595,78 @@ SineTooth.prototype.play = function(bars, pitch, holdBars) {
     this.oscillator.frequency.setValueAtTime(pitch, time);
     
     this.gain.gain.setValueAtTime(0, time);
-    this.gain.gain.exponentialRampToValueAtTime(0.4, attackEndTime);
-    this.gain.gain.exponentialRampToValueAtTime(0.2, reduceEndTime);
+    this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
+    this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
     this.gain.gain.setValueAtTime(0.2, fallOffTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
     this.oscillator.start(time);
     this.oscillator.stop(endTime);
+};
+
+
+// Trumpet
+
+function Trumpet(context) {
+    this.context = context;
+    
+    var length = 9;
+    var real = new Float32Array(length);
+    var imag = new Float32Array(length);
+    
+    // Build on top of a pure sine wave
+    real[0] = 0;
+    imag[0] = 0;
+    for (var i = 1; i < length; ++i) {
+        real[i] = 1;
+        imag[i] = 0;
+    }
+    
+    this.waveform = this.context.createPeriodicWave(real, imag);
+}
+
+Trumpet.prototype.init = function() {
+    this.oscillator1 = this.context.createOscillator();
+    this.oscillator1.setPeriodicWave(this.waveform);
+    this.oscillator2 = this.context.createOscillator();
+    this.oscillator2.setPeriodicWave(this.waveform);
+ 
+    this.gain = this.context.createGain();
+    this.oscillator1.connect(this.gain);
+    this.oscillator2.connect(this.gain);
+    
+    this.filter = this.context.createBiquadFilter();
+    this.filter.type = "lowpass";
+    this.filter.frequency.value = 2000;
+    
+    this.gain.connect(this.filter);
+    this.filter.connect(this.context.destination);
+};
+
+Trumpet.prototype.play = function(bars, pitch, holdBars) {
+    this.init();
+
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    var attackEndTime = time + 0.02;
+    var reduceEndTime = attackEndTime + 0.02;
+    var fallOffTime = Math.max(reduceEndTime, time + SECONDS_PER_BAR * holdBars);
+    var endTime = fallOffTime + 0.01;
+    
+    this.oscillator1.frequency.setValueAtTime(pitch, time);
+    this.oscillator1.detune.value = 10;
+    this.oscillator2.frequency.setValueAtTime(pitch, time);
+    this.oscillator2.detune.value = -10;
+    
+    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
+    this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
+    this.gain.gain.linearRampToValueAtTime(0.4, fallOffTime);
+    this.gain.gain.linearRampToValueAtTime(BASICALLY_ZERO, endTime);
+    
+    this.oscillator1.start(time);
+    this.oscillator1.stop(endTime);
+    this.oscillator2.start(time);
+    this.oscillator2.stop(endTime);
 };
 
 const A4 = 440;
@@ -616,6 +681,7 @@ const D4 = A4 * Math.pow(2, -7/12);
 const Cs4 = A4 * Math.pow(2, -8/12);
 const C4 = A4 * Math.pow(2, -9/12);
 const B3 = A4 * Math.pow(2, -10/12);
+const As3 = A4 * Math.pow(2, -11/12);
 
 const D5 = A4 * Math.pow(2, 5/12);
 const Cs5 = A4 * Math.pow(2, 4/12);
@@ -631,20 +697,21 @@ function playSong() {
     var snareDrum = new SnareDrum(context, 100, 0.1 + 0.03 * masteries['rengar'],
             0.2 + 0.03 * masteries['talon'], 1500 - 200 * masteries['zed']);
     var sineTooth = new SineTooth(context);
+    var trumpet = new Trumpet(context);
     
     // Megalovania
-    /*sineTooth.play(0, D4, 1/16);
-    sineTooth.play(0, A4, 1/16);
-    sineTooth.play(1/16, D4, 1/16);
-    sineTooth.play(1/16, A4, 1/16);
-    sineTooth.play(1/8, D5, 1/8);
-    sineTooth.play(1/4, A4, 3/16);
-    sineTooth.play(7/16, Gs4, 1/8);
-    sineTooth.play(9/16, G4, 1/8);
-    sineTooth.play(11/16, F4, 1/8);
-    sineTooth.play(13/16, D4, 1/16);
-    sineTooth.play(14/16, F4, 1/16);
-    sineTooth.play(15/16, G4, 1/16);
+    trumpet.play(0, D4, 1/16);
+    trumpet.play(0, A4, 1/16);
+    trumpet.play(1/16, D4, 1/16);
+    trumpet.play(1/16, A4, 1/16);
+    trumpet.play(1/8, D5, 1/8);
+    trumpet.play(1/4, A4, 3/16);
+    trumpet.play(7/16, Gs4, 1/8);
+    trumpet.play(9/16, G4, 1/8);
+    trumpet.play(11/16, F4, 1/8);
+    trumpet.play(13/16, D4, 1/16);
+    trumpet.play(14/16, F4, 1/16);
+    trumpet.play(15/16, G4, 1/16);
     
     sineTooth.play(1+0, C4, 1/16);
     sineTooth.play(1+0, G4, 1/16);
@@ -659,18 +726,33 @@ function playSong() {
     sineTooth.play(1+14/16, F4, 1/16);
     sineTooth.play(1+15/16, G4, 1/16);
     
-    sineTooth.play(2+0, B3, 1/16);
-    sineTooth.play(2+0, Fs4, 1/16);
-    sineTooth.play(2+1/16, B3, 1/16);
-    sineTooth.play(2+1/16, Fs4, 1/16);
-    sineTooth.play(2+1/8, D5, 1/8);
-    sineTooth.play(2+1/4, A4, 3/16);
-    sineTooth.play(2+7/16, Gs4, 1/8);
-    sineTooth.play(2+9/16, G4, 1/8);
-    sineTooth.play(2+11/16, F4, 1/8);
-    sineTooth.play(2+13/16, D4, 1/16);
-    sineTooth.play(2+14/16, F4, 1/16);
-    sineTooth.play(2+15/16, G4, 1/16);*/
+    trumpet.play(2+0, B3, 1/16);
+    trumpet.play(2+0, Fs4, 1/16);
+    trumpet.play(2+1/16, B3, 1/16);
+    trumpet.play(2+1/16, Fs4, 1/16);
+    trumpet.play(2+1/8, D5, 1/8);
+    trumpet.play(2+1/4, A4, 3/16);
+    trumpet.play(2+7/16, Gs4, 1/8);
+    trumpet.play(2+9/16, G4, 1/8);
+    trumpet.play(2+11/16, F4, 1/8);
+    trumpet.play(2+13/16, D4, 1/16);
+    trumpet.play(2+14/16, F4, 1/16);
+    trumpet.play(2+15/16, G4, 1/16);
+    
+    sineTooth.play(3+0, As3, 1/16);
+    sineTooth.play(3+0, F4, 1/16);
+    sineTooth.play(3+1/16, As3, 1/16);
+    sineTooth.play(3+1/16, F4, 1/16);
+    sineTooth.play(3+1/8, D5, 1/8);
+    sineTooth.play(3+1/4, A4, 3/16);
+    sineTooth.play(3+7/16, Gs4, 1/8);
+    sineTooth.play(3+9/16, G4, 1/8);
+    sineTooth.play(3+11/16, F4, 1/8);
+    sineTooth.play(3+13/16, D4, 1/16);
+    sineTooth.play(3+14/16, F4, 1/16);
+    sineTooth.play(3+15/16, G4, 1/16);
+    
+    trumpet.play(4, D4, 1);
     
     bassDrum.play(0);
     bassDrum.play(1/16);
@@ -696,6 +778,14 @@ function playSong() {
     snareDrum.play(2+6/16);
     snareDrum.play(2+8/16);
     
+    bassDrum.play(3+0);
+    bassDrum.play(3+1/16);
+    snareDrum.play(3+2/16);
+    bassDrum.play(3+3/16);
+    snareDrum.play(3+4/16);
+    snareDrum.play(3+6/16);
+    snareDrum.play(3+8/16);
+    
     
 
     // Increasing speed drum pattern
@@ -705,9 +795,9 @@ function playSong() {
     
     for (var i = 0; i < 4; ++i) {
         for (var j = 0; j < repeats; ++j) {
-            snareDrum.play(3+bars);
+            snareDrum.play(bars);
             if (j % 2 == 0) {
-                bassDrum.play(3+bars, 1);
+                bassDrum.play(bars, 1);
             }
             bars += delta;
             if (j == 24) break;

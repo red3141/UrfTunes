@@ -49,8 +49,6 @@ function playFrequency(frequency, startTime, duration) {
     var gain = this.context.createGain();
     gain.gain.setValueAtTime(0.25, 0);
     oscillator.frequency.value = frequency;
-    var i = 0;
-    //setInterval(function() { oscillator.frequency.value += 50 * Math.sin(i); i += 0.3;}, 100);
     oscillator.connect(gain);
     gain.connect(context.destination);
     oscillator.start(startTime);

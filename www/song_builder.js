@@ -170,16 +170,16 @@ var songBuilder = (function() {
                     return [
                         { value: { duration: 0.5 }, probability: 0.1 },
                         { value: { duration: 0.5, isRest: true }, probability: 0.3 },
-                        { value: { duration: 1 }, probability: 0.2 },
+                        { value: { duration: 1 }, probability: 0.1 },
                         { value: { duration: 1, isRest: true }, probability: 0.3 },
-                        { value: { duration: 1.5 }, probability: 0.1 },
+                        { value: { duration: 1.5 }, probability: 0.2 },
                     ];
                 case 0.5:
                     return [
-                        { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
-                        { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 0.5 }, probability: 0.6 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1 }, probability: 0.2 },
+                        { value: { duration: 1, isRest: true }, probability: 0.1 },
                     ];
                 case 1:
                     return [
@@ -190,7 +190,8 @@ var songBuilder = (function() {
                     ];
                 case 1.5:
                     return [
-                        { value: { duration: 0.5 }, probability: 0.7 },
+                        { value: { duration: 0.5 }, probability: 0.5 },
+                        { value: { duration: 1 }, probability: 0.2 },
                         { value: { duration: 1.5 }, probability: 0.3 },
                     ];
                 case 2:
@@ -202,22 +203,22 @@ var songBuilder = (function() {
                     ];
                 case 2.5:
                     return [
-                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5 }, probability: 0.5 },
                         { value: { duration: 0.5, isRest: true }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: true }, probability: 0.1 },
                     ];
                 case 3:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
-                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1 }, probability: 0.2 },
                         { value: { duration: 1, isRest: true }, probability: 0.2 },
                     ];
                 case 3.5:
                     return [
-                        { value: { duration: 0.5 }, probability: 0.5 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.5 },
+                        { value: { duration: 0.5 }, probability: 0.7 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
                     ];
                 default:
                     return [
@@ -226,7 +227,9 @@ var songBuilder = (function() {
             }
         }
         for (var i = 0; i < segments.length; ++i) {
-            segments[i].melodyRhythm = markovChain.buildRhythm(melodyRhythmRule, measuresPerSegment);
+            var rhythm = markovChain.buildRhythm(melodyRhythmRule, 4);
+            rhythm = rhythm.concat(rhythm).concat(rhythm).concat(rhythm);
+            segments[i].melodyRhythm = rhythm;
         }
         
         // Generate a sequence of notes for each segment (0=A, 1=B, 2=C)
@@ -264,7 +267,6 @@ var songBuilder = (function() {
                         case 0.5:
                         case 2:
                         case 2.5:
-                            // Ensure that strong beats land on 1, 3, or 5 in the chord
                             stateMap = [0.1, 0, 0.3, 0, 0.6, 0, 0, 0];
                             break;
                         default:
@@ -334,9 +336,43 @@ var songBuilder = (function() {
             segment.notes = markovChain.buildNotes(pitchRule, segment.melodyRhythm, segment.chordProgression);
         }
         
+        // Make an ending
+        // For now just play a double whole note
+        var lastForm = form[form.length - 1];
+        var lastSegment = segments[lastForm];
+        var lastNote = lastSegment.notes[lastSegment.notes.length - 1];
+        var octaveShift = 0;
+        while (lastNote > 7) {
+            lastNote -= 7;
+            ++octaveShift;
+        }
+        var endingNote;
+        switch (lastNote) {
+            case 0:
+            case 1:
+            case 2:
+                endingNote = 0;
+                break;
+            case 3:
+            case 4:
+                endingNote = 4;
+                break;
+            default:
+                endingNote = 7;
+                break;
+        }
+        
+        var ending = {
+            chordProgression: [0],
+            bassLineRhythm: [{ duration: 8 }],
+            melodyRhythm: [{ duration: 8 }],
+            notes: [endingNote],
+        }
+        
         return {
             form: form,
             segments: segments,
+            ending: ending,
         };
     }
     
@@ -367,8 +403,8 @@ var songBuilder = (function() {
                 var rhythm = segment.bassLineRhythm[j % segment.bassLineRhythm.length];
                 if (!rhythm.isRest) {
                     // Play the root note of the chord
-                    var chord = segment.chordProgression[measure % 4];
-                    var frequency = frequencies[chord] / 2;
+                    var chord = segment.chordProgression[measure % segment.chordProgression.length];
+                    var frequency = frequencies[chord] / 4;
                     playFrequency(frequency, currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
                 }
                 currentBeat += rhythm.duration;
@@ -395,6 +431,37 @@ var songBuilder = (function() {
             }
         }
         console.log(currentBeat);
+        // Add ending
+        var endingStartBeat = currentBeat;
+        currentBeat = 0;
+        for (var j = 0; j < song.ending.notes.length; ++j) {
+            var rhythm = song.ending.melodyRhythm[j];
+            if (!rhythm.isRest) {
+                var note = song.ending.notes[j];
+                playFrequency(frequencies[note], (currentBeat + endingStartBeat) * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
+            }
+            currentBeat += rhythm.duration;
+        }
+        var endingLength = currentBeat;
+        currentBeat = 0;
+        measure = 0;
+        while (measure < endingLength) {
+            var rhythm = song.ending.bassLineRhythm[j % song.ending.bassLineRhythm.length];
+            if (!rhythm.isRest) {
+                // Play the root note of the chord
+                var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
+                var frequency = frequencies[chord] / 4;
+                playFrequency(frequency, (currentBeat + endingStartBeat) * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
+            }
+            currentBeat += rhythm.duration;
+            beatInMeasure += rhythm.duration;
+            if (beatInMeasure >= BEATS_PER_BAR) {
+                ++measure;
+                beatInMeasure = 0;
+            }
+            ++j;
+        }
+        
     }
     
     function buildAndRun()  {

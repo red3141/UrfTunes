@@ -98,7 +98,7 @@ var songBuilder = (function() {
         }
         
         // Generate rhythms for each section
-        var rhythmRule = function (beat) {
+        var bassLineRhythmRule = function (beat) {
             switch (beat % 4) {
                 case 0:
                     return [
@@ -160,7 +160,73 @@ var songBuilder = (function() {
             }
         }
         for (var i = 0; i < segments.length; ++i) {
-            segments[i].rhythm = markovChain.buildRhythm(rhythmRule, measuresPerSegment);
+            segments[i].bassLineRhythm = markovChain.buildRhythm(bassLineRhythmRule, 2);
+        }
+        
+        // Generate rhythms for each section
+        var melodyRhythmRule = function (beat) {
+            switch (beat % 4) {
+                case 0:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.1 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.2 },
+                        { value: { duration: 1, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1.5 }, probability: 0.1 },
+                    ];
+                case 0.5:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 1:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 1.5:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.7 },
+                        { value: { duration: 1.5 }, probability: 0.3 },
+                    ];
+                case 2:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 2.5:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 3:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.4 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1 }, probability: 0.1 },
+                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                    ];
+                case 3.5:
+                    return [
+                        { value: { duration: 0.5 }, probability: 0.5 },
+                        { value: { duration: 0.5, isRest: true }, probability: 0.5 },
+                    ];
+                default:
+                    return [
+                        { value: { duration: 1 }, probability: 1 },
+                    ];
+            }
+        }
+        for (var i = 0; i < segments.length; ++i) {
+            segments[i].melodyRhythm = markovChain.buildRhythm(melodyRhythmRule, measuresPerSegment);
         }
         
         // Generate a sequence of notes for each segment (0=A, 1=B, 2=C)
@@ -265,7 +331,7 @@ var songBuilder = (function() {
         }
         for (var i = 0; i < segments.length; ++i) {
             var segment = segments[i];
-            segment.notes = markovChain.buildNotes(pitchRule, segment.rhythm, segment.chordProgression);
+            segment.notes = markovChain.buildNotes(pitchRule, segment.melodyRhythm, segment.chordProgression);
         }
         
         return {
@@ -275,7 +341,7 @@ var songBuilder = (function() {
     }
     
     function run(song)  {
-        // C4-B4
+        // C4-B5
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
         var currentBeat = 0;
         // Add bass drum
@@ -294,12 +360,24 @@ var songBuilder = (function() {
         currentBeat = 0;
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
-            for (var j = 0; j < measuresPerSegment; ++j) {
-                var chord = segment.chordProgression[j % segment.chordProgression.length];
-                // Play the root note of the chord for 1 bar
-                var frequency = frequencies[chord] / 2;
-                playFrequency(frequency, currentBeat * SECONDS_PER_BEAT + songStartTime, SECONDS_PER_BAR);
-                currentBeat += BEATS_PER_BAR;
+            var measure = 0;
+            var beatInMeasure = 0;
+            var j = 0;
+            while (measure < measuresPerSegment) {
+                var rhythm = segment.bassLineRhythm[j % segment.bassLineRhythm.length];
+                if (!rhythm.isRest) {
+                    // Play the root note of the chord
+                    var chord = segment.chordProgression[measure % 4];
+                    var frequency = frequencies[chord] / 2;
+                    playFrequency(frequency, currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
+                }
+                currentBeat += rhythm.duration;
+                beatInMeasure += rhythm.duration;
+                if (beatInMeasure >= BEATS_PER_BAR) {
+                    ++measure;
+                    beatInMeasure = 0;
+                }
+                ++j;
             }
         }
         console.log(currentBeat);
@@ -308,7 +386,7 @@ var songBuilder = (function() {
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < segment.notes.length; ++j) {
-                var rhythm = segment.rhythm[j];
+                var rhythm = segment.melodyRhythm[j];
                 if (!rhythm.isRest) {
                     var note = segment.notes[j];
                     playFrequency(frequencies[note], currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);

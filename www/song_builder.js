@@ -380,6 +380,7 @@ var songBuilder = (function() {
         // C4-B5
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
         var currentBeat = 0;
+        
         // Add bass drum
         var bassDrum = new BassDrum(context, 75 + 20 * masteries['braum'], 0.1 + 0.1 * masteries['malphite']);
         for (var i = 0; i < song.form.length; ++i) {
@@ -392,8 +393,10 @@ var songBuilder = (function() {
             }
         }
         console.log(currentBeat);
+        
         // Add bass line
         currentBeat = 0;
+        var bassInstrument = new SineTooth(context);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             var measure = 0;
@@ -405,7 +408,8 @@ var songBuilder = (function() {
                     // Play the root note of the chord
                     var chord = segment.chordProgression[measure % segment.chordProgression.length];
                     var frequency = frequencies[chord] / 4;
-                    playFrequency(frequency, currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
+                    bassInstrument.play(currentBeat / BEATS_PER_BAR, frequencies[chord] / 2, rhythm.duration / BEATS_PER_BAR);
+                    //playFrequency(frequency, currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
                 }
                 currentBeat += rhythm.duration;
                 beatInMeasure += rhythm.duration;
@@ -417,20 +421,24 @@ var songBuilder = (function() {
             }
         }
         console.log(currentBeat);
+        
         // Add melody
         currentBeat = 0;
+        var melodyInstrument = new SineTooth(context);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < segment.notes.length; ++j) {
                 var rhythm = segment.melodyRhythm[j];
                 if (!rhythm.isRest) {
                     var note = segment.notes[j];
-                    playFrequency(frequencies[note], currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
+                    melodyInstrument.play(currentBeat / BEATS_PER_BAR, frequencies[note], rhythm.duration / BEATS_PER_BAR);
+                    //playFrequency(frequencies[note], currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
                 }
                 currentBeat += rhythm.duration;
             }
         }
         console.log(currentBeat);
+        
         // Add ending
         var endingStartBeat = currentBeat;
         currentBeat = 0;
@@ -438,7 +446,8 @@ var songBuilder = (function() {
             var rhythm = song.ending.melodyRhythm[j];
             if (!rhythm.isRest) {
                 var note = song.ending.notes[j];
-                playFrequency(frequencies[note], (currentBeat + endingStartBeat) * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
+                melodyInstrument.play((currentBeat + endingStartBeat) / BEATS_PER_BAR, frequencies[note], rhythm.duration / BEATS_PER_BAR);
+                //playFrequency(frequencies[note], (currentBeat + endingStartBeat) * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
             }
             currentBeat += rhythm.duration;
         }
@@ -451,7 +460,8 @@ var songBuilder = (function() {
                 // Play the root note of the chord
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
                 var frequency = frequencies[chord] / 4;
-                playFrequency(frequency, (currentBeat + endingStartBeat) * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
+                bassInstrument.play((currentBeat + endingStartBeat) / BEATS_PER_BAR, frequencies[chord] / 2, rhythm.duration / BEATS_PER_BAR);
+                //playFrequency(frequency, (currentBeat + endingStartBeat) * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
             }
             currentBeat += rhythm.duration;
             beatInMeasure += rhythm.duration;

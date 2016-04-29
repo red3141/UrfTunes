@@ -404,7 +404,7 @@ const MAX_GAIN = 3;
 const BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
 const BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
-const BEATS_PER_MINUTE = 110 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
+const BEATS_PER_MINUTE = 200 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
 const SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
 const SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
 
@@ -464,7 +464,7 @@ BassDrum.prototype.play = function(bars) {
     var endTime = time + this.duration;
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.gain.gain.setValueAtTime(0.8, time);
+    this.gain.gain.setValueAtTime(1, time);
     
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);

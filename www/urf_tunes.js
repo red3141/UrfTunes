@@ -420,11 +420,11 @@ function init() {
     }
 };
 
-function playFrequency(frequency, startTime, duration) {
+function playFrequency(context, frequency, startTime, duration) {
     startTime = startTime || 0;
     
     var oscillator = context.createOscillator();
-    var gain = this.context.createGain();
+    var gain = context.createGain();
     gain.gain.setValueAtTime(0.25, 0);
     oscillator.frequency.value = frequency;
     oscillator.connect(gain);
@@ -595,9 +595,11 @@ SineTooth.prototype.play = function(bars, pitch, holdBars) {
     var fallOffTime = Math.max(reduceEndTime, time + SECONDS_PER_BAR * holdBars);
     var endTime = fallOffTime + 0.01;
     
-    this.oscillator.frequency.setValueAtTime(pitch, time);
+    //this.oscillator.frequency.setValueAtTime(pitch, time);
+    this.oscillator.frequency.value = pitch;
     
-    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
     this.gain.gain.exponentialRampToValueAtTime(0.4, attackEndTime);
     this.gain.gain.exponentialRampToValueAtTime(0.2, reduceEndTime);
     this.gain.gain.setValueAtTime(0.2, fallOffTime);

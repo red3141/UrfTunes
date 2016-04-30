@@ -398,7 +398,7 @@ var songBuilder = (function() {
                 // Play bass drum on 1 and 3
                 bassDrum.play(currentBeat / BEATS_PER_BAR);
                 bassDrum.play((currentBeat + 2)  / BEATS_PER_BAR);
-                currentBeat += 4;
+                currentBeat += BEATS_PER_BAR;
             }
         }
         console.log(currentBeat);
@@ -417,8 +417,8 @@ var songBuilder = (function() {
                 if (!rhythm.isRest) {
                     // Play the root note of the chord
                     var chord = segment.chordProgression[measure % segment.chordProgression.length];
-                    var frequency = frequencies[chord] / 4;
-                    bassInstrument.play(currentBeat / BEATS_PER_BAR, frequencies[chord] / 2, rhythm.duration / BEATS_PER_BAR);
+                    var frequency = frequencies[chord] / 2;
+                    bassInstrument.play(currentBeat / BEATS_PER_BAR, frequency, rhythm.duration / BEATS_PER_BAR);
                 }
                 currentBeat += rhythm.duration;
                 beatInMeasure += rhythm.duration;
@@ -467,8 +467,8 @@ var songBuilder = (function() {
             if (!rhythm.isRest) {
                 // Play the root note of the chord
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
-                var frequency = frequencies[chord] / 4;
-                bassInstrument.play((currentBeat + endingStartBeat) / BEATS_PER_BAR, frequencies[chord] / 2, rhythm.duration / BEATS_PER_BAR);
+                var frequency = frequencies[chord] / 2;
+                bassInstrument.play((currentBeat + endingStartBeat) / BEATS_PER_BAR, frequency, rhythm.duration / BEATS_PER_BAR);
             }
             currentBeat += rhythm.duration;
             beatInMeasure += rhythm.duration;
@@ -493,7 +493,7 @@ var songBuilder = (function() {
         context.close();
         context = null;
     }
-    
+
     currentSong = build();
     
     return {

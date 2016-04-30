@@ -541,12 +541,13 @@ SnareDrum.prototype.play = function(bars) {
     var noiseEndTime = time + this.noiseDuration;
     var endTime = Math.max(oscillatorEndTime, noiseEndTime);
     
-    this.noiseGain.gain.setValueAtTime(MAX_GAIN * 0.3, time);
+    var volume = 0.3;
+    this.noiseGain.gain.setValueAtTime(volume, time);
     this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, noiseEndTime);
     this.noise.start(time);
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.oscillatorGain.gain.setValueAtTime(MAX_GAIN * 0.3, time);
+    this.oscillatorGain.gain.setValueAtTime(volume, time);
     this.oscillatorGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, oscillatorEndTime);
     this.oscillator.start(time);
     

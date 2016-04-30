@@ -389,15 +389,56 @@ var songBuilder = (function() {
             context.close();
         context = new AudioContext();
         
-        // Add bass drum
         var bassDrum = new BassDrum(context, 75 + 20 * masteries['braum'], 0.1 + 0.1 * masteries['malphite']);
-        currentInstruments.push(bassDrum);
+        var snareDrum = new SnareDrum(context, 100, 0.1 + 0.03 * masteries['rengar'],
+            0.2 + 0.03 * masteries['talon'], 1500 - 200 * masteries['zed']);
+        var bassInstrument = new Bass(context);
+        var melodyInstrument = new SineTooth(context);
+        
+        // Intro
+        var introLength = 32;
+        for (var i = 0; i < introLength; ++i) {
+            // Play bass drum on 1 and 3
+            if (i % 2 === 0)
+                bassDrum.play(currentBeat / BEATS_PER_BAR);
+            if (currentBeat >= 16 && i % 4 == 2)
+                snareDrum.play(currentBeat / BEATS_PER_BAR);
+            ++currentBeat;
+        }
+        currentBeat = 0;
+        var j = 0;
+        var segment = song.segments[0];
+        var measure = 0;
+        var beatInMeasure = 0;
+        while (currentBeat < introLength) {
+            var rhythm = segment.bassLineRhythm[j % segment.bassLineRhythm.length];
+            if (!rhythm.isRest) {
+                // Play the root note of the chord
+                var chord = segment.chordProgression[measure % segment.chordProgression.length];
+                var frequency = frequencies[chord] / 4;
+                bassInstrument.play(currentBeat / BEATS_PER_BAR, frequency, rhythm.duration / BEATS_PER_BAR);
+            }
+            currentBeat += rhythm.duration;
+            beatInMeasure += rhythm.duration;
+            while (beatInMeasure >= BEATS_PER_BAR) {
+                ++measure;
+                beatInMeasure -= BEATS_PER_BAR;
+            }
+            ++j;
+        }
+        
+        // Body
+        var bodyStartBeat = currentBeat;
+        currentBeat = 0;
+        // Add drums
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < measuresPerSegment; ++j) {
                 // Play bass drum on 1 and 3
-                bassDrum.play(currentBeat / BEATS_PER_BAR);
-                bassDrum.play((currentBeat + 2)  / BEATS_PER_BAR);
+                bassDrum.play((currentBeat + bodyStartBeat) / BEATS_PER_BAR);
+                bassDrum.play((currentBeat + 2 + bodyStartBeat)  / BEATS_PER_BAR);
+                // Snare on 3
+                snareDrum.play((currentBeat + 2 + bodyStartBeat)  / BEATS_PER_BAR);
                 currentBeat += BEATS_PER_BAR;
             }
         }
@@ -405,8 +446,6 @@ var songBuilder = (function() {
         
         // Add bass line
         currentBeat = 0;
-        var bassInstrument = new Bass(context);
-        currentInstruments.push(bassInstrument);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             var measure = 0;
@@ -418,7 +457,7 @@ var songBuilder = (function() {
                     // Play the root note of the chord
                     var chord = segment.chordProgression[measure % segment.chordProgression.length];
                     var frequency = frequencies[chord] / 4;
-                    bassInstrument.play(currentBeat / BEATS_PER_BAR, frequency, rhythm.duration / BEATS_PER_BAR);
+                    bassInstrument.play((currentBeat + bodyStartBeat) / BEATS_PER_BAR, frequency, rhythm.duration / BEATS_PER_BAR);
                 }
                 currentBeat += rhythm.duration;
                 beatInMeasure += rhythm.duration;
@@ -433,15 +472,13 @@ var songBuilder = (function() {
         
         // Add melody
         currentBeat = 0;
-        var melodyInstrument = new SineTooth(context);
-        currentInstruments.push(melodyInstrument);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < segment.notes.length; ++j) {
                 var rhythm = segment.melodyRhythm[j];
                 if (!rhythm.isRest) {
                     var note = segment.notes[j];
-                    melodyInstrument.play(currentBeat / BEATS_PER_BAR, frequencies[note], rhythm.duration / BEATS_PER_BAR);
+                    melodyInstrument.play((currentBeat + bodyStartBeat) / BEATS_PER_BAR, frequencies[note], rhythm.duration / BEATS_PER_BAR);
                 }
                 currentBeat += rhythm.duration;
             }
@@ -449,7 +486,7 @@ var songBuilder = (function() {
         console.log(currentBeat);
         
         // Add ending
-        var endingStartBeat = currentBeat;
+        var endingStartBeat = currentBeat + bodyStartBeat;
         currentBeat = 0;
         for (var j = 0; j < song.ending.notes.length; ++j) {
             var rhythm = song.ending.melodyRhythm[j];
@@ -462,7 +499,8 @@ var songBuilder = (function() {
         var endingLength = currentBeat;
         currentBeat = 0;
         measure = 0;
-        while (measure < endingLength) {
+        var j = 0;
+        while (measure * BEATS_PER_BAR < endingLength) {
             var rhythm = song.ending.bassLineRhythm[j % song.ending.bassLineRhythm.length];
             if (!rhythm.isRest) {
                 // Play the root note of the chord
@@ -472,9 +510,9 @@ var songBuilder = (function() {
             }
             currentBeat += rhythm.duration;
             beatInMeasure += rhythm.duration;
-            if (beatInMeasure >= BEATS_PER_BAR) {
+            while (beatInMeasure >= BEATS_PER_BAR) {
                 ++measure;
-                beatInMeasure = 0;
+                beatInMeasure -= BEATS_PER_BAR;
             }
             ++j;
         }

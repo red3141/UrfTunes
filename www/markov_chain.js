@@ -46,8 +46,9 @@ var markovChain = (function() {
         var beatInMeasure = 0;
         var currentMeasure = 0;
         var rhythms = [];
+        var prevRhythm = { duration: 0 };
         while (currentMeasure < measures) {
-            var stateMap = rule(beatInMeasure);
+            var stateMap = rule(beatInMeasure, prevRhythm);
             rhythm = getNextStateComplex(stateMap, Math.random());
             rhythms.push(rhythm);
             beatInMeasure += rhythm.duration;
@@ -55,6 +56,7 @@ var markovChain = (function() {
                 beatInMeasure = 0;
                 ++currentMeasure;
             }
+            prevRhythm = rhythm;
         }
         return rhythms;
     }

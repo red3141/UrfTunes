@@ -408,7 +408,7 @@ const BEATS_PER_MINUTE = 200 + 1.5 * (masteries['hecarim'] + masteries['masteryi
 const SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
 const SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
 
-var songStartTime = 2;
+var songStartTime = 0;
 
 window.addEventListener('load', init, false);
 function init() {
@@ -700,7 +700,7 @@ function playSong() {
     snareDrum.play(2+8/16);
     
     
-
+    
     // Increasing speed drum pattern
     var delta = 0.25;
     var repeats = 4;

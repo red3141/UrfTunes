@@ -1,4 +1,7 @@
 var songBuilder = (function() {
+    var context;
+    var currentSong;
+    var currentInstruments = [];
     var measuresPerSegment = 16;
     function build()  {
         // Start by building the form of the song (e.g. AABA)
@@ -98,7 +101,7 @@ var songBuilder = (function() {
         }
         
         // Generate rhythms for each section
-        var bassLineRhythmRule = function (beat) {
+        var bassLineRhythmRule = function (beat, prevRhythm) {
             switch (beat % 4) {
                 case 0:
                     return [
@@ -164,29 +167,29 @@ var songBuilder = (function() {
         }
         
         // Generate rhythms for each section
-        var melodyRhythmRule = function (beat) {
+        var melodyRhythmRule = function (beat, prevRhythm) {
             switch (beat % 4) {
                 case 0:
                     return [
                         { value: { duration: 0.5 }, probability: 0.1 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.3 },
                         { value: { duration: 1.5 }, probability: 0.2 },
                     ];
                 case 0.5:
                     return [
                         { value: { duration: 0.5 }, probability: 0.6 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.2 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.2 },
                         { value: { duration: 1 }, probability: 0.2 },
-                        { value: { duration: 1, isRest: true }, probability: 0.1 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.1 },
                     ];
                 case 1:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.2 },
                     ];
                 case 1.5:
                     return [
@@ -197,28 +200,28 @@ var songBuilder = (function() {
                 case 2:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.2 },
                     ];
                 case 2.5:
                     return [
                         { value: { duration: 0.5 }, probability: 0.5 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.1 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.1 },
                     ];
                 case 3:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.2 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.2 },
                         { value: { duration: 1 }, probability: 0.2 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.2 },
                     ];
                 case 3.5:
                     return [
                         { value: { duration: 0.5 }, probability: 0.7 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.3 },
                     ];
                 default:
                     return [
@@ -376,13 +379,19 @@ var songBuilder = (function() {
         };
     }
     
-    function run(song)  {
+    function play(song)  {
+        song = song || currentSong;
+        currentInstruments = [];
         // C4-B5
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
         var currentBeat = 0;
+        if (context)
+            context.close();
+        context = new AudioContext();
         
         // Add bass drum
         var bassDrum = new BassDrum(context, 75 + 20 * masteries['braum'], 0.1 + 0.1 * masteries['malphite']);
+        currentInstruments.push(bassDrum);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < measuresPerSegment; ++j) {
@@ -397,6 +406,7 @@ var songBuilder = (function() {
         // Add bass line
         currentBeat = 0;
         var bassInstrument = new SineTooth(context);
+        currentInstruments.push(bassInstrument);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             var measure = 0;
@@ -409,7 +419,6 @@ var songBuilder = (function() {
                     var chord = segment.chordProgression[measure % segment.chordProgression.length];
                     var frequency = frequencies[chord] / 4;
                     bassInstrument.play(currentBeat / BEATS_PER_BAR, frequencies[chord] / 2, rhythm.duration / BEATS_PER_BAR);
-                    //playFrequency(frequency, currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
                 }
                 currentBeat += rhythm.duration;
                 beatInMeasure += rhythm.duration;
@@ -425,6 +434,7 @@ var songBuilder = (function() {
         // Add melody
         currentBeat = 0;
         var melodyInstrument = new SineTooth(context);
+        currentInstruments.push(melodyInstrument);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < segment.notes.length; ++j) {
@@ -432,7 +442,6 @@ var songBuilder = (function() {
                 if (!rhythm.isRest) {
                     var note = segment.notes[j];
                     melodyInstrument.play(currentBeat / BEATS_PER_BAR, frequencies[note], rhythm.duration / BEATS_PER_BAR);
-                    //playFrequency(frequencies[note], currentBeat * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
                 }
                 currentBeat += rhythm.duration;
             }
@@ -447,7 +456,6 @@ var songBuilder = (function() {
             if (!rhythm.isRest) {
                 var note = song.ending.notes[j];
                 melodyInstrument.play((currentBeat + endingStartBeat) / BEATS_PER_BAR, frequencies[note], rhythm.duration / BEATS_PER_BAR);
-                //playFrequency(frequencies[note], (currentBeat + endingStartBeat) * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
             }
             currentBeat += rhythm.duration;
         }
@@ -461,7 +469,6 @@ var songBuilder = (function() {
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
                 var frequency = frequencies[chord] / 4;
                 bassInstrument.play((currentBeat + endingStartBeat) / BEATS_PER_BAR, frequencies[chord] / 2, rhythm.duration / BEATS_PER_BAR);
-                //playFrequency(frequency, (currentBeat + endingStartBeat) * SECONDS_PER_BEAT + songStartTime, rhythm.duration * SECONDS_PER_BEAT);
             }
             currentBeat += rhythm.duration;
             beatInMeasure += rhythm.duration;
@@ -474,14 +481,25 @@ var songBuilder = (function() {
         
     }
     
-    function buildAndRun()  {
+    function buildAndPlay()  {
         var song = build();
-        run(song);
+        currentSong = song;
+        play(song);
     }
+    
+    function stop()  {
+        if (!context)
+            return;
+        context.close();
+        context = null;
+    }
+    
+    currentSong = build();
     
     return {
         build: build,
-        run: run,
-        buildAndRun: buildAndRun,
+        play: play,
+        buildAndPlay: buildAndPlay,
+        stop: stop,
     }
 })();

@@ -106,24 +106,24 @@ var songBuilder = (function() {
                 case 0:
                     return [
                         { value: { duration: 0.5 }, probability: 0.1 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.2 },
-                        { value: { duration: 1, isRest: true }, probability: 0.3 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.3 },
                         { value: { duration: 1.5 }, probability: 0.1 },
                     ];
                 case 0.5:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.2 },
                     ];
                 case 1:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.2 },
                     ];
                 case 1.5:
                     return [
@@ -133,28 +133,28 @@ var songBuilder = (function() {
                 case 2:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.2 },
                     ];
                 case 2.5:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.2 },
                     ];
                 case 3:
                     return [
                         { value: { duration: 0.5 }, probability: 0.4 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                         { value: { duration: 1 }, probability: 0.1 },
-                        { value: { duration: 1, isRest: true }, probability: 0.2 },
+                        { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.2 },
                     ];
                 case 3.5:
                     return [
                         { value: { duration: 0.5 }, probability: 0.5 },
-                        { value: { duration: 0.5, isRest: true }, probability: 0.5 },
+                        { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.5 },
                     ];
                 default:
                     return [
@@ -405,7 +405,7 @@ var songBuilder = (function() {
         
         // Add bass line
         currentBeat = 0;
-        var bassInstrument = new SineTooth(context);
+        var bassInstrument = new Bass(context);
         currentInstruments.push(bassInstrument);
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
@@ -417,7 +417,7 @@ var songBuilder = (function() {
                 if (!rhythm.isRest) {
                     // Play the root note of the chord
                     var chord = segment.chordProgression[measure % segment.chordProgression.length];
-                    var frequency = frequencies[chord] / 2;
+                    var frequency = frequencies[chord] / 4;
                     bassInstrument.play(currentBeat / BEATS_PER_BAR, frequency, rhythm.duration / BEATS_PER_BAR);
                 }
                 currentBeat += rhythm.duration;
@@ -467,7 +467,7 @@ var songBuilder = (function() {
             if (!rhythm.isRest) {
                 // Play the root note of the chord
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
-                var frequency = frequencies[chord] / 2;
+                var frequency = frequencies[chord] / 4;
                 bassInstrument.play((currentBeat + endingStartBeat) / BEATS_PER_BAR, frequency, rhythm.duration / BEATS_PER_BAR);
             }
             currentBeat += rhythm.duration;

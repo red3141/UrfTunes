@@ -603,9 +603,9 @@ SineTooth.prototype.play = function(bars, pitch, holdBars) {
     
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
-    this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
-    this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
-    this.gain.gain.setValueAtTime(0.2, fallOffTime);
+    this.gain.gain.linearRampToValueAtTime(0.3, attackEndTime);
+    this.gain.gain.linearRampToValueAtTime(0.15, reduceEndTime);
+    this.gain.gain.setValueAtTime(0.15, fallOffTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
     this.oscillator.start(time);
@@ -709,7 +709,8 @@ Bass.prototype.play = function(bars, pitch, holdBars) {
     
     this.oscillator.frequency.setValueAtTime(pitch, time);
     
-    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
     this.gain.gain.linearRampToValueAtTime(attackGain, attackEndTime);
     this.gain.gain.linearRampToValueAtTime(reduceGain, reduceEndTime);
     // The bass can't be "held," it will fall off over time no matter what

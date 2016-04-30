@@ -464,7 +464,9 @@ BassDrum.prototype.play = function(bars) {
     var endTime = time + this.duration;
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.gain.gain.setValueAtTime(1, time);
+    this.oscillator.frequency.setValueAtTime(this.pitch, time + 0.01);
+    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.exponentialRampToValueAtTime(MAX_GAIN, time + 0.01);
     
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
@@ -600,9 +602,164 @@ SineTooth.prototype.play = function(bars, pitch, holdBars) {
     
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
-    this.gain.gain.exponentialRampToValueAtTime(0.4, attackEndTime);
-    this.gain.gain.exponentialRampToValueAtTime(0.2, reduceEndTime);
+    this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
+    this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
     this.gain.gain.setValueAtTime(0.2, fallOffTime);
+    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    
+    this.oscillator.start(time);
+    this.oscillator.stop(endTime);
+};
+
+
+// Trumpet
+
+function Trumpet(context) {
+    this.context = context;
+    
+    var length = 9;
+    var real = new Float32Array(length);
+    var imag = new Float32Array(length);
+    
+    // Build on top of a pure sine wave
+    real[0] = 0;
+    imag[0] = 0;
+    for (var i = 1; i < length; ++i) {
+        real[i] = 1;
+        imag[i] = 0;
+    }
+    
+    this.waveform = this.context.createPeriodicWave(real, imag);
+}
+
+Trumpet.prototype.init = function() {
+    this.oscillator1 = this.context.createOscillator();
+    this.oscillator1.setPeriodicWave(this.waveform);
+    this.oscillator2 = this.context.createOscillator();
+    this.oscillator2.setPeriodicWave(this.waveform);
+ 
+    this.gain = this.context.createGain();
+    this.oscillator1.connect(this.gain);
+    this.oscillator2.connect(this.gain);
+    
+    this.filter = this.context.createBiquadFilter();
+    this.filter.type = "lowpass";
+    this.filter.frequency.value = 2000;
+    
+    this.gain.connect(this.filter);
+    this.filter.connect(this.context.destination);
+};
+
+Trumpet.prototype.play = function(bars, pitch, holdBars) {
+    this.init();
+
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    var attackEndTime = time + 0.02;
+    var reduceEndTime = attackEndTime + 0.02;
+    var fallOffTime = Math.max(reduceEndTime, time + SECONDS_PER_BAR * holdBars);
+    var endTime = fallOffTime + 0.01;
+    
+    this.oscillator1.frequency.setValueAtTime(pitch, time);
+    this.oscillator1.detune.value = 10;
+    this.oscillator2.frequency.setValueAtTime(pitch, time);
+    this.oscillator2.detune.value = -10;
+    
+    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
+    this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
+    this.gain.gain.exponentialRampToValueAtTime(0.4, fallOffTime);
+    this.gain.gain.linearRampToValueAtTime(0, endTime);
+    
+    this.oscillator1.start(time);
+    this.oscillator1.stop(endTime);
+    this.oscillator2.start(time);
+    this.oscillator2.stop(endTime);
+};
+
+// Bass
+// If you use this instrument for non-low notes, you're gonna have a bad time :sans:
+
+function Bass(context) {
+    this.context = context;
+}
+
+Bass.prototype.init = function() {
+    this.oscillator = this.context.createOscillator();
+    this.oscillator.type = 'triangle';
+ 
+    this.gain = this.context.createGain();
+    this.oscillator.connect(this.gain);
+    
+    this.gain.connect(this.context.destination);
+};
+
+Bass.prototype.play = function(bars, pitch, holdBars) {
+    this.init();
+        
+    var attackGain = 0.9;
+    var reduceGain = 0.5;
+    var maxDurationSeconds = 3.0;
+
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    var attackEndTime = time + 0.02;
+    var reduceEndTime = attackEndTime + 0.02;
+    var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, time + SECONDS_PER_BAR * holdBars));
+    var endTime = fallOffTime + 0.01;
+    
+    this.oscillator.frequency.setValueAtTime(pitch, time);
+    
+    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.linearRampToValueAtTime(attackGain, attackEndTime);
+    this.gain.gain.linearRampToValueAtTime(reduceGain, reduceEndTime);
+    // The bass can't be "held," it will fall off over time no matter what
+    this.gain.gain.exponentialRampToValueAtTime(
+        reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
+        fallOffTime);
+    this.gain.gain.linearRampToValueAtTime(0, endTime);
+    
+    this.oscillator.start(time);
+    this.oscillator.stop(endTime);
+};
+
+// Slider
+
+function Slider(context) {
+    this.context = context;
+}
+
+Slider.prototype.init = function() {
+    this.oscillator = this.context.createOscillator();
+    this.oscillator.type = 'sine';
+ 
+    this.gain = this.context.createGain();
+    this.oscillator.connect(this.gain);
+    
+    this.gain.connect(this.context.destination);
+};
+
+Slider.prototype.play = function(bars, fromPitch, toPitch, fromGain, toGain, holdBars) {
+    this.init();
+
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    // Ramp up/down at the beginning/end of being played to avoid clicks.
+    var rampUpTime = 0.02;
+    var rampDownTime = 0.02;
+    var rampUpEndTime = time + rampUpTime;
+    var holdTime = SECONDS_PER_BAR * holdBars;
+    holdTime = Math.max(holdTime, rampUpTime);
+    var rampDownStartTime = time + holdTime;
+    var endTime = rampDownStartTime + rampDownTime;
+    
+    this.oscillator.frequency.setValueAtTime(fromPitch, time);
+    this.oscillator.frequency.linearRampToValueAtTime(toPitch, endTime);
+    
+    // Avoid errors if fromGain or toGain is 0
+    fromGain = Math.max(fromGain, BASICALLY_ZERO);
+    toGain = Math.max(toGain, BASICALLY_ZERO);
+    
+    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.exponentialRampToValueAtTime(fromGain, rampUpEndTime);
+    this.gain.gain.linearRampToValueAtTime(toGain, rampDownStartTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
     this.oscillator.start(time);
@@ -621,12 +778,22 @@ const D4 = A4 * Math.pow(2, -7/12);
 const Cs4 = A4 * Math.pow(2, -8/12);
 const C4 = A4 * Math.pow(2, -9/12);
 const B3 = A4 * Math.pow(2, -10/12);
+const As3 = A4 * Math.pow(2, -11/12);
 
 const D5 = A4 * Math.pow(2, 5/12);
 const Cs5 = A4 * Math.pow(2, 4/12);
 const C5 = A4 * Math.pow(2, 3/12);
 const B4 = A4 * Math.pow(2, 2/12);
 const As4 = A4 * Math.pow(2, 1/12);
+
+const A3 = 220;
+const A2 = 110;
+
+const As2 = A2 * Math.pow(2, 1/12);
+const B2 = A2 * Math.pow(2, 2/12);
+const C3 = A2 * Math.pow(2, 3/12);
+const Cs3 = A2 * Math.pow(2, 4/12);
+const D3 = A2 * Math.pow(2, 5/12);
 
 function playSong() {
     songStartTime = context.currentTime;
@@ -636,20 +803,36 @@ function playSong() {
     var snareDrum = new SnareDrum(context, 100, 0.1 + 0.03 * masteries['rengar'],
             0.2 + 0.03 * masteries['talon'], 1500 - 200 * masteries['zed']);
     var sineTooth = new SineTooth(context);
+    var trumpet = new Trumpet(context);
+    var bass = new Bass(context);
+    var slider = new Slider(context);
+    
+    slider.play(0, A2, A4 * 2, 0, 0.2, 3.75);
     
     // Megalovania
-    sineTooth.play(0, D4, 1/16);
-    sineTooth.play(0, A4, 1/16);
-    sineTooth.play(1/16, D4, 1/16);
-    sineTooth.play(1/16, A4, 1/16);
-    sineTooth.play(1/8, D5, 1/8);
-    sineTooth.play(1/4, A4, 3/16);
-    sineTooth.play(7/16, Gs4, 1/8);
-    sineTooth.play(9/16, G4, 1/8);
-    sineTooth.play(11/16, F4, 1/8);
-    sineTooth.play(13/16, D4, 1/16);
-    sineTooth.play(14/16, F4, 1/16);
-    sineTooth.play(15/16, G4, 1/16);
+    /*trumpet.play(0, D4, 1/16);
+    trumpet.play(0, A4, 1/16);
+    trumpet.play(1/16, D4, 1/16);
+    trumpet.play(1/16, A4, 1/16);
+    trumpet.play(1/8, D5, 1/8);
+    trumpet.play(1/4, A4, 3/16);
+    trumpet.play(7/16, Gs4, 1/8);
+    trumpet.play(9/16, G4, 1/8);
+    trumpet.play(11/16, F4, 1/8);
+    trumpet.play(13/16, D4, 1/16);
+    trumpet.play(14/16, F4, 1/16);
+    trumpet.play(15/16, G4, 1/16);
+    
+    bass.play(0, D3, 1/8);
+    bass.play(1/8, D3, 1/8);
+    bass.play(1/4, D3, 1/16);
+    bass.play(5/16, D3, 1/16);
+    bass.play(7/16, D3, 1/8);
+    bass.play(9/16, D3, 1/8);
+    bass.play(11/16, D3, 1/16);
+    bass.play(12/16, D3, 1/16);
+    bass.play(13/16, D3, 1/16);
+    bass.play(14/16, D3, 1/8);
     
     sineTooth.play(1+0, C4, 1/16);
     sineTooth.play(1+0, G4, 1/16);
@@ -664,18 +847,66 @@ function playSong() {
     sineTooth.play(1+14/16, F4, 1/16);
     sineTooth.play(1+15/16, G4, 1/16);
     
-    sineTooth.play(2+0, B3, 1/16);
-    sineTooth.play(2+0, Fs4, 1/16);
-    sineTooth.play(2+1/16, B3, 1/16);
-    sineTooth.play(2+1/16, Fs4, 1/16);
-    sineTooth.play(2+1/8, D5, 1/8);
-    sineTooth.play(2+1/4, A4, 3/16);
-    sineTooth.play(2+7/16, Gs4, 1/8);
-    sineTooth.play(2+9/16, G4, 1/8);
-    sineTooth.play(2+11/16, F4, 1/8);
-    sineTooth.play(2+13/16, D4, 1/16);
-    sineTooth.play(2+14/16, F4, 1/16);
-    sineTooth.play(2+15/16, G4, 1/16);
+    bass.play(1+0, C3, 1/8);
+    bass.play(1+1/8, C3, 1/8);
+    bass.play(1+1/4, C3, 1/16);
+    bass.play(1+5/16, C3, 1/16);
+    bass.play(1+7/16, C3, 1/8);
+    bass.play(1+9/16, C3, 1/8);
+    bass.play(1+11/16, C3, 1/16);
+    bass.play(1+12/16, C3, 1/16);
+    bass.play(1+13/16, C3, 1/16);
+    bass.play(1+14/16, C3, 1/8);
+    
+    trumpet.play(2+0, B3, 1/16);
+    trumpet.play(2+0, Fs4, 1/16);
+    trumpet.play(2+1/16, B3, 1/16);
+    trumpet.play(2+1/16, Fs4, 1/16);
+    trumpet.play(2+1/8, D5, 1/8);
+    trumpet.play(2+1/4, A4, 3/16);
+    trumpet.play(2+7/16, Gs4, 1/8);
+    trumpet.play(2+9/16, G4, 1/8);
+    trumpet.play(2+11/16, F4, 1/8);
+    trumpet.play(2+13/16, D4, 1/16);
+    trumpet.play(2+14/16, F4, 1/16);
+    trumpet.play(2+15/16, G4, 1/16);
+    
+    bass.play(2+0, B2, 1/8);
+    bass.play(2+1/8, B2, 1/8);
+    bass.play(2+1/4, B2, 1/16);
+    bass.play(2+5/16, B2, 1/16);
+    bass.play(2+7/16, B2, 1/8);
+    bass.play(2+9/16, B2, 1/8);
+    bass.play(2+11/16, B2, 1/16);
+    bass.play(2+12/16, B2, 1/16);
+    bass.play(2+13/16, B2, 1/16);
+    bass.play(2+14/16, B2, 1/8);
+    
+    sineTooth.play(3+0, As3, 1/16);
+    sineTooth.play(3+0, F4, 1/16);
+    sineTooth.play(3+1/16, As3, 1/16);
+    sineTooth.play(3+1/16, F4, 1/16);
+    sineTooth.play(3+1/8, D5, 1/8);
+    sineTooth.play(3+1/4, A4, 3/16);
+    sineTooth.play(3+7/16, Gs4, 1/8);
+    sineTooth.play(3+9/16, G4, 1/8);
+    sineTooth.play(3+11/16, F4, 1/8);
+    sineTooth.play(3+13/16, D4, 1/16);
+    sineTooth.play(3+14/16, F4, 1/16);
+    sineTooth.play(3+15/16, G4, 1/16);
+    
+    bass.play(3+0, As2, 1/8);
+    bass.play(3+1/8, As2, 1/8);
+    bass.play(3+1/4, As2, 1/16);
+    bass.play(3+5/16, As2, 1/16);
+    bass.play(3+7/16, C3, 1/8);
+    bass.play(3+9/16, C3, 1/8);
+    bass.play(3+11/16, C3, 1/16);
+    bass.play(3+12/16, C3, 1/16);
+    bass.play(3+13/16, C3, 1/16);
+    bass.play(3+14/16, C3, 5);
+    
+    //trumpet.play(4, D4, 1);
     
     bassDrum.play(0);
     bassDrum.play(1/16);
@@ -701,6 +932,14 @@ function playSong() {
     snareDrum.play(2+6/16);
     snareDrum.play(2+8/16);
     
+    bassDrum.play(3+0);
+    bassDrum.play(3+1/16);
+    snareDrum.play(3+2/16);
+    bassDrum.play(3+3/16);
+    snareDrum.play(3+4/16);
+    snareDrum.play(3+6/16);
+    snareDrum.play(3+8/16);*/
+    
     
     
     // Increasing speed drum pattern
@@ -710,9 +949,9 @@ function playSong() {
     
     for (var i = 0; i < 4; ++i) {
         for (var j = 0; j < repeats; ++j) {
-            snareDrum.play(3+bars);
+            snareDrum.play(bars);
             if (j % 2 == 0) {
-                bassDrum.play(3+bars, 1);
+                bassDrum.play(bars, 1);
             }
             bars += delta;
             if (j == 24) break;

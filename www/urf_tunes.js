@@ -714,6 +714,51 @@ Bass.prototype.play = function(bars, pitch, holdBars) {
     this.oscillator.stop(endTime);
 };
 
+// Slider
+
+function Slider(context) {
+    this.context = context;
+}
+
+Slider.prototype.init = function() {
+    this.oscillator = this.context.createOscillator();
+    this.oscillator.type = 'sine';
+ 
+    this.gain = this.context.createGain();
+    this.oscillator.connect(this.gain);
+    
+    this.gain.connect(this.context.destination);
+};
+
+Slider.prototype.play = function(bars, fromPitch, toPitch, fromGain, toGain, holdBars) {
+    this.init();
+
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    // Ramp up/down at the beginning/end of being played to avoid clicks.
+    var rampUpTime = 0.02;
+    var rampDownTime = 0.02;
+    var rampUpEndTime = time + rampUpTime;
+    var holdTime = SECONDS_PER_BAR * holdBars;
+    holdTime = Math.max(holdTime, rampUpTime);
+    var rampDownStartTime = time + holdTime;
+    var endTime = rampDownStartTime + rampDownTime;
+    
+    this.oscillator.frequency.setValueAtTime(fromPitch, time);
+    this.oscillator.frequency.linearRampToValueAtTime(toPitch, endTime);
+    
+    // Avoid errors if fromGain or toGain is 0
+    fromGain = Math.max(fromGain, BASICALLY_ZERO);
+    toGain = Math.max(toGain, BASICALLY_ZERO);
+    
+    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.exponentialRampToValueAtTime(fromGain, rampUpEndTime);
+    this.gain.gain.linearRampToValueAtTime(toGain, rampDownStartTime);
+    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    
+    this.oscillator.start(time);
+    this.oscillator.stop(endTime);
+};
+
 const A4 = 440;
 
 const Gs4 = A4 * Math.pow(2, -1/12);
@@ -753,9 +798,12 @@ function playSong() {
     var sineTooth = new SineTooth(context);
     var trumpet = new Trumpet(context);
     var bass = new Bass(context);
+    var slider = new Slider(context);
+    
+    slider.play(0, A2, A4 * 2, 0, 0.2, 3.75);
     
     // Megalovania
-    trumpet.play(0, D4, 1/16);
+    /*trumpet.play(0, D4, 1/16);
     trumpet.play(0, A4, 1/16);
     trumpet.play(1/16, D4, 1/16);
     trumpet.play(1/16, A4, 1/16);
@@ -851,9 +899,9 @@ function playSong() {
     bass.play(3+13/16, C3, 1/16);
     bass.play(3+14/16, C3, 5);
     
-    trumpet.play(4, D4, 1);
+    //trumpet.play(4, D4, 1);
     
-    /*bassDrum.play(0);
+    bassDrum.play(0);
     bassDrum.play(1/16);
     snareDrum.play(2/16);
     bassDrum.play(3/16);
@@ -888,7 +936,7 @@ function playSong() {
     
 
     // Increasing speed drum pattern
-    /*var delta = 0.25;
+    var delta = 0.25;
     var repeats = 4;
     var bars = 0;
     
@@ -903,5 +951,5 @@ function playSong() {
         }
         delta /= 2;
         repeats *= 2;
-    }*/
+    }
 };

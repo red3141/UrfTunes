@@ -1,67 +1,81 @@
 Planning for how each champion will affect the form of the song.
 Note: "+1" is in arbirary units (not seconds or beats per minute or anything)
 
-General instrument scaling - instruments should behave differently based on mastery level
-  1) eighth notes in quarter notes
-  2) 
+General instrument scaling - instruments should behave differently based on mastery level. All levels should increase volume.
+  1) eighth notes and quarter notes
+  2) Fewer rests
+  3) Sixteenth notes
+  4) ?
+  5) Triplets
+
+* = not yet implemented
 
 aatrox
+  *1-5) +1 modulate pitch upward transition
 ahri
 akali
+  *1-5) +1 quiet section
 alistar
-  1-5)  +1 bass intro duration
+  *1-5) +1 bass intro duration
 amumu
+  *1-5) +1 melody pitch bend down
 anivia
-  1-5)  +1 Piano intro duration
+  *1-5) +1 Piano intro duration
 annie
 ashe
-  1-5)  +1 Piano intro duration
+  *1-5) +1 Piano intro duration
 aurelionsol
 azir
 bard
-  1-5) +1 loud funky instrument section 
+  *1-5) +1 loud funky instrument section
 blitzcrank
-  1-5) +1 loud funky instrument section 
+  *1-5) +1 loud funky instrument section
 brand
 braum
-  1-5)  +1 Piano intro duration
+  *1-5) +1 Piano intro duration
 caitlyn
 cassiopeia
 chogath
-  1-5) +1 loud funky instrument section 
+  *1-5) +1 loud funky instrument section
 corki
 darius
+  *1-5) +1 bass+percussion only section
 diana
 drmundo
-  1-5)  +1 bass intro duration
+  *1-5) +1 bass intro duration
 draven
-  1-5)  +1 electric intro duration
+  *1-5) +1 electric intro duration
 ekko
 elise
 evelynn
 ezreal
-  1-5)  +1 electric intro duration
+  *1-5) +1 electric intro duration
 fiddlesticks
+  *1-5) +1 guitar backgrounds
 fiora
 fizz
 galio
 gangplank
 garen
+  *1-5) +1 bass+percussion only section
 gnar
 gragas
 graves
+  *1-5) +1 speeding up drum fill
 hecarim
-  1-5) +1 tempo
+  *1-5) +1 tempo
 heimerdinger
 illaoi
+  *1-5) +1 bass+percussion only section
 irelia
 janna
+  *1-5) +1 white noise backgrounds
 jarvaniv
 jax
 jayce
 jhin
 jinx
-  1-5)  +1 electric intro duration
+  *1-5) +1 electric intro duration
 kalista
 karma
 karthus
@@ -69,32 +83,39 @@ kassadin
 katarina
 kayle
 kennen
+  *1-5) +1 quiet section
 khazix
 kindred
 kogmaw
 leblanc
+  *1-5) +1 arpeggios in melody
 leesin
+  *1-5) +1 quiet section
 leona
 lissandra
-  1-5)  +1 Piano intro duration
+  *1-5) +1 Piano intro duration
 lucian
 lulu
 lux
 malphite
+  *1-5) +1 speeding up drum fill
 malzahar
+  *1-5)  +1 guitar backgrounds
 maokai
+  *1-5) +1 speeding up drum fill
 masteryi
-  1-5) +1 tempo
+  *1-5) +1 tempo
 missfortune
-  1-5)  +1 electric intro duration
+  *1-5) +1 electric intro duration
 mordekaiser
 morgana
-  1-5)  +1 string intro duration
+  *1-5) +1 string intro duration
 nami
-  1-5)  +1 string intro duration
+  *1-5) +1 string intro duration
 nasus
+  *1-5) +1 speeding up drum fill
 nautilus
-  1-5)  +1 bass intro duration
+  *1-5)  +1 bass intro duration
 nidalee
 nocturne
 nunu
@@ -104,7 +125,7 @@ pantheon
 poppy
 quinn
 rammus
-  1-5) +1 tempo
+  *1-5) +1 tempo
 reksai
 renekton
 rengar
@@ -112,18 +133,20 @@ riven
 rumble
 ryze
 sejuani
-  1-5)  +1 Piano intro duration
+  *1-5) +1 Piano intro duration
 shaco
 shen
+  *1-5) +1 quiet section
 shyvana
 singed
 sion
+  *) Controls drum beat
 sivir
 skarner
 sona
-  1-5)  +1 string intro duration
+  *1-5) +1 string intro duration
 soraka
-  1-5)  +1 string intro duration
+  *1-5) +1 string intro duration
 swain
 syndra
 tahmkench
@@ -137,7 +160,7 @@ tryndamere
 twistedfate
 twitch
 udyr
-  1-5) +1 tempo
+  *1-5) +1 tempo
 urgot
 varus
 vayne
@@ -152,12 +175,14 @@ wukong
 xerath
 xinzhao
 yasuo
+  *1-5) +1 white noise backgrounds
 yorick
 zac
-  1-5)  +1 bass intro duration
+  *1-5) +1 bass intro duration
 zed
+  *1-5) +1 quiet section
 ziggs
 zilean
-  1-5) +1 tempo
+  *1-5) +1 tempo
 zyra
-  1-5)  +1 string intro duration
+  *1-5) +1 string intro duration

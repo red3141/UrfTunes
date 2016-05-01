@@ -4,29 +4,100 @@ var songBuilder = (function() {
     var currentInstruments = [];
     var measuresPerSegment = 16;
     function build()  {
+        var formSeedInputs = ['aatrox', 'ahri', 'akali', 'alistar', 'amumu', 'anivia', 'annie', 'ashe', 'aurelionsol', 'azir', 'bard', 'blitzcrank', 'brand', 'braum', 'caitlyn', 'cassiopeia', 'chogath', 'corki', 'darius', 'diana', 'drmundo', 'draven', 'ekko', 'elise', 'evelynn', 'ezreal', 'fiddlesticks', 'fiora', 'fizz', 'galio', 'gangplank', 'garen', 'gnar', 'gragas', 'graves', 'hecarim', 'heimerdinger', 'illaoi', 'irelia', 'janna', 'jarvaniv'];
+        var prng = Math.seedrandom(getSeed(formSeedInputs), { global: false });
         // Start by building the form of the song (e.g. AABA)
         // A "rule" is a function that determines the probability of getting to each state from the current state.
         // It returns a stateMap, which is an array of probabilities for each state.
-        var form = markovChain.build(formRule, 8);
+        var form = markovChain.build(formRule, 8, prng);
         
         var segments = [];
         for (var i = 0; i < 3; ++i) {
             segments.push({});
         }
         
+        var bassSeedInputs = ['jax',
+            'jayce',
+            'jhin',
+            'jinx',
+            'kalista',
+            'karma',
+            'karthus',
+            'kassadin',
+            'katarina',
+            'kayle',
+            'kennen',
+            'khazix',
+            'kindred',
+            'kogmaw',
+            'leblanc',
+            'leesin',
+            'leona',
+            'lissandra',
+            'lucian',
+            'lulu',
+            'lux',
+            'malphite',
+            'malzahar',
+            'maokai',
+            'masteryi',
+            'missfortune',
+            'mordekaiser',
+            'morgana',
+            'nami',
+            'nasus',
+            'nautilus',
+            'nidalee',
+            'nocturne',
+            'nunu'];
+        prng = Math.seedrandom(getSeed(bassSeedInputs), { global: false });
         // Generate a chord progression (0=C, 1=Dm, 2=Em, 3=F, etc.)
         for (var i = 0; i < segments.length; ++i) {
-            segments[i].chordProgression = markovChain.build(chordRule, 4);
+            segments[i].chordProgression = markovChain.build(chordRule, 4, prng);
         }
         
         // Generate rhythms for each section
         for (var i = 0; i < segments.length; ++i) {
-            segments[i].bassLineRhythm = markovChain.buildRhythm(bassLineRhythmRule, 2);
+            segments[i].bassLineRhythm = markovChain.buildRhythm(bassLineRhythmRule, 2, prng);
         }
+        
+        var melodySeedInputs = ['olaf',
+            'orianna',
+            'pantheon',
+            'poppy',
+            'quinn',
+            'rammus',
+            'reksai',
+            'renekton',
+            'rengar',
+            'riven',
+            'rumble',
+            'ryze',
+            'sejuani',
+            'shaco',
+            'shen',
+            'shyvana',
+            'singed',
+            'sion',
+            'sivir',
+            'skarner',
+            'sona',
+            'soraka',
+            'swain',
+            'syndra',
+            'tahmkench',
+            'talon',
+            'taric',
+            'teemo',
+            'thresh',
+            'tristana',
+            'trundle',
+            'tryndamere'];
+        prng = Math.seedrandom(getSeed(melodySeedInputs), { global: false });
         
         // Generate rhythms for each section
         for (var i = 0; i < segments.length; ++i) {
-            var rhythm = markovChain.buildRhythm(melodyRhythmRule, 4);
+            var rhythm = markovChain.buildRhythm(melodyRhythmRule, 4, prng);
             rhythm = rhythm.concat(rhythm).concat(rhythm).concat(rhythm);
             segments[i].melodyRhythm = rhythm;
         }
@@ -34,7 +105,7 @@ var songBuilder = (function() {
         // Generate a sequence of notes for each segment
         for (var i = 0; i < segments.length; ++i) {
             var segment = segments[i];
-            segment.notes = markovChain.buildNotes(melodyPitchRule, segment.melodyRhythm, segment.chordProgression);
+            segment.notes = markovChain.buildNotes(melodyPitchRule, segment.melodyRhythm, segment.chordProgression, prng);
         }
         
         // Make an ending
@@ -75,6 +146,13 @@ var songBuilder = (function() {
             segments: segments,
             ending: ending,
         };
+    }
+    
+    function getSeed(inputs) {
+        var s = '';
+        for (var i = 0; i < inputs.length; ++i)
+            s += masteries[inputs[i]];
+        return s;
     }
     
     function play(song)  {

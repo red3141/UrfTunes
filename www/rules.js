@@ -157,8 +157,8 @@ var melodyRhythmRule = function (beat, prevRhythm) {
             return [
                 { value: { duration: 0.5 }, probability: 0.6 },
                 { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.2 },
-                { value: { duration: 1 }, probability: 0.2 },
-                { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.1 },
+                { value: { duration: 1.5 }, probability: 0.2 },
+                { value: { duration: 1.5, isRest: !prevRhythm.isRest  }, probability: 0.2 },
             ];
         case 1:
             return [

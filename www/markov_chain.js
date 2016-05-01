@@ -26,21 +26,21 @@ var markovChain = (function() {
         return currentState.value;
     }
     
-    function build(rule, length) {
+    function build(rule, length, prng) {
+        prng = prng || Math.random;
         // Build the chain of states
         var state = 0;
         var states = [];
         for (var i = 0; i < length; ++i) {
             var stateMap = rule(states);
-            // Use RNG for now
-            // TODO: get rid of RNG and use champion mastery data to decide the next state
-            state = getNextState(stateMap, Math.random());
+            state = getNextState(stateMap, prng());
             states[i] = state;
         }
         return states;
     }
     
-    function buildRhythm(rule, measures) {
+    function buildRhythm(rule, measures, prng) {
+        prng = prng || Math.random;
         var beatsPerMeasure = 4; // Always use 4/4 time
         var state = 0;
         var beatInMeasure = 0;
@@ -49,7 +49,7 @@ var markovChain = (function() {
         var prevRhythm = { duration: 0 };
         while (currentMeasure < measures) {
             var stateMap = rule(beatInMeasure, prevRhythm);
-            rhythm = getNextStateComplex(stateMap, Math.random());
+            rhythm = getNextStateComplex(stateMap, prng());
             rhythms.push(rhythm);
             beatInMeasure += rhythm.duration;
             if (beatInMeasure >= 4 - 1e-2) {
@@ -61,7 +61,8 @@ var markovChain = (function() {
         return rhythms;
     }
     
-    function buildNotes(rule, rhythm, chordProgression) {
+    function buildNotes(rule, rhythm, chordProgression, prng) {
+        prng = prng || Math.random;
         var beatsPerMeasure = 4; // Always use 4/4 time
         var prevNote = 0;
         var beatInMeasure = 0;
@@ -79,7 +80,7 @@ var markovChain = (function() {
                     // For now assume that each chord is one measure long
                     var chord = chordProgression[currentMeasure % chordProgression.length];
                     var stateMap = rule(prevNote, beatInMeasure, chord);
-                    notes[i] = getNextState(stateMap, Math.random());
+                    notes[i] = getNextState(stateMap, prng());
                 } else {
                     // Use repetition
                     notes[i] = firstTimeNotes[i2];

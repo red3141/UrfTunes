@@ -54,11 +54,14 @@ Ways to make songs more interesting / varying
   - Trumpet shots??
   - Any other weird percussive noise we can come up with
 - Cut out percussion for a section (could be a short section or a full section)
+- Fade out transition
+  - optionally build up before fading out
+  - should always be folowed by a loud section
 - Drum beat that doubles speed every few bars
-  - Whoosh noise that increases in volume & pitch
+  - Have one background that increases in volume & pitch
 - Arpeggios in melody (or backgrounds)
 - Play sounds backwards (especially drums)
-- Slider
+- Pitch bend
 - Fall off medium-length notes (i.e. pitch bend down)
 - Pan to left/right speakers
 - Piano/violin intro
@@ -66,3 +69,12 @@ Ways to make songs more interesting / varying
 - 16th note groups/runs
 - Different key signatures for different songs
 - Dynamic contrast
+- Modulate pitch up over time for a few bars
+- Change the melody instrument between sections
+- When generating sections, generate a specific "type" of section
+  - Intro (see above)
+  - Bass line + melody ("A" section should always have this type)
+  - Quieter section (no percussion, maybe longer notes)
+  - Loud funky instruments
+- Sections can have varying lengths
+- When replaying the "A" section, add something on top

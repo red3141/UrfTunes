@@ -82,10 +82,11 @@ var songBuilder = (function() {
         currentInstruments = [];
         // C4-B5
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
-        var currentBeat = 0;
         if (context)
             context.close();
         context = new AudioContext();
+        
+        var currentBeat = 0;
         
         var bassDrum = new BassDrum(context, 90, 0.2);
         var snareDrum = new SnareDrum(context, 100, 0.1, 0.2, 1500);
@@ -93,6 +94,14 @@ var songBuilder = (function() {
         var melodyInstrument = new SineTooth(context);
         
         // Intro
+        /* Options:
+          - SineTooth note only
+          - Basic: start with bottom instruments and build up
+          - Start with melody instrument only and add supporting lines later
+          - Piano intro that transitions to electro
+          - String ensemble that transitions to electro
+          - Low bass note followed by drums
+        */
         var introLength = 32;
         for (var i = 0; i < introLength; ++i) {
             // Play bass drum on 1 and 3

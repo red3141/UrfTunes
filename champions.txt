@@ -1,0 +1,163 @@
+Planning for how each champion will affect the form of the song.
+Note: "+1" is in arbirary units (not seconds or beats per minute or anything)
+
+General instrument scaling - instruments should behave differently based on mastery level
+  1) eighth notes in quarter notes
+  2) 
+
+aatrox
+ahri
+akali
+alistar
+  1-5)  +1 bass intro duration
+amumu
+anivia
+  1-5)  +1 Piano intro duration
+annie
+ashe
+  1-5)  +1 Piano intro duration
+aurelionsol
+azir
+bard
+  1-5) +1 loud funky instrument section 
+blitzcrank
+  1-5) +1 loud funky instrument section 
+brand
+braum
+  1-5)  +1 Piano intro duration
+caitlyn
+cassiopeia
+chogath
+  1-5) +1 loud funky instrument section 
+corki
+darius
+diana
+drmundo
+  1-5)  +1 bass intro duration
+draven
+  1-5)  +1 electric intro duration
+ekko
+elise
+evelynn
+ezreal
+  1-5)  +1 electric intro duration
+fiddlesticks
+fiora
+fizz
+galio
+gangplank
+garen
+gnar
+gragas
+graves
+hecarim
+  1-5) +1 tempo
+heimerdinger
+illaoi
+irelia
+janna
+jarvaniv
+jax
+jayce
+jhin
+jinx
+  1-5)  +1 electric intro duration
+kalista
+karma
+karthus
+kassadin
+katarina
+kayle
+kennen
+khazix
+kindred
+kogmaw
+leblanc
+leesin
+leona
+lissandra
+  1-5)  +1 Piano intro duration
+lucian
+lulu
+lux
+malphite
+malzahar
+maokai
+masteryi
+  1-5) +1 tempo
+missfortune
+  1-5)  +1 electric intro duration
+mordekaiser
+morgana
+  1-5)  +1 string intro duration
+nami
+  1-5)  +1 string intro duration
+nasus
+nautilus
+  1-5)  +1 bass intro duration
+nidalee
+nocturne
+nunu
+olaf
+orianna
+pantheon
+poppy
+quinn
+rammus
+  1-5) +1 tempo
+reksai
+renekton
+rengar
+riven
+rumble
+ryze
+sejuani
+  1-5)  +1 Piano intro duration
+shaco
+shen
+shyvana
+singed
+sion
+sivir
+skarner
+sona
+  1-5)  +1 string intro duration
+soraka
+  1-5)  +1 string intro duration
+swain
+syndra
+tahmkench
+talon
+taric
+teemo
+thresh
+tristana
+trundle
+tryndamere
+twistedfate
+twitch
+udyr
+  1-5) +1 tempo
+urgot
+varus
+vayne
+veigar
+velkoz
+vi
+viktor
+vladimir
+volibear
+warwick
+wukong
+xerath
+xinzhao
+yasuo
+yorick
+zac
+  1-5)  +1 bass intro duration
+zed
+ziggs
+zilean
+  1-5) +1 tempo
+zyra
+  1-5)  +1 string intro duration

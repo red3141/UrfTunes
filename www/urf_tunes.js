@@ -1,5 +1,3 @@
-var context;
-
 var masteries = {
     'aatrox' : 0,
     'ahri' : 0,
@@ -403,18 +401,10 @@ var championNames = [
 const MAX_GAIN = 3;
 const BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
-const BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
-const BEATS_PER_MINUTE = 200 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
-const SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
-const SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
-
-var songStartTime = 0;
-
 window.addEventListener('load', init, false);
 function init() {
     try {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        context = new AudioContext();
     } catch(e) {
         alert('Your browser does not support Urf Tunes; we recommend using Google Chrome.');
     }
@@ -449,21 +439,20 @@ BassDrum.prototype.init = function() {
     this.gain.connect(this.context.destination);
 };
 
-BassDrum.prototype.play = function(bars) {
+BassDrum.prototype.play = function(startTime) {
     this.init();
     
-    var time = songStartTime + SECONDS_PER_BAR * bars;
-    var endTime = time + this.duration;
+    var endTime = startTime + this.duration;
     
-    this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.oscillator.frequency.setValueAtTime(this.pitch, time + 0.01);
+    this.oscillator.frequency.setValueAtTime(this.pitch, startTime);
+    this.oscillator.frequency.setValueAtTime(this.pitch, startTime + 0.01);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
-    this.gain.gain.exponentialRampToValueAtTime(2, time + 0.01);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    this.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.01);
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator.start(time);
+    this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
 };
 
@@ -508,23 +497,22 @@ SnareDrum.prototype.init = function() {
     this.oscillatorGain.connect(this.context.destination);
 };
 
-SnareDrum.prototype.play = function(bars) {
+SnareDrum.prototype.play = function(startTime) {
     this.init();
     
-    var time = songStartTime + SECONDS_PER_BAR * bars;
-    var oscillatorEndTime = time + this.oscillatorDuration;
-    var noiseEndTime = time + this.noiseDuration;
+    var oscillatorEndTime = startTime + this.oscillatorDuration;
+    var noiseEndTime = startTime + this.noiseDuration;
     var endTime = Math.max(oscillatorEndTime, noiseEndTime);
     
     var volume = 0.3;
-    this.noiseGain.gain.setValueAtTime(volume, time);
+    this.noiseGain.gain.setValueAtTime(volume, startTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, noiseEndTime);
-    this.noise.start(time);
+    this.noise.start(startTime);
     
-    this.oscillator.frequency.setValueAtTime(this.pitch, time);
-    this.oscillatorGain.gain.setValueAtTime(volume, time);
+    this.oscillator.frequency.setValueAtTime(this.pitch, startTime);
+    this.oscillatorGain.gain.setValueAtTime(volume, startTime);
     this.oscillatorGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, oscillatorEndTime);
-    this.oscillator.start(time);
+    this.oscillator.start(startTime);
     
     this.noise.stop(endTime);
     this.oscillator.stop(endTime);
@@ -565,26 +553,24 @@ SineTooth.prototype.init = function() {
     this.gain.connect(this.context.destination);
 };
 
-SineTooth.prototype.play = function(bars, pitch, holdBars) {
+SineTooth.prototype.play = function(startTime, pitch, duration) {
     this.init();
     
-    var time = songStartTime + SECONDS_PER_BAR * bars;
-    var attackEndTime = time + 0.02;
+    var attackEndTime = startTime + 0.02;
     var reduceEndTime = attackEndTime + 0.02;
-    var fallOffTime = Math.max(reduceEndTime, time + SECONDS_PER_BAR * holdBars);
+    var fallOffTime = Math.max(reduceEndTime, startTime + duration);
     var endTime = fallOffTime + 0.01;
     
-    //this.oscillator.frequency.setValueAtTime(pitch, time);
     this.oscillator.frequency.value = pitch;
     
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
     this.gain.gain.linearRampToValueAtTime(0.3, attackEndTime);
     this.gain.gain.linearRampToValueAtTime(0.15, reduceEndTime);
     this.gain.gain.setValueAtTime(0.15, fallOffTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator.start(time);
+    this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
 };
 
@@ -626,30 +612,29 @@ Trumpet.prototype.init = function() {
     this.filter.connect(this.context.destination);
 };
 
-Trumpet.prototype.play = function(bars, pitch, holdBars) {
+Trumpet.prototype.play = function(startTime, pitch, duration) {
     this.init();
 
-    var time = songStartTime + SECONDS_PER_BAR * bars;
-    var attackEndTime = time + 0.02;
+    var attackEndTime = startTime + 0.02;
     var reduceEndTime = attackEndTime + 0.02;
-    var fallOffTime = Math.max(reduceEndTime, time + SECONDS_PER_BAR * holdBars);
+    var fallOffTime = Math.max(reduceEndTime, startTime + duration);
     var endTime = fallOffTime + 0.01;
     
-    this.oscillator1.frequency.setValueAtTime(pitch, time);
+    this.oscillator1.frequency.setValueAtTime(pitch, startTime);
     this.oscillator1.detune.value = 10;
-    this.oscillator2.frequency.setValueAtTime(pitch, time);
+    this.oscillator2.frequency.setValueAtTime(pitch, startTime);
     this.oscillator2.detune.value = -10;
     
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
     this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
     this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
     this.gain.gain.exponentialRampToValueAtTime(0.4, fallOffTime);
     this.gain.gain.linearRampToValueAtTime(0, endTime);
     
-    this.oscillator1.start(time);
+    this.oscillator1.start(startTime);
     this.oscillator1.stop(endTime);
-    this.oscillator2.start(time);
+    this.oscillator2.start(startTime);
     this.oscillator2.stop(endTime);
 };
 
@@ -670,23 +655,22 @@ Bass.prototype.init = function() {
     this.gain.connect(this.context.destination);
 };
 
-Bass.prototype.play = function(bars, pitch, holdBars) {
+Bass.prototype.play = function(startTime, pitch, duration) {
     this.init();
         
     var attackGain = 0.9;
     var reduceGain = 0.5;
     var maxDurationSeconds = 3.0;
 
-    var time = songStartTime + SECONDS_PER_BAR * bars;
-    var attackEndTime = time + 0.02;
+    var attackEndTime = startTime + 0.02;
     var reduceEndTime = attackEndTime + 0.02;
-    var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, time + SECONDS_PER_BAR * holdBars));
+    var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
     var endTime = fallOffTime + 0.01;
     
-    this.oscillator.frequency.setValueAtTime(pitch, time);
+    this.oscillator.frequency.setValueAtTime(pitch, startTime);
     
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
     this.gain.gain.linearRampToValueAtTime(attackGain, attackEndTime);
     this.gain.gain.linearRampToValueAtTime(reduceGain, reduceEndTime);
     // The bass can't be "held," it will fall off over time no matter what
@@ -695,7 +679,7 @@ Bass.prototype.play = function(bars, pitch, holdBars) {
         fallOffTime);
     this.gain.gain.linearRampToValueAtTime(0, endTime);
     
-    this.oscillator.start(time);
+    this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
 };
 
@@ -715,32 +699,31 @@ Slider.prototype.init = function() {
     this.gain.connect(this.context.destination);
 };
 
-Slider.prototype.play = function(bars, fromPitch, toPitch, fromGain, toGain, holdBars) {
+Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain, duration) {
     this.init();
 
-    var time = songStartTime + SECONDS_PER_BAR * bars;
     // Ramp up/down at the beginning/end of being played to avoid clicks.
     var rampUpTime = 0.02;
     var rampDownTime = 0.02;
-    var rampUpEndTime = time + rampUpTime;
-    var holdTime = SECONDS_PER_BAR * holdBars;
+    var rampUpEndTime = startTime + rampUpTime;
+    var holdTime = duration;
     holdTime = Math.max(holdTime, rampUpTime);
-    var rampDownStartTime = time + holdTime;
+    var rampDownStartTime = startTime + holdTime;
     var endTime = rampDownStartTime + rampDownTime;
     
-    this.oscillator.frequency.setValueAtTime(fromPitch, time);
+    this.oscillator.frequency.setValueAtTime(fromPitch, tstartTimeime);
     this.oscillator.frequency.linearRampToValueAtTime(toPitch, endTime);
     
     // Avoid errors if fromGain or toGain is 0
     fromGain = Math.max(fromGain, BASICALLY_ZERO);
     toGain = Math.max(toGain, BASICALLY_ZERO);
     
-    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.setValueAtTime(0, startTime);
     this.gain.gain.exponentialRampToValueAtTime(fromGain, rampUpEndTime);
     this.gain.gain.linearRampToValueAtTime(toGain, rampDownStartTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator.start(time);
+    this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
 };
 
@@ -775,63 +758,56 @@ WhiteNoiseWithAFilter.prototype.init = function() {
     this.noiseGain.connect(this.context.destination);
 };
 
-WhiteNoiseWithAFilter.prototype.play = function(bars, durationBars, frequency, qualityFactor) {
+WhiteNoiseWithAFilter.prototype.play = function(startTime, duration, frequency, qualityFactor) {
     this.init();
     
-    var time = songStartTime + SECONDS_PER_BAR * bars;
-    var rampUpTime = time + 0.02;
-    var rampDownTime = rampUpTime + SECONDS_PER_BAR * durationBars;
+    var rampUpTime = startTime + 0.02;
+    var rampDownTime = rampUpTime + duration;
     var endTime = rampDownTime + 0.02;
     
-    this.noiseFilter.frequency.setValueAtTime(frequency, time);
-    this.noiseFilter.Q.setValueAtTime(qualityFactor, time);
+    this.noiseFilter.frequency.setValueAtTime(frequency, startTime);
+    this.noiseFilter.Q.setValueAtTime(qualityFactor, startTime);
     
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, time);
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(1, rampUpTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(1, rampDownTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.noise.start(time);
+    this.noise.start(startTime);
     this.noise.stop(endTime);
 };
 
-WhiteNoiseWithAFilter.prototype.linearRampCenterPitchToValueAtBars = function(newValue, bars) {
-    var time = songStartTime + SECONDS_PER_BAR * bars;
+WhiteNoiseWithAFilter.prototype.linearRampCenterPitchToValueAtBars = function(newValue, time) {
     if (this.noiseFilter) {
         this.noiseFilter.frequency.linearRampToValueAtTime(newValue, time);
     }
 };
 
-WhiteNoiseWithAFilter.prototype.exponentialRampCenterPitchToValueAtBars = function(newValue, bars) {
-    var time = songStartTime + SECONDS_PER_BAR * bars;
+WhiteNoiseWithAFilter.prototype.exponentialRampCenterPitchToValueAtBars = function(newValue, time) {
     if (this.noiseFilter) {
         this.noiseFilter.frequency.exponentialRampToValueAtTime(newValue, time);
     }
 };
 
-WhiteNoiseWithAFilter.prototype.setCenterPitchToValueAtBars = function(newValue, bars) {
-    var time = songStartTime + SECONDS_PER_BAR * bars;
+WhiteNoiseWithAFilter.prototype.setCenterPitchToValueAtBars = function(newValue, time) {
     if (this.noiseFilter) {
         this.noiseFilter.frequency.setValueAtTime(newValue, time);
     }
 };
 
-WhiteNoiseWithAFilter.prototype.linearRampQualityFactorToValueAtBars = function(newValue, bars) {
-    var time = songStartTime + SECONDS_PER_BAR * bars;
+WhiteNoiseWithAFilter.prototype.linearRampQualityFactorToValueAtBars = function(newValue, time) {
     if (this.noiseFilter) {
         this.noiseFilter.Q.linearRampToValueAtTime(newValue, time);
     }
 };
 
-WhiteNoiseWithAFilter.prototype.exponentialRampQualityFactorToValueAtBars = function(newValue, bars) {
-    var time = songStartTime + SECONDS_PER_BAR * bars;
+WhiteNoiseWithAFilter.prototype.exponentialRampQualityFactorToValueAtBars = function(newValue, time) {
     if (this.noiseFilter) {
         this.noiseFilter.Q.exponentialRampToValueAtTime(newValue, time);
     }
 }
 
-WhiteNoiseWithAFilter.prototype.setQualityFactorToValueAtBars = function(newValue, bars) {
-    var time = songStartTime + SECONDS_PER_BAR * bars;
+WhiteNoiseWithAFilter.prototype.setQualityFactorToValueAtBars = function(newValue, time) {
     if (this.noiseFilter) {
         this.noiseFilter.Q.setValueAtTime(newValue, time);
     }
@@ -867,7 +843,12 @@ const Cs3 = A2 * Math.pow(2, 4/12);
 const D3 = A2 * Math.pow(2, 5/12);
 
 function playSong() {
-    songStartTime = context.currentTime;
+    const BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
+    const BEATS_PER_MINUTE = 80 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
+    const SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
+    const SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
+
+    var context = new AudioContext();
     
     // Create the instruments for the song.
     var bassDrum = new BassDrum(context);
@@ -878,141 +859,145 @@ function playSong() {
     var slider = new Slider(context);
     var whiteNoiseWithAFilter = new WhiteNoiseWithAFilter(context);
     
-    whiteNoiseWithAFilter.play(0, 2, 440, BASICALLY_ZERO);
-    whiteNoiseWithAFilter.exponentialRampQualityFactorToValueAtBars(100, 1);
-    whiteNoiseWithAFilter.setQualityFactorToValueAtBars(100, 1.25);
-    whiteNoiseWithAFilter.linearRampQualityFactorToValueAtBars(BASICALLY_ZERO, 2);
+    function play(instrument, bar, note, durationBars) {
+        instrument.play(bar * SECONDS_PER_BAR, note, durationBars * SECONDS_PER_BAR);
+    }
+    
+    whiteNoiseWithAFilter.play(0, 6, 440, BASICALLY_ZERO);
+    whiteNoiseWithAFilter.exponentialRampQualityFactorToValueAtBars(100, 3);
+    whiteNoiseWithAFilter.setQualityFactorToValueAtBars(100, 4);
+    whiteNoiseWithAFilter.linearRampQualityFactorToValueAtBars(BASICALLY_ZERO, 6);
     
     // Megalovania
-    /*trumpet.play(0, D4, 1/16);
-    trumpet.play(0, A4, 1/16);
-    trumpet.play(1/16, D4, 1/16);
-    trumpet.play(1/16, A4, 1/16);
-    trumpet.play(1/8, D5, 1/8);
-    trumpet.play(1/4, A4, 3/16);
-    trumpet.play(7/16, Gs4, 1/8);
-    trumpet.play(9/16, G4, 1/8);
-    trumpet.play(11/16, F4, 1/8);
-    trumpet.play(13/16, D4, 1/16);
-    trumpet.play(14/16, F4, 1/16);
-    trumpet.play(15/16, G4, 1/16);
+    /*play(trumpet, 0, D4, 1/16);
+    play(trumpet, 0, A4, 1/16);
+    play(trumpet, 1/16, D4, 1/16);
+    play(trumpet, 1/16, A4, 1/16);
+    play(trumpet, 1/8, D5, 1/8);
+    play(trumpet, 1/4, A4, 3/16);
+    play(trumpet, 7/16, Gs4, 1/8);
+    play(trumpet, 9/16, G4, 1/8);
+    play(trumpet, 11/16, F4, 1/8);
+    play(trumpet, 13/16, D4, 1/16);
+    play(trumpet, 14/16, F4, 1/16);
+    play(trumpet, 15/16, G4, 1/16);
     
-    bass.play(0, D3, 1/8);
-    bass.play(1/8, D3, 1/8);
-    bass.play(1/4, D3, 1/16);
-    bass.play(5/16, D3, 1/16);
-    bass.play(7/16, D3, 1/8);
-    bass.play(9/16, D3, 1/8);
-    bass.play(11/16, D3, 1/16);
-    bass.play(12/16, D3, 1/16);
-    bass.play(13/16, D3, 1/16);
-    bass.play(14/16, D3, 1/8);
+    play(bass, 0, D3, 1/8);
+    play(bass, 1/8, D3, 1/8);
+    play(bass, 1/4, D3, 1/16);
+    play(bass, 5/16, D3, 1/16);
+    play(bass, 7/16, D3, 1/8);
+    play(bass, 9/16, D3, 1/8);
+    play(bass, 11/16, D3, 1/16);
+    play(bass, 12/16, D3, 1/16);
+    play(bass, 13/16, D3, 1/16);
+    play(bass, 14/16, D3, 1/8);
     
-    sineTooth.play(1+0, C4, 1/16);
-    sineTooth.play(1+0, G4, 1/16);
-    sineTooth.play(1+1/16, C4, 1/16);
-    sineTooth.play(1+1/16, G4, 1/16);
-    sineTooth.play(1+1/8, D5, 1/8);
-    sineTooth.play(1+1/4, A4, 3/16);
-    sineTooth.play(1+7/16, Gs4, 1/8);
-    sineTooth.play(1+9/16, G4, 1/8);
-    sineTooth.play(1+11/16, F4, 1/8);
-    sineTooth.play(1+13/16, D4, 1/16);
-    sineTooth.play(1+14/16, F4, 1/16);
-    sineTooth.play(1+15/16, G4, 1/16);
+    play(sineTooth, 1+0, C4, 1/16);
+    play(sineTooth, 1+0, G4, 1/16);
+    play(sineTooth, 1+1/16, C4, 1/16);
+    play(sineTooth, 1+1/16, G4, 1/16);
+    play(sineTooth, 1+1/8, D5, 1/8);
+    play(sineTooth, 1+1/4, A4, 3/16);
+    play(sineTooth, 1+7/16, Gs4, 1/8);
+    play(sineTooth, 1+9/16, G4, 1/8);
+    play(sineTooth, 1+11/16, F4, 1/8);
+    play(sineTooth, 1+13/16, D4, 1/16);
+    play(sineTooth, 1+14/16, F4, 1/16);
+    play(sineTooth, 1+15/16, G4, 1/16);
     
-    bass.play(1+0, C3, 1/8);
-    bass.play(1+1/8, C3, 1/8);
-    bass.play(1+1/4, C3, 1/16);
-    bass.play(1+5/16, C3, 1/16);
-    bass.play(1+7/16, C3, 1/8);
-    bass.play(1+9/16, C3, 1/8);
-    bass.play(1+11/16, C3, 1/16);
-    bass.play(1+12/16, C3, 1/16);
-    bass.play(1+13/16, C3, 1/16);
-    bass.play(1+14/16, C3, 1/8);
+    play(bass, 1+0, C3, 1/8);
+    play(bass, 1+1/8, C3, 1/8);
+    play(bass, 1+1/4, C3, 1/16);
+    play(bass, 1+5/16, C3, 1/16);
+    play(bass, 1+7/16, C3, 1/8);
+    play(bass, 1+9/16, C3, 1/8);
+    play(bass, 1+11/16, C3, 1/16);
+    play(bass, 1+12/16, C3, 1/16);
+    play(bass, 1+13/16, C3, 1/16);
+    play(bass, 1+14/16, C3, 1/8);
     
-    sineTooth.play(2+0, B3, 1/16);
-    sineTooth.play(2+0, Fs4, 1/16);
-    sineTooth.play(2+1/16, B3, 1/16);
-    sineTooth.play(2+1/16, Fs4, 1/16);
-    sineTooth.play(2+1/8, D5, 1/8);
-    sineTooth.play(2+1/4, A4, 3/16);
-    sineTooth.play(2+7/16, Gs4, 1/8);
-    sineTooth.play(2+9/16, G4, 1/8);
-    sineTooth.play(2+11/16, F4, 1/8);
-    sineTooth.play(2+13/16, D4, 1/16);
-    sineTooth.play(2+14/16, F4, 1/16);
-    sineTooth.play(2+15/16, G4, 1/16);
+    play(sineTooth, 2+0, B3, 1/16);
+    play(sineTooth, 2+0, Fs4, 1/16);
+    play(sineTooth, 2+1/16, B3, 1/16);
+    play(sineTooth, 2+1/16, Fs4, 1/16);
+    play(sineTooth, 2+1/8, D5, 1/8);
+    play(sineTooth, 2+1/4, A4, 3/16);
+    play(sineTooth, 2+7/16, Gs4, 1/8);
+    play(sineTooth, 2+9/16, G4, 1/8);
+    play(sineTooth, 2+11/16, F4, 1/8);
+    play(sineTooth, 2+13/16, D4, 1/16);
+    play(sineTooth, 2+14/16, F4, 1/16);
+    play(sineTooth, 2+15/16, G4, 1/16);
     
-    bass.play(2+0, B2, 1/8);
-    bass.play(2+1/8, B2, 1/8);
-    bass.play(2+1/4, B2, 1/16);
-    bass.play(2+5/16, B2, 1/16);
-    bass.play(2+7/16, B2, 1/8);
-    bass.play(2+9/16, B2, 1/8);
-    bass.play(2+11/16, B2, 1/16);
-    bass.play(2+12/16, B2, 1/16);
-    bass.play(2+13/16, B2, 1/16);
-    bass.play(2+14/16, B2, 1/8);
+    play(bass, 2+0, B2, 1/8);
+    play(bass, 2+1/8, B2, 1/8);
+    play(bass, 2+1/4, B2, 1/16);
+    play(bass, 2+5/16, B2, 1/16);
+    play(bass, 2+7/16, B2, 1/8);
+    play(bass, 2+9/16, B2, 1/8);
+    play(bass, 2+11/16, B2, 1/16);
+    play(bass, 2+12/16, B2, 1/16);
+    play(bass, 2+13/16, B2, 1/16);
+    play(bass, 2+14/16, B2, 1/8);
     
-    sineTooth.play(3+0, As3, 1/16);
-    sineTooth.play(3+0, F4, 1/16);
-    sineTooth.play(3+1/16, As3, 1/16);
-    sineTooth.play(3+1/16, F4, 1/16);
-    sineTooth.play(3+1/8, D5, 1/8);
-    sineTooth.play(3+1/4, A4, 3/16);
-    sineTooth.play(3+7/16, Gs4, 1/8);
-    sineTooth.play(3+9/16, G4, 1/8);
-    sineTooth.play(3+11/16, F4, 1/8);
-    sineTooth.play(3+13/16, D4, 1/16);
-    sineTooth.play(3+14/16, F4, 1/16);
-    sineTooth.play(3+15/16, G4, 1/16);
+    play(sineTooth, 3+0, As3, 1/16);
+    play(sineTooth, 3+0, F4, 1/16);
+    play(sineTooth, 3+1/16, As3, 1/16);
+    play(sineTooth, 3+1/16, F4, 1/16);
+    play(sineTooth, 3+1/8, D5, 1/8);
+    play(sineTooth, 3+1/4, A4, 3/16);
+    play(sineTooth, 3+7/16, Gs4, 1/8);
+    play(sineTooth, 3+9/16, G4, 1/8);
+    play(sineTooth, 3+11/16, F4, 1/8);
+    play(sineTooth, 3+13/16, D4, 1/16);
+    play(sineTooth, 3+14/16, F4, 1/16);
+    play(sineTooth, 3+15/16, G4, 1/16);
     
-    bass.play(3+0, As2, 1/8);
-    bass.play(3+1/8, As2, 1/8);
-    bass.play(3+1/4, As2, 1/16);
-    bass.play(3+5/16, As2, 1/16);
-    bass.play(3+7/16, C3, 1/8);
-    bass.play(3+9/16, C3, 1/8);
-    bass.play(3+11/16, C3, 1/16);
-    bass.play(3+12/16, C3, 1/16);
-    bass.play(3+13/16, C3, 1/16);
-    bass.play(3+14/16, C3, 5);
+    play(bass, 3+0, As2, 1/8);
+    play(bass, 3+1/8, As2, 1/8);
+    play(bass, 3+1/4, As2, 1/16);
+    play(bass, 3+5/16, As2, 1/16);
+    play(bass, 3+7/16, C3, 1/8);
+    play(bass, 3+9/16, C3, 1/8);
+    play(bass, 3+11/16, C3, 1/16);
+    play(bass, 3+12/16, C3, 1/16);
+    play(bass, 3+13/16, C3, 1/16);
+    play(bass, 3+14/16, C3, 5);
     
-    //trumpet.play(4, D4, 1);
+    //play(trumpet, 4, D4, 1);
     
-    bassDrum.play(0);
-    bassDrum.play(1/16);
-    snareDrum.play(2/16);
-    bassDrum.play(3/16);
-    snareDrum.play(4/16);
-    snareDrum.play(6/16);
-    snareDrum.play(8/16);
+    play(bassDrum, 0);
+    play(bassDrum, 1/16);
+    play(snareDrum, 2/16);
+    play(bassDrum, 3/16);
+    play(snareDrum, 4/16);
+    play(snareDrum, 6/16);
+    play(snareDrum, 8/16);
     
-    bassDrum.play(1+0);
-    bassDrum.play(1+1/16);
-    snareDrum.play(1+2/16);
-    bassDrum.play(1+3/16);
-    snareDrum.play(1+4/16);
-    snareDrum.play(1+6/16);
-    snareDrum.play(1+8/16);
+    play(bassDrum, 1+0);
+    play(bassDrum, 1+1/16);
+    play(snareDrum, 1+2/16);
+    play(bassDrum, 1+3/16);
+    play(snareDrum, 1+4/16);
+    play(snareDrum, 1+6/16);
+    play(snareDrum, 1+8/16);
     
-    bassDrum.play(2+0);
-    bassDrum.play(2+1/16);
-    snareDrum.play(2+2/16);
-    bassDrum.play(2+3/16);
-    snareDrum.play(2+4/16);
-    snareDrum.play(2+6/16);
-    snareDrum.play(2+8/16);
+    play(bassDrum, 2+0);
+    play(bassDrum, 2+1/16);
+    play(snareDrum, 2+2/16);
+    play(bassDrum, 2+3/16);
+    play(snareDrum, 2+4/16);
+    play(snareDrum, 2+6/16);
+    play(snareDrum, 2+8/16);
     
-    bassDrum.play(3+0);
-    bassDrum.play(3+1/16);
-    snareDrum.play(3+2/16);
-    bassDrum.play(3+3/16);
-    snareDrum.play(3+4/16);
-    snareDrum.play(3+6/16);
-    snareDrum.play(3+8/16);*/
+    play(bassDrum, 3+0);
+    play(bassDrum, 3+1/16);
+    play(snareDrum, 3+2/16);
+    play(bassDrum, 3+3/16);
+    play(snareDrum, 3+4/16);
+    play(snareDrum, 3+6/16);
+    play(snareDrum, 3+8/16);*/
     
     
     
@@ -1024,9 +1009,9 @@ function playSong() {
     
     for (var i = 0; i < 4; ++i) {
         for (var j = 0; j < repeats; ++j) {
-            snareDrum.play(bars);
+            play(snareDrum, bars);
             if (j % 2 == 0) {
-                bassDrum.play(bars, 1);
+                play(bassDrum, bars, 1);
             }
             bars += delta;
             if (j == 24) break;

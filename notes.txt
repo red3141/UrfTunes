@@ -38,3 +38,31 @@ How should champion mastery data affect the song?
      Some champions will tend to create more agressive lines of music, while others will tend to create more peaceful lines.
      Some champions (like Jinx) will be more likely to break the rules of music theory.
   c) Have multiple sections, where each section features a different high-mastery-level champion. 
+
+
+Ways to make songs more interesting / varying
+- Reverb
+- More layers of backgrounds. Maybe pick some based on champion mastery:
+  - Whoosh noise
+  - Guitar-ish instrument playing a regular pattern (maybe SineTooth will work)
+  - Wood block
+  - Hi hats
+  - Toms
+  - Clap noise (kind of like snare? Maybe snare is good enough)
+  - Violins
+  - Chorus
+  - Trumpet shots??
+  - Any other weird percussive noise we can come up with
+- Cut out percussion for a section (could be a short section or a full section)
+- Drum beat that doubles speed every few bars
+  - Whoosh noise that increases in volume & pitch
+- Arpeggios in melody (or backgrounds)
+- Play sounds backwards (especially drums)
+- Slider
+- Fall off medium-length notes (i.e. pitch bend down)
+- Pan to left/right speakers
+- Piano/violin intro
+- Special drum beat (more advanced than 1+3. Should always be on 1 though)
+- 16th note groups/runs
+- Different key signatures for different songs
+- Dynamic contrast

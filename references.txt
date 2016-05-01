@@ -6,3 +6,4 @@ procedural music generation, and other topics pertaining to our project.
 3) https://dev.opera.com/articles/drum-sounds-webaudio/ - Creating synthesized drum sounds in the Web Audio API
 4) http://www.sitepoint.com/using-fourier-transforms-web-audio-api/ - Explains how to create sounds using Fourier coefficients
 5) http://www.hooktheory.com/trends# - Frequencies of which chords follow other chords, super helpful for making chord progressions that don't sound terrible
+6) https://en.wikipedia.org/wiki/Markov_chain - Markov chains - can generate notes as well as the structure of the song

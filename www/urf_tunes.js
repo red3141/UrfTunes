@@ -467,7 +467,7 @@ BassDrum.prototype.play = function(bars) {
     this.oscillator.frequency.setValueAtTime(this.pitch, time + 0.01);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
-    this.gain.gain.exponentialRampToValueAtTime(1, time + 0.01);
+    this.gain.gain.exponentialRampToValueAtTime(2, time + 0.01);
     
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
@@ -666,7 +666,8 @@ Trumpet.prototype.play = function(bars, pitch, holdBars) {
     this.oscillator2.frequency.setValueAtTime(pitch, time);
     this.oscillator2.detune.value = -10;
     
-    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
     this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
     this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
     this.gain.gain.exponentialRampToValueAtTime(0.4, fallOffTime);

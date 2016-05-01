@@ -88,8 +88,8 @@ var songBuilder = (function() {
         
         var currentBeat = 0;
         
-        var bassDrum = new BassDrum(context, 90, 0.2);
-        var snareDrum = new SnareDrum(context, 100, 0.1, 0.2, 1500);
+        var bassDrum = new BassDrum(context);
+        var snareDrum = new SnareDrum(context);
         var bassInstrument = new Bass(context);
         var melodyInstrument = new SineTooth(context);
         

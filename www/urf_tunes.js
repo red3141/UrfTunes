@@ -435,10 +435,10 @@ function playFrequency(context, frequency, startTime, duration) {
 };
 
 // Bass Drum
-function BassDrum(context, pitch, duration) {
+function BassDrum(context) {
     this.context = context;
-    this.pitch = pitch;
-    this.duration = duration;
+    this.pitch = 150;
+    this.duration = 0.1;
 };
 
 BassDrum.prototype.init = function() {
@@ -447,14 +447,6 @@ BassDrum.prototype.init = function() {
     this.gain = this.context.createGain();
     this.oscillator.connect(this.gain);
     this.gain.connect(this.context.destination);
-};
-
-BassDrum.prototype.setPitch = function(newPitch) {
-    this.pitch = newPitch;
-};
-
-BassDrum.prototype.setDuration = function(newDuration) {
-    this.duration = newDuration;
 };
 
 BassDrum.prototype.play = function(bars) {
@@ -468,7 +460,6 @@ BassDrum.prototype.play = function(bars) {
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
     this.gain.gain.exponentialRampToValueAtTime(2, time + 0.01);
-    
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
@@ -477,13 +468,13 @@ BassDrum.prototype.play = function(bars) {
 };
 
 // Snare Drum
-function SnareDrum(context, pitch, oscillatorDuration, noiseDuration, filterMinPitch) {
+function SnareDrum(context) {
     this.context = context;
     this.noiseBuffer = this.createNoiseBuffer();
-    this.pitch = pitch;
-    this.oscillatorDuration = oscillatorDuration;
-    this.noiseDuration = noiseDuration;
-    this.filterMinPitch = filterMinPitch;
+    this.pitch = 100;
+    this.oscillatorDuration = 0.1;
+    this.noiseDuration = 0.2;
+    this.filterMinPitch = 1500;
 }
 
 SnareDrum.prototype.createNoiseBuffer = function() {
@@ -516,22 +507,6 @@ SnareDrum.prototype.init = function() {
     this.oscillator.connect(this.oscillatorGain);
     this.oscillatorGain.connect(this.context.destination);
 };
-
-SnareDrum.prototype.setPitch = function(newPitch) {
-    this.pitch = newPitch;
-}
-
-SnareDrum.prototype.setOscillatorDuration = function(newOscillatorDuration) {
-    this.oscillatorDuration = newOscillatorDuration;
-}
-
-SnareDrum.prototype.setNoiseDuration = function(newNoiseDuration) {
-    this.noiseDuration = newNoiseDuration;
-}
-
-SnareDrum.prototype.setFilterMinPitch = function(newFilterMinPitch) {
-    this.filterMinPitch = filterMinPitch;
-}
 
 SnareDrum.prototype.play = function(bars) {
     this.init();
@@ -612,7 +587,6 @@ SineTooth.prototype.play = function(bars, pitch, holdBars) {
     this.oscillator.start(time);
     this.oscillator.stop(endTime);
 };
-
 
 // Trumpet
 
@@ -770,6 +744,99 @@ Slider.prototype.play = function(bars, fromPitch, toPitch, fromGain, toGain, hol
     this.oscillator.stop(endTime);
 };
 
+// White noise with a filter
+
+function WhiteNoiseWithAFilter(context) {
+    this.context = context;
+    this.noiseBuffer = this.createNoiseBuffer();
+}
+
+WhiteNoiseWithAFilter.prototype.createNoiseBuffer = function() {
+    var bufferSize = this.context.sampleRate;
+    var buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+    var output = buffer.getChannelData(0);
+    for (var i = 0; i < bufferSize; ++i) {
+        output[i] = Math.random() * 2 - 1;
+    }
+    
+    return buffer;
+};
+
+WhiteNoiseWithAFilter.prototype.init = function() {
+    this.noise = this.context.createBufferSource();
+    this.noise.buffer = this.noiseBuffer;
+    this.noise.loop = true;
+    this.noiseFilter = this.context.createBiquadFilter();
+    this.noiseFilter.type = 'bandpass';
+    this.noise.connect(this.noiseFilter);
+    this.noiseGain = this.context.createGain();
+    this.noiseFilter.connect(this.noiseGain);
+    
+    this.noiseGain.connect(this.context.destination);
+};
+
+WhiteNoiseWithAFilter.prototype.play = function(bars, durationBars, frequency, qualityFactor) {
+    this.init();
+    
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    var rampUpTime = time + 0.02;
+    var rampDownTime = rampUpTime + SECONDS_PER_BAR * durationBars;
+    var endTime = rampDownTime + 0.02;
+    
+    this.noiseFilter.frequency.setValueAtTime(frequency, time);
+    this.noiseFilter.Q.setValueAtTime(qualityFactor, time);
+    
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, time);
+    this.noiseGain.gain.exponentialRampToValueAtTime(1, rampUpTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(1, rampDownTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    
+    this.noise.start(time);
+    this.noise.stop(endTime);
+};
+
+WhiteNoiseWithAFilter.prototype.linearRampCenterPitchToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.frequency.linearRampToValueAtTime(newValue, time);
+    }
+};
+
+WhiteNoiseWithAFilter.prototype.exponentialRampCenterPitchToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.frequency.exponentialRampToValueAtTime(newValue, time);
+    }
+};
+
+WhiteNoiseWithAFilter.prototype.setCenterPitchToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.frequency.setValueAtTime(newValue, time);
+    }
+};
+
+WhiteNoiseWithAFilter.prototype.linearRampQualityFactorToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.Q.linearRampToValueAtTime(newValue, time);
+    }
+};
+
+WhiteNoiseWithAFilter.prototype.exponentialRampQualityFactorToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.Q.exponentialRampToValueAtTime(newValue, time);
+    }
+}
+
+WhiteNoiseWithAFilter.prototype.setQualityFactorToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.Q.setValueAtTime(newValue, time);
+    }
+};
+
 const A4 = 440;
 
 const Gs4 = A4 * Math.pow(2, -1/12);
@@ -803,15 +870,18 @@ function playSong() {
     songStartTime = context.currentTime;
     
     // Create the instruments for the song.
-    var bassDrum = new BassDrum(context, 150 + 20 * masteries['braum'], 0.1 + 0.1 * masteries['malphite']);
-    var snareDrum = new SnareDrum(context, 100, 0.1 + 0.03 * masteries['rengar'],
-            0.2 + 0.03 * masteries['talon'], 1500 - 200 * masteries['zed']);
+    var bassDrum = new BassDrum(context);
+    var snareDrum = new SnareDrum(context);
     var sineTooth = new SineTooth(context);
     var trumpet = new Trumpet(context);
     var bass = new Bass(context);
     var slider = new Slider(context);
+    var whiteNoiseWithAFilter = new WhiteNoiseWithAFilter(context);
     
-    slider.play(0, A2, A4 * 2, 0, 0.2, 3.75);
+    whiteNoiseWithAFilter.play(0, 2, 440, BASICALLY_ZERO);
+    whiteNoiseWithAFilter.exponentialRampQualityFactorToValueAtBars(100, 1);
+    whiteNoiseWithAFilter.setQualityFactorToValueAtBars(100, 1.25);
+    whiteNoiseWithAFilter.linearRampQualityFactorToValueAtBars(BASICALLY_ZERO, 2);
     
     // Megalovania
     /*trumpet.play(0, D4, 1/16);
@@ -862,18 +932,18 @@ function playSong() {
     bass.play(1+13/16, C3, 1/16);
     bass.play(1+14/16, C3, 1/8);
     
-    trumpet.play(2+0, B3, 1/16);
-    trumpet.play(2+0, Fs4, 1/16);
-    trumpet.play(2+1/16, B3, 1/16);
-    trumpet.play(2+1/16, Fs4, 1/16);
-    trumpet.play(2+1/8, D5, 1/8);
-    trumpet.play(2+1/4, A4, 3/16);
-    trumpet.play(2+7/16, Gs4, 1/8);
-    trumpet.play(2+9/16, G4, 1/8);
-    trumpet.play(2+11/16, F4, 1/8);
-    trumpet.play(2+13/16, D4, 1/16);
-    trumpet.play(2+14/16, F4, 1/16);
-    trumpet.play(2+15/16, G4, 1/16);
+    sineTooth.play(2+0, B3, 1/16);
+    sineTooth.play(2+0, Fs4, 1/16);
+    sineTooth.play(2+1/16, B3, 1/16);
+    sineTooth.play(2+1/16, Fs4, 1/16);
+    sineTooth.play(2+1/8, D5, 1/8);
+    sineTooth.play(2+1/4, A4, 3/16);
+    sineTooth.play(2+7/16, Gs4, 1/8);
+    sineTooth.play(2+9/16, G4, 1/8);
+    sineTooth.play(2+11/16, F4, 1/8);
+    sineTooth.play(2+13/16, D4, 1/16);
+    sineTooth.play(2+14/16, F4, 1/16);
+    sineTooth.play(2+15/16, G4, 1/16);
     
     bass.play(2+0, B2, 1/8);
     bass.play(2+1/8, B2, 1/8);
@@ -947,7 +1017,8 @@ function playSong() {
     
     
     // Increasing speed drum pattern
-    var delta = 0.25;
+    //slider.play(0, A2, A4 * 2, 0, 0.2, 3.75);
+    /*var delta = 0.25;
     var repeats = 4;
     var bars = 0;
     
@@ -962,5 +1033,5 @@ function playSong() {
         }
         delta /= 2;
         repeats *= 2;
-    }
+    }*/
 };

@@ -430,10 +430,10 @@ function playFrequency(frequency) {
 };
 
 // Bass Drum
-function BassDrum(context, pitch, duration) {
+function BassDrum(context) {
     this.context = context;
-    this.pitch = pitch;
-    this.duration = duration;
+    this.pitch = 150;
+    this.duration = 0.1;
 };
 
 BassDrum.prototype.init = function() {
@@ -444,14 +444,6 @@ BassDrum.prototype.init = function() {
     this.gain.connect(this.context.destination);
 };
 
-BassDrum.prototype.setPitch = function(newPitch) {
-    this.pitch = newPitch;
-};
-
-BassDrum.prototype.setDuration = function(newDuration) {
-    this.duration = newDuration;
-};
-
 BassDrum.prototype.play = function(bars) {
     this.init();
     
@@ -460,7 +452,7 @@ BassDrum.prototype.play = function(bars) {
     
     this.oscillator.frequency.setValueAtTime(this.pitch, time);
     this.oscillator.frequency.setValueAtTime(this.pitch, time + 0.01);
-    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
     this.gain.gain.exponentialRampToValueAtTime(MAX_GAIN, time + 0.01);
     
     this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
@@ -471,13 +463,13 @@ BassDrum.prototype.play = function(bars) {
 };
 
 // Snare Drum
-function SnareDrum(context, pitch, oscillatorDuration, noiseDuration, filterMinPitch) {
+function SnareDrum(context) {
     this.context = context;
     this.noiseBuffer = this.createNoiseBuffer();
-    this.pitch = pitch;
-    this.oscillatorDuration = oscillatorDuration;
-    this.noiseDuration = noiseDuration;
-    this.filterMinPitch = filterMinPitch;
+    this.pitch = 100;
+    this.oscillatorDuration = 0.1;
+    this.noiseDuration = 0.2;
+    this.filterMinPitch = 1500;
 }
 
 SnareDrum.prototype.createNoiseBuffer = function() {
@@ -510,22 +502,6 @@ SnareDrum.prototype.init = function() {
     this.oscillator.connect(this.oscillatorGain);
     this.oscillatorGain.connect(this.context.destination);
 };
-
-SnareDrum.prototype.setPitch = function(newPitch) {
-    this.pitch = newPitch;
-}
-
-SnareDrum.prototype.setOscillatorDuration = function(newOscillatorDuration) {
-    this.oscillatorDuration = newOscillatorDuration;
-}
-
-SnareDrum.prototype.setNoiseDuration = function(newNoiseDuration) {
-    this.noiseDuration = newNoiseDuration;
-}
-
-SnareDrum.prototype.setFilterMinPitch = function(newFilterMinPitch) {
-    this.filterMinPitch = filterMinPitch;
-}
 
 SnareDrum.prototype.play = function(bars) {
     this.init();
@@ -594,7 +570,7 @@ SineTooth.prototype.play = function(bars, pitch, holdBars) {
     
     this.oscillator.frequency.setValueAtTime(pitch, time);
     
-    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
     this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
     this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
     this.gain.gain.setValueAtTime(0.2, fallOffTime);
@@ -603,7 +579,6 @@ SineTooth.prototype.play = function(bars, pitch, holdBars) {
     this.oscillator.start(time);
     this.oscillator.stop(endTime);
 };
-
 
 // Trumpet
 
@@ -657,7 +632,7 @@ Trumpet.prototype.play = function(bars, pitch, holdBars) {
     this.oscillator2.frequency.setValueAtTime(pitch, time);
     this.oscillator2.detune.value = -10;
     
-    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
     this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
     this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
     this.gain.gain.exponentialRampToValueAtTime(0.4, fallOffTime);
@@ -701,7 +676,7 @@ Bass.prototype.play = function(bars, pitch, holdBars) {
     
     this.oscillator.frequency.setValueAtTime(pitch, time);
     
-    this.gain.gain.setValueAtTime(0, time);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, time);
     this.gain.gain.linearRampToValueAtTime(attackGain, attackEndTime);
     this.gain.gain.linearRampToValueAtTime(reduceGain, reduceEndTime);
     // The bass can't be "held," it will fall off over time no matter what
@@ -792,18 +767,15 @@ function playSong() {
     songStartTime = context.currentTime;
     
     // Create the instruments for the song.
-    var bassDrum = new BassDrum(context, 150 + 20 * masteries['braum'], 0.1 + 0.1 * masteries['malphite']);
-    var snareDrum = new SnareDrum(context, 100, 0.1 + 0.03 * masteries['rengar'],
-            0.2 + 0.03 * masteries['talon'], 1500 - 200 * masteries['zed']);
+    var bassDrum = new BassDrum(context);
+    var snareDrum = new SnareDrum(context);
     var sineTooth = new SineTooth(context);
     var trumpet = new Trumpet(context);
     var bass = new Bass(context);
     var slider = new Slider(context);
     
-    slider.play(0, A2, A4 * 2, 0, 0.2, 3.75);
-    
     // Megalovania
-    /*trumpet.play(0, D4, 1/16);
+    trumpet.play(0, D4, 1/16);
     trumpet.play(0, A4, 1/16);
     trumpet.play(1/16, D4, 1/16);
     trumpet.play(1/16, A4, 1/16);
@@ -851,18 +823,18 @@ function playSong() {
     bass.play(1+13/16, C3, 1/16);
     bass.play(1+14/16, C3, 1/8);
     
-    trumpet.play(2+0, B3, 1/16);
-    trumpet.play(2+0, Fs4, 1/16);
-    trumpet.play(2+1/16, B3, 1/16);
-    trumpet.play(2+1/16, Fs4, 1/16);
-    trumpet.play(2+1/8, D5, 1/8);
-    trumpet.play(2+1/4, A4, 3/16);
-    trumpet.play(2+7/16, Gs4, 1/8);
-    trumpet.play(2+9/16, G4, 1/8);
-    trumpet.play(2+11/16, F4, 1/8);
-    trumpet.play(2+13/16, D4, 1/16);
-    trumpet.play(2+14/16, F4, 1/16);
-    trumpet.play(2+15/16, G4, 1/16);
+    sineTooth.play(2+0, B3, 1/16);
+    sineTooth.play(2+0, Fs4, 1/16);
+    sineTooth.play(2+1/16, B3, 1/16);
+    sineTooth.play(2+1/16, Fs4, 1/16);
+    sineTooth.play(2+1/8, D5, 1/8);
+    sineTooth.play(2+1/4, A4, 3/16);
+    sineTooth.play(2+7/16, Gs4, 1/8);
+    sineTooth.play(2+9/16, G4, 1/8);
+    sineTooth.play(2+11/16, F4, 1/8);
+    sineTooth.play(2+13/16, D4, 1/16);
+    sineTooth.play(2+14/16, F4, 1/16);
+    sineTooth.play(2+15/16, G4, 1/16);
     
     bass.play(2+0, B2, 1/8);
     bass.play(2+1/8, B2, 1/8);
@@ -931,12 +903,13 @@ function playSong() {
     bassDrum.play(3+3/16);
     snareDrum.play(3+4/16);
     snareDrum.play(3+6/16);
-    snareDrum.play(3+8/16);*/
+    snareDrum.play(3+8/16);
     
     
 
     // Increasing speed drum pattern
-    var delta = 0.25;
+    //slider.play(0, A2, A4 * 2, 0, 0.2, 3.75);
+    /*var delta = 0.25;
     var repeats = 4;
     var bars = 0;
     
@@ -951,5 +924,5 @@ function playSong() {
         }
         delta /= 2;
         repeats *= 2;
-    }
+    }*/
 };

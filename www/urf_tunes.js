@@ -734,6 +734,99 @@ Slider.prototype.play = function(bars, fromPitch, toPitch, fromGain, toGain, hol
     this.oscillator.stop(endTime);
 };
 
+// White noise with a filter
+
+function WhiteNoiseWithAFilter(context) {
+    this.context = context;
+    this.noiseBuffer = this.createNoiseBuffer();
+}
+
+WhiteNoiseWithAFilter.prototype.createNoiseBuffer = function() {
+    var bufferSize = this.context.sampleRate;
+    var buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+    var output = buffer.getChannelData(0);
+    for (var i = 0; i < bufferSize; ++i) {
+        output[i] = Math.random() * 2 - 1;
+    }
+    
+    return buffer;
+};
+
+WhiteNoiseWithAFilter.prototype.init = function() {
+    this.noise = this.context.createBufferSource();
+    this.noise.buffer = this.noiseBuffer;
+    this.noise.loop = true;
+    this.noiseFilter = this.context.createBiquadFilter();
+    this.noiseFilter.type = 'bandpass';
+    this.noise.connect(this.noiseFilter);
+    this.noiseGain = this.context.createGain();
+    this.noiseFilter.connect(this.noiseGain);
+    
+    this.noiseGain.connect(this.context.destination);
+};
+
+WhiteNoiseWithAFilter.prototype.play = function(bars, durationBars, frequency, qualityFactor) {
+    this.init();
+    
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    var rampUpTime = time + 0.02;
+    var rampDownTime = rampUpTime + SECONDS_PER_BAR * durationBars;
+    var endTime = rampDownTime + 0.02;
+    
+    this.noiseFilter.frequency.setValueAtTime(frequency, time);
+    this.noiseFilter.Q.setValueAtTime(qualityFactor, time);
+    
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, time);
+    this.noiseGain.gain.exponentialRampToValueAtTime(1, rampUpTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(1, rampDownTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    
+    this.noise.start(time);
+    this.noise.stop(endTime);
+};
+
+WhiteNoiseWithAFilter.prototype.linearRampCenterPitchToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.frequency.linearRampToValueAtTime(newValue, time);
+    }
+};
+
+WhiteNoiseWithAFilter.prototype.exponentialRampCenterPitchToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.frequency.exponentialRampToValueAtTime(newValue, time);
+    }
+};
+
+WhiteNoiseWithAFilter.prototype.setCenterPitchToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.frequency.setValueAtTime(newValue, time);
+    }
+};
+
+WhiteNoiseWithAFilter.prototype.linearRampQualityFactorToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.Q.linearRampToValueAtTime(newValue, time);
+    }
+};
+
+WhiteNoiseWithAFilter.prototype.exponentialRampQualityFactorToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.Q.exponentialRampToValueAtTime(newValue, time);
+    }
+}
+
+WhiteNoiseWithAFilter.prototype.setQualityFactorToValueAtBars = function(newValue, bars) {
+    var time = songStartTime + SECONDS_PER_BAR * bars;
+    if (this.noiseFilter) {
+        this.noiseFilter.Q.setValueAtTime(newValue, time);
+    }
+};
+
 const A4 = 440;
 
 const Gs4 = A4 * Math.pow(2, -1/12);
@@ -773,9 +866,15 @@ function playSong() {
     var trumpet = new Trumpet(context);
     var bass = new Bass(context);
     var slider = new Slider(context);
+    var whiteNoiseWithAFilter = new WhiteNoiseWithAFilter(context);
+    
+    whiteNoiseWithAFilter.play(0, 2, 440, BASICALLY_ZERO);
+    whiteNoiseWithAFilter.exponentialRampQualityFactorToValueAtBars(100, 1);
+    whiteNoiseWithAFilter.setQualityFactorToValueAtBars(100, 1.25);
+    whiteNoiseWithAFilter.linearRampQualityFactorToValueAtBars(BASICALLY_ZERO, 2);
     
     // Megalovania
-    trumpet.play(0, D4, 1/16);
+    /*trumpet.play(0, D4, 1/16);
     trumpet.play(0, A4, 1/16);
     trumpet.play(1/16, D4, 1/16);
     trumpet.play(1/16, A4, 1/16);
@@ -903,7 +1002,7 @@ function playSong() {
     bassDrum.play(3+3/16);
     snareDrum.play(3+4/16);
     snareDrum.play(3+6/16);
-    snareDrum.play(3+8/16);
+    snareDrum.play(3+8/16);*/
     
     
 

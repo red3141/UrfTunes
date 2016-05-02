@@ -267,7 +267,7 @@ var songBuilder = (function(seedrandom) {
         
         // Add melody
         currentBeat = 0;
-        currentTime = 0;
+        currentTime = bodyStartTime;
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < segment.notes.length; ++j) {

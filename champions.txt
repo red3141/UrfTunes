@@ -13,6 +13,7 @@ General instrument scaling - instruments should behave differently based on mast
 aatrox
   *1-5) +1 modulate pitch upward transition
 ahri
+  *1-5) +1 white noise backgrouns (high pass)
 akali
   *1-5) +1 quiet section
 alistar
@@ -34,10 +35,12 @@ brand
 braum
   *1-5) +1 Piano intro duration
 caitlyn
+  *1-5) +1 white noise backgrouns (low pass)
 cassiopeia
 chogath
   *1-5) +1 loud funky instrument section
 corki
+  *1-5) +1 white noise backgrouns (low pass)
 darius
   *1-5) +1 bass+percussion only section
 diana
@@ -69,14 +72,16 @@ illaoi
   *1-5) +1 bass+percussion only section
 irelia
 janna
-  *1-5) +1 white noise backgrounds
+  *1-5) +1 white noise backgrounds (band pass?)
 jarvaniv
 jax
 jayce
 jhin
+  *1-5) +1 white noise backgrouns (low pass)
 jinx
   *1-5) +1 electric intro duration
 kalista
+  *1-5) +1 white noise backgrouns (low pass)
 karma
 karthus
 kassadin
@@ -124,6 +129,7 @@ orianna
 pantheon
 poppy
 quinn
+  *1-5) +1 white noise backgrouns (low pass)
 rammus
   *1-5) +1 tempo
 reksai
@@ -142,6 +148,7 @@ singed
 sion
   *) Controls drum beat
 sivir
+  *1-5) +1 white noise backgrouns (low pass)
 skarner
 sona
   *1-5) +1 string intro duration
@@ -155,6 +162,7 @@ taric
 teemo
 thresh
 tristana
+  *1-5) +1 white noise backgrouns (low pass)
 trundle
 tryndamere
 twistedfate
@@ -164,6 +172,7 @@ udyr
 urgot
 varus
 vayne
+  *1-5) +1 white noise backgrouns (low pass)
 veigar
 velkoz
 vi
@@ -177,6 +186,7 @@ xinzhao
 yasuo
   *1-5) +1 white noise backgrounds
 yorick
+  *1-5) +1 super low long bass notes
 zac
   *1-5) +1 bass intro duration
 zed

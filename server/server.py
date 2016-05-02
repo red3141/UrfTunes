@@ -180,6 +180,10 @@ MAX_CACHE_TIME = 24 * 60 * 60; # One day in seconds
 
 # Based heavily on: http://stackoverflow.com/questions/14088294/multithreaded-web-server-in-python
 class Handler(BaseHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        BaseHTTPRequestHandler.end_headers(self)
+
     def do_GET(self):
         # Expects a path of the form /region/summonerName (possibly with a / on the end)
         pathArgs = self.path.strip('/').split('/')

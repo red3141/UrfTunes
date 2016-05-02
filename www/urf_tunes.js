@@ -1,3 +1,6 @@
+
+// Example server call: http://172.81.178.14:8080/na/rndminternetman/
+
 var championNames = [
     'aatrox',
     'ahri',

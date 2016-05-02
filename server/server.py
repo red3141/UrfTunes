@@ -1,5 +1,9 @@
 import json
+import time
 import urllib2
+
+from collections import OrderedDict
+from threading import Lock
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
@@ -154,6 +158,26 @@ championIdToNameMap = {
     143 : 'zyra'
 }
 
+# From https://docs.python.org/2/library/collections.html#collections.OrderedDict
+class LastUpdatedOrderedDict(OrderedDict):
+    'Store items in the order the keys were last added'
+    maxSize = 1000
+
+    def __setitem__(self, key, value):
+        if key in self:
+            del self[key]
+        elif len(self) >= self.maxSize:
+            # Remove the least recently used cached data
+            OrderedDict.popitem(last=False)
+        OrderedDict.__setitem__(self, key, value)
+
+# This least-recently-used cache will store retrieved champion mastery levels in the form:
+# (<region>, <standardizedSummonerName>) : (<masteryLevels, initialRetrievalTime>)
+# If a summoner's data is requested and the data in the cache is over 24 hours old, it will be removed.
+cache = LastUpdatedOrderedDict()
+cacheLock = Lock()
+MAX_CACHE_TIME = 24 * 60 * 60; # One day in seconds
+
 # Based heavily on: http://stackoverflow.com/questions/14088294/multithreaded-web-server-in-python
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -165,8 +189,32 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
+        # Check if we already have the summoner's data stored
+        region = pathArgs[0]
+        standardizedSummonerName = self.__getStandardizedSummonerName(pathArgs[1])
+        key = (region, standardizedSummonerName)
+        with cacheLock:
+            if key in cache:
+                if time.time() - cache[key][1] > MAX_CACHE_TIME:
+                    del cache[key]
+                else:
+                    print "RETURNING FROM CACHE! :D"
+                    self.send_response(200)
+                    self.send_header("Content-type", "application/json")
+                    self.end_headers()
+                    json.dump(cache[key][0], self.wfile)
+                    return
+            
+
         try:
-            masteryLevels = self.__getChampionMastery(pathArgs[0], self.__getSummonerId(pathArgs[0], pathArgs[1]))
+            print region, standardizedSummonerName
+            masteryLevels = self.__getChampionMastery(region, self.__getSummonerId(region, standardizedSummonerName))
+
+            # Cache the mastery levels
+            with cacheLock:
+                if key not in cache:
+                    cache[key] = (masteryLevels, time.time())
+
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
@@ -181,8 +229,10 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-    def __getSummonerId(self, region, summonerName):
-        standardizedSummonerName = summonerName.replace(" ", "").lower()
+    def __getStandardizedSummonerName(self, summonerName):
+        return summonerName.replace(" ", "").lower()
+
+    def __getSummonerId(self, region, standardizedSummonerName):
         f = urllib2.urlopen("https://" + region + ".api.pvp.net/api/lol/" + region + "/v1.4/summoner/by-name/" +
             standardizedSummonerName + "?api_key=" + key)
         j = json.loads(f.read())

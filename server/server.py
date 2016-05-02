@@ -204,7 +204,6 @@ class Handler(BaseHTTPRequestHandler):
                     self.end_headers()
                     json.dump(cache[key][0], self.wfile)
                     return
-            
 
         try:
             print region, standardizedSummonerName

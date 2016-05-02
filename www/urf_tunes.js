@@ -485,30 +485,33 @@ WhiteNoiseWithFilter.prototype.baseInit = function() {
 };
 WhiteNoiseWithFilter.prototype.init = WhiteNoiseWithFilter.prototype.baseInit;
 
-WhiteNoiseWithFilter.prototype.play = function(startTime, duration, initialCenter, initialQ, finalCenter, finalQ) {
-    initialCenter = initialCenter || 440;
-    initialQ = initialQ || 0;
-    finalCenter = finalCenter || initialCenter;
-    finalQ = finalQ || initialQ;
+WhiteNoiseWithFilter.prototype.play = function(options) {
+    options = options || {};
+    options.startTime = options.startTime || 0;
+    options.duration = options.duration || 1;
+    options.initialFrequency = options.initialFrequency || 440;
+    options.initialQ = options.initialQ || BASICALLY_ZERO;
+    options.finalFrequency = options.finalFrequency || options.initialFrequency;
+    options.finalQ = options.finalQ || options.initialQ;
     
     this.init();
     
-    var rampUpTime = startTime + 0.02;
-    var rampDownTime = rampUpTime + duration;
+    var rampUpTime = options.startTime + 0.02;
+    var rampDownTime = rampUpTime + options.duration;
     var endTime = rampDownTime + 0.02;
     
-    this.noiseFilter.frequency.setValueAtTime(initialCenter, startTime);
-    this.noiseFilter.Q.setValueAtTime(initialQ, startTime);
-    this.noiseFilter.frequency.exponentialRampToValueAtTime(finalCenter, endTime);
-    this.noiseFilter.Q.exponentialRampToValueAtTime(finalQ, endTime);
+    this.noiseFilter.frequency.setValueAtTime(options.initialFrequency, options.startTime);
+    this.noiseFilter.Q.setValueAtTime(options.initialQ, options.startTime);
+    this.noiseFilter.frequency.exponentialRampToValueAtTime(options.finalFrequency, endTime);
+    this.noiseFilter.Q.exponentialRampToValueAtTime(options.finalQ, endTime);
     
     this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, options.startTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(1, rampUpTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(1, rampDownTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.noise.start(startTime);
+    this.noise.start(options.startTime);
     this.noise.stop(endTime);
 };
 
@@ -599,9 +602,14 @@ function playSong() {
         instrument.play(bar * SECONDS_PER_BAR, note, durationBars * SECONDS_PER_BAR);
     }
     
-    //whiteNoise.play(0, 6, 440, BASICALLY_ZERO, 440, 100);
-    //whiteNoise.play(0, 0.3, 440, BASICALLY_ZERO, BASICALLY_ZERO, 100);
-    whiteNoise.play(0, 0.3, 10000, 100, 440, 10);
+    whiteNoise.play({
+        startTime: 0,
+        duration: 0.3,
+        initialFrequency: 10000,
+        initialQ: 100, 
+        finalFrequency: 440,
+        finalQ: 10,
+    });
     
     // Megalovania
     /*play(trumpet, 0, D4, 1/16);

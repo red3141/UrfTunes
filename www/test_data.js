@@ -130,7 +130,7 @@ var masteries = (function() {
         'ziggs' : 2,
         'zilean' : 0,
         'zyra' : 2
-    }
+    };
 
     var kirkberkley = {
         'aatrox' : 0,
@@ -263,7 +263,14 @@ var masteries = (function() {
         'ziggs' : 3,
         'zilean' : 0,
         'zyra' : 0
-    }
+    };
     
-    return rndminternetman;
+    var testchampion = {
+        'aatrox' : 5
+    };
+    
+    // Pick which set of test data to return here
+    //return rndminternetman;
+    return kirkberkley;
+    //return testchampion;
 })();

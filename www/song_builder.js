@@ -105,14 +105,28 @@ var songBuilder = (function(seedrandom) {
         // Generate a sequence of notes for each segment
         for (var i = 0; i < segments.length; ++i) {
             var segment = segments[i];
-            segment.notes = markovChain.buildNotes(melodyPitchRule, segment.melodyRhythm, segment.chordProgression, prng);
+            segment.melodyNotes = markovChain.buildNotes(melodyPitchRule, segment.melodyRhythm, segment.chordProgression, prng);
+        }
+        
+        for (var i = 0; i < segments.length; ++i) {
+            var segment = segments[i];
+            // Generate backgrounds
+            segment.backgrounds = [];
+            if (masteries['caitlyn']) {
+                var background = {
+                    instrument: 'WhiteNoiseWithLowPass',
+                    options: { initialFrequency: 1000, finalFrequency: BASICALLY_ZERO, duration: 0.5 },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['caitlyn']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
         }
         
         // Make an ending
         // For now just play a double whole note
         var lastForm = form[form.length - 1];
         var lastSegment = segments[lastForm];
-        var lastNote = lastSegment.notes[lastSegment.notes.length - 1];
+        var lastNote = lastSegment.melodyNotes[lastSegment.melodyNotes.length - 1];
         var octaveShift = 0;
         while (lastNote > 7) {
             lastNote -= 7;
@@ -138,7 +152,7 @@ var songBuilder = (function(seedrandom) {
             chordProgression: [0],
             bassLineRhythm: [{ duration: 8 }],
             melodyRhythm: [{ duration: 8 }],
-            notes: [endingNote],
+            melodyNotes: [endingNote],
         }
         
         return {
@@ -153,6 +167,16 @@ var songBuilder = (function(seedrandom) {
         for (var i = 0; i < inputs.length; ++i)
             s += masteries[inputs[i]];
         return s;
+    }
+    
+    function getInstrument(name) {
+        switch (name) {
+            case 'WhiteNoiseWithLowPass':
+                return new WhiteNoiseWithLowPass(context);
+            default:
+                console.error('Unexpected instrument name: ' + name);
+                return null;
+        }
     }
     
     function play(song)  {
@@ -184,7 +208,7 @@ var songBuilder = (function(seedrandom) {
           - String ensemble that transitions to electro
           - Low bass note followed by drums
         */
-        var introLength = 32;
+        /*var introLength = 32;
         for (var i = 0; i < introLength; ++i) {
             // Play bass drum on 1 and 3
             if (i % 2 === 0)
@@ -216,7 +240,7 @@ var songBuilder = (function(seedrandom) {
                 beatInMeasure -= beatsPerBar;
             }
             ++j;
-        }
+        }*/
         
         // Body
         var bodyStartTime = currentTime;
@@ -270,10 +294,10 @@ var songBuilder = (function(seedrandom) {
         currentTime = bodyStartTime;
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
-            for (var j = 0; j < segment.notes.length; ++j) {
+            for (var j = 0; j < segment.melodyNotes.length; ++j) {
                 var rhythm = segment.melodyRhythm[j];
                 if (!rhythm.isRest) {
-                    var note = segment.notes[j];
+                    var note = segment.melodyNotes[j];
                     melodyInstrument.play(currentTime, frequencies[note], rhythm.duration * secondsPerBeat);
                 }
                 currentBeat += rhythm.duration;
@@ -282,14 +306,40 @@ var songBuilder = (function(seedrandom) {
         }
         console.log(currentBeat);
         
+        var endingStartTime = currentTime;
+        
+        // Add backgrounds
+        currentBeat = 0;
+        currentTime = bodyStartTime;
+        for (var i = 0; i < song.form.length; ++i) {
+            var segment = song.segments[song.form[i]];
+            for (var j = 0; j < segment.backgrounds.length; ++j) {
+                var background = segment.backgrounds[j];
+                var backgroundInstrument = getInstrument(background.instrument);
+                currentBeat = i * measuresPerSegment * secondsPerBeat * beatsPerBar;
+                currentTime = currentBeat * secondsPerBeat + bodyStartTime;
+                for (var k = 0; k < background.rhythm.length; ++k) {
+                    var rhythm = background.rhythm[k];
+                    if (!rhythm.isRest) {
+                        var options = copy(background.options);
+                        options.startTime = currentTime;
+                        options.duration *= secondsPerBeat;
+                        backgroundInstrument.play(options);
+                    }
+                    currentBeat += rhythm.duration;
+                    currentTime = currentBeat * secondsPerBeat + bodyStartTime;
+                }
+            }
+        }
+        console.log(currentBeat);
+        
         // Add ending
-        var endingStartTime = currentTime + bodyStartTime;
         currentBeat = 0;
         currentTime = endingStartTime;
-        for (var j = 0; j < song.ending.notes.length; ++j) {
+        for (var j = 0; j < song.ending.melodyNotes.length; ++j) {
             var rhythm = song.ending.melodyRhythm[j];
             if (!rhythm.isRest) {
-                var note = song.ending.notes[j];
+                var note = song.ending.melodyNotes[j];
                 melodyInstrument.play(currentTime, frequencies[note], rhythm.duration * secondsPerBeat);
             }
             currentBeat += rhythm.duration;

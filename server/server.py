@@ -198,11 +198,12 @@ class Handler(BaseHTTPRequestHandler):
                 if time.time() - cache[key][1] > MAX_CACHE_TIME:
                     del cache[key]
                 else:
-                    print "RETURNING FROM CACHE! :D"
                     self.send_response(200)
                     self.send_header("Content-type", "application/json")
                     self.end_headers()
                     json.dump(cache[key][0], self.wfile)
+                    # Reassign the cached value to mark it as recently used
+                    cache[key] = (cache[key][0], cache[key][1])
                     return
 
         try:

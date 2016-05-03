@@ -186,7 +186,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         # Expects a path of the form /region/summonerName (possibly with a / on the end)
-        pathArgs = self.path.strip('/').split('/')
+        pathArgs = urllib2.unquote(self.path).strip('/').split('/')
         if len(pathArgs) != 2 or pathArgs[0] not in regionToLocationMap:
             # Error
             self.send_response(400)
@@ -211,7 +211,6 @@ class Handler(BaseHTTPRequestHandler):
                     return
 
         try:
-            print region, standardizedSummonerName
             masteryLevels = self.__getChampionMastery(region, self.__getSummonerId(region, standardizedSummonerName))
 
             # Cache the mastery levels
@@ -240,7 +239,11 @@ class Handler(BaseHTTPRequestHandler):
         f = urllib2.urlopen("https://" + region + ".api.pvp.net/api/lol/" + region + "/v1.4/summoner/by-name/" +
             standardizedSummonerName + "?api_key=" + key)
         j = json.loads(f.read())
-        return j[standardizedSummonerName]["id"]
+
+        # Abuse the fact that the returned object only has one key (the summoner name)
+        # to get around some confusion with non-ascii characters.
+        for k in j.keys():
+            return j[k]["id"]
 
     def __getChampionMastery(self, region, summonerId):
         f = urllib2.urlopen("https://" + region + ".api.pvp.net/championmastery/location/" + regionToLocationMap[region] +

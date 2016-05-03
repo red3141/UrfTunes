@@ -226,52 +226,49 @@ function getAdcRule(level) {
             break;
     }
     return function (beat, measure, prevRhythm) {
-        //if (measure % 2 === 1)
-        //    return [{ value: { duration: 1, isRest: true }, probability: 1 }];
-            
         switch (beat % 4) {
             case 0:
                 return [
-                    { value: { duration: 1, isRest: true }, probability: 1 },
+                    { value: { duration: duration, }, probability: 0.1 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.9 },
                 ];
             case 0.5:
                 return [
-                    { value: { duration: 3 }, probability: 0.6 },
-                    { value: { duration: 0.5, isRest: true }, probability: 0.4 },
+                    { value: { duration: 0.5, isRest: true }, probability: 1 },
                 ];
             case 1:
                 return [
-                    { value: { duration: 3 }, probability: 0.6 },
-                    { value: { duration: 0.5, isRest: true }, probability: 0.4 },
+                    { value: { duration: duration }, probability: 0.5 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.5 },
                 ];
             case 1.5:
                 return [
-                    { value: { duration: 3 }, probability: 0.6 },
-                    { value: { duration: 0.5, isRest: true }, probability: 0.4 },
+                    { value: { duration: duration }, probability: 0.4 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.6 },
                 ];
             case 2:
                 return [
-                    { value: { duration: 3 }, probability: 0.3 },
+                    { value: { duration: duration }, probability: 0.3 },
                     { value: { duration: 0.5, isRest: true }, probability: 0.7 },
                 ];
             case 2.5:
                 return [
-                    { value: { duration: 3 }, probability: 0.7 },
-                    { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                    { value: { duration: duration }, probability: 0.1 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.9 },
                 ];
             case 3:
                 return [
-                    { value: { duration: 3 }, probability: 0.7 },
-                    { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                    { value: { duration: duration }, probability: 0.5 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.5 },
                 ];
             case 3.5:
                 return [
-                    { value: { duration: 0.5 }, probability: 0.3 },
-                    { value: { duration: 0.5, isRest: true }, probability: 0.7 },
+                    { value: { duration: duration }, probability: 0.05 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.95 },
                 ];
             default:
                 return [
-                    { value: { duration: 1 }, probability: 1 },
+                    { value: { duration: 1, isRest: true }, probability: 1 },
                 ];
        }
     }

@@ -376,7 +376,7 @@ WhiteNoiseWithFilter.prototype.play = function(options) {
     this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
     this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, rampUpStartTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(volume, startTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(volume, rampDownStartTime);
+    this.noiseGain.gain.setValueAtTime(volume, rampDownStartTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
     this.noise.start(rampUpStartTime);

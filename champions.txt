@@ -1,19 +1,12 @@
 Planning for how each champion will affect the form of the song.
 Note: "+1" is in arbirary units (not seconds or beats per minute or anything)
 
-General instrument scaling - instruments should behave differently based on mastery level. All levels should increase volume.
-  1) eighth notes and quarter notes
-  2) Fewer rests
-  3) Sixteenth notes
-  4) ?
-  5) Triplets
-
 * = not yet implemented
 
 aatrox
   *1-5) +1 modulate pitch upward transition
 ahri
-  *1-5) +1 white noise backgrounds (high pass)
+  1-5) +1 white noise backgrounds (high pass)
 akali
   *1-5) +1 quiet section
 alistar
@@ -23,10 +16,12 @@ amumu
 anivia
   *1-5) +1 Piano intro duration
 annie
+  1-5) +1 white noise backgrounds (high pass)
 ashe
   *1-5) +1 Piano intro duration
 aurelionsol
 azir
+  1-5) +1 white noise backgrounds (high pass)
 bard
   *1-5) +1 loud funky instrument section
 blitzcrank
@@ -83,8 +78,10 @@ jinx
 kalista
   1-5) +1 white noise backgrounds (low pass)
 karma
+  1-5) +1 white noise backgrounds (high pass)
 karthus
 kassadin
+  1-5) +1 white noise backgrounds (high pass)
 katarina
 kayle
 kennen
@@ -138,6 +135,7 @@ rengar
 riven
 rumble
 ryze
+  1-5) +1 white noise backgrounds (high pass)
 sejuani
   *1-5) +1 Piano intro duration
 shaco
@@ -156,6 +154,7 @@ soraka
   *1-5) +1 string intro duration
 swain
 syndra
+  1-5) +1 white noise backgrounds (band pass)
 tahmkench
 talon
 taric
@@ -174,6 +173,7 @@ varus
 vayne
   1-5) +1 white noise backgrounds (low pass)
 veigar
+  1-5) +1 white noise backgrounds (band pass)
 velkoz
 vi
 viktor
@@ -192,7 +192,8 @@ zac
 zed
   *1-5) +1 quiet section
 ziggs
+  1-5) +1 white noise backgrounds (band pass)
 zilean
-  *1-5) +1 tempo
+  1-5) +1 tempo
 zyra
   *1-5) +1 string intro duration

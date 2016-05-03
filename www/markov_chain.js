@@ -53,8 +53,8 @@ var markovChain = (function() {
             rhythm = getNextStateComplex(stateMap, prng());
             rhythms.push(rhythm);
             beatInMeasure += rhythm.duration;
-            if (beatInMeasure >= 4 - 1e-2) {
-                beatInMeasure = 0;
+            while (beatInMeasure >= 4 - 1e-2) {
+                beatInMeasure -= 4;
                 ++currentMeasure;
             }
             prevRhythm = rhythm;
@@ -91,8 +91,8 @@ var markovChain = (function() {
             if (currentMeasure < 4)
                 firstTimeNotes[i] = notes[i];
             beatInMeasure += rhythm[i].duration;
-            if (beatInMeasure >= 4 - 1e-2) {
-                beatInMeasure = 0;
+            while (beatInMeasure >= 4 - 1e-2) {
+                beatInMeasure -= 4;
                 ++currentMeasure;
             }
             ++i2;

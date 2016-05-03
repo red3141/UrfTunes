@@ -108,82 +108,166 @@ var songBuilder = (function(seedrandom) {
             segment.melodyNotes = markovChain.buildNotes(melodyPitchRule, segment.melodyRhythm, segment.chordProgression, prng);
         }
         
-        for (var i = 0; i < segments.length; ++i) {
-            var segment = segments[i];
-            // Generate backgrounds
-            segment.backgrounds = [];
-            if (masteries['caitlyn']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 700, initialQ: 0.2, finalFrequency: 80, finalQ: 200, volume: 0.2, duration: 0.5 },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['caitlyn']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
-            if (masteries['corki']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 200, initialQ: 0.5, finalFrequency: 8, finalQ: 100, volume: 0.5, duration: 0.3, multishots:[0.25] },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['corki']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
-            if (masteries['jhin']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 440, initialQ: 0.2, finalFrequency: 8, finalQ: 100, volume: 0.3, duration: 2 },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['jhin']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
-            if (masteries['kalista']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 100, initialQ: 0.2, finalFrequency: 800, finalQ: 100, volume: 0.8, duration: 1.5 },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['kalista']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
-            if (masteries['quinn']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 100, initialQ: 1, finalFrequency: 50, finalQ: 0.1, volume: 0.5, duration: 2 },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['quinn']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
-            if (masteries['sivir']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 400, initialQ: 0.2, finalFrequency: 100, finalQ: 20, volume: 0.2, duration: 2 },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['sivir']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
-            if (masteries['tristana']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 200, initialQ: 0.2, finalFrequency: 50, finalQ: 1, volume: 0.2, duration: 3 },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['tristana']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
-            if (masteries['vayne']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 1000, initialQ: 0.7, finalFrequency: 500, finalQ: 1, volume: 0.5, duration: 0.4 },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['vayne']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
-            if (masteries['ahri']) {
-                var background = {
-                    instrument: WhiteNoiseWithBandPass,
-                    options: { initialFrequency: 1000, initialQ: 0.7, finalFrequency: 500, finalQ: 1, volume: 0.5, duration: 0.4 },
-                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['ahri']], 4, prng)
-                };
-                segment.backgrounds.push(background);
-            }
+        // Generate backgrounds
+        var segment = segments[0];
+        segment.backgrounds = [];
+        if (masteries['ahri']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 1000, initialQ: 100, finalFrequency: 500, finalQ: 1, volume: 0.5, duration: 0.4 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['ahri']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['annie']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 440, initialQ: 0.8, finalFrequency: 440, finalQ: 0.8, volume: 0.2, duration: 1.5 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['annie']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['azir']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 1000, initialQ: 100, finalFrequency: 500, finalQ: 2, volume: 0.5, duration: 2 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['azir']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['caitlyn']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 700, initialQ: 0.2, finalFrequency: 80, finalQ: 200, volume: 0.5, duration: 0.7 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['caitlyn']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['corki']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 200, initialQ: 0.5, finalFrequency: 8, finalQ: 100, volume: 0.6, duration: 0.3, multishots:[0.25, 0.5] },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['corki']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        
+        segment = segments[1];
+        segment.backgrounds = [];
+        if (masteries['janna']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 400, initialQ: 0.8, finalFrequency: 600, finalQ: 0.8, volume: 0.1, duration: 4 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['janna']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['jhin']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 440, initialQ: 0.2, finalFrequency: 8, finalQ: 100, volume: 0.3, duration: 2 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['jhin']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['kalista']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 100, initialQ: 0.7, finalFrequency: 800, finalQ: 100, volume: 2, duration: 1.5 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['kalista']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['karma']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 100, initialQ: 50, finalFrequency: 1000, finalQ: 9, volume: 0.4, duration: 1 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['karma']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['kassadin']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 4000, initialQ: 50, finalFrequency: 100, finalQ: 3, volume: 0.8, duration: 1 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['kassadin']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['quinn']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 100, initialQ: 1, finalFrequency: 50, finalQ: 0.1, volume: 0.5, duration: 2 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['quinn']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        
+        segment = segments[2];
+        segment.backgrounds = [];
+        if (masteries['ryze']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 150, initialQ: 20, finalFrequency: 150, finalQ: 1, volume: 1, duration: 0.9 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['ryze']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['sivir']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 400, initialQ: 0.2, finalFrequency: 100, finalQ: 20, volume: 0.2, duration: 2 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['sivir']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['syndra']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 800, initialQ: 20, finalFrequency: 400, finalQ: 5, volume: 1.2, duration: 2.5 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['syndra']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['teemo']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 500, initialQ: 100, finalFrequency: 1000, finalQ: 1, volume: 1.2, duration: 0.4 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['teemo']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['tristana']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 200, initialQ: 0.2, finalFrequency: 50, finalQ: 1, volume: 0.2, duration: 3 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['tristana']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['vayne']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 1000, initialQ: 0.7, finalFrequency: 500, finalQ: 1, volume: 0.5, duration: 0.4 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['vayne']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['veigar']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 4000, initialQ: 3000, finalFrequency: 4000, finalQ: 50, volume: 1.2, duration: 0.7 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['veigar']], 4, prng)
+            };
+            segment.backgrounds.push(background);
+        }
+        if (masteries['ziggs']) {
+            var background = {
+                instrument: WhiteNoiseWithBandPass,
+                options: { initialFrequency: 200, initialQ: 50, finalFrequency: 200, finalQ: 50, volume: 1.2, duration: 2 },
+                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['ziggs']], 4, prng)
+            };
+            segment.backgrounds.push(background);
         }
         
         // Make an ending

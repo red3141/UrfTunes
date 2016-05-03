@@ -266,11 +266,13 @@ var masteries = (function() {
     };
     
     var testchampion = {
-        'ahri' : 5
+        'annie' : 5,
     };
+    for (var i = 0; i < championNames.length; ++i)
+        testchampion[championNames[i]] = testchampion[championNames[i]] || 0;
     
     // Pick which set of test data to return here
     //return rndminternetman;
-    return kirkberkley;
-    //return testchampion;
+    //return kirkberkley;
+    return testchampion;
 })();

@@ -1,0 +1,72 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+input[type=text], select, button {
+    box-sizing: border-box;
+    padding: 0 0.5rem;
+    border: 1px #DDD solid;
+    border-radius: 0.5rem;
+    height: 2.1rem;
+    margin: 0;
+    outline: none;
+}
+select {
+    cursor: pointer;
+}
+button {
+    cursor: pointer;
+    background-color: #D0EBFF;
+    border-color: #A0CCFF;
+    position: relative;
+}
+button:hover {
+    background-color: #DDF2FF;
+}
+button:active {
+    top: 0.1rem;
+}
+.button-green {
+    background-color: #A0FFA0;
+    border-color: #00FF00;
+}
+.button-green:hover {
+    background-color: #C0FFC0;
+}
+.button-red {
+    background-color: #FFA0A0;
+    border-color: #FF5050;
+}
+.button-red:hover {
+    background-color: #FFAAAA;
+}
+button:disabled {
+    background-color: #DDDDDD !important;
+    border-color: #BBBBBB;
+    cursor: default;
+}
+input, input:focus, select, select:focus {
+    outline: none;
+}
+
+#summonerForm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#summonerName  {
+    flex: 0 0 20rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+#region {
+    flex: 0 0 auto;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px;
+    margin-right: 0.5rem;
+}
+#go {
+    flex: 0 0 3rem;
+}

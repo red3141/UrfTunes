@@ -303,11 +303,12 @@ var songBuilder = (function(seedrandom) {
             melodyNotes: [endingNote],
         }
         
-        return {
+        currentSong = {
             form: form,
             segments: segments,
             ending: ending,
         };
+        return currentSong;
     }
     
     function getSeed(inputs) {

@@ -1,8 +1,10 @@
 <html>
     <head>
         <title>Urf Tunes</title>
-        <script src="championNames.js"></script>
+        <link href="css/main.css" rel="stylesheet" type="text/css" />
+        <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
         <script src="seedrandom.min.js"></script>
+        <script src="championNames.js"></script>
         <script src="common_functions.js"></script>
         <script src="test_data.js"></script>
         <script src="urf_tunes.js"></script>
@@ -12,24 +14,26 @@
         <script src="main.js"></script>
     </head>
     <body>
-        <button onclick="songBuilder.play();">Play</button>
-        <button onclick="songBuilder.stop();">Stop</button>
         <br />
         <br />
-        <textarea id="summonerName" style="overflow:auto;resize:none" rows="1" cols="30" placeholder="Enter your summoner name"></textarea>
-        <select id="region">
-            <option value="br">BR</option>
-            <option value="eune">EUNE</option>
-            <option value="euw">EUW</option>
-            <option value="jp">JP</option>
-            <option value="kr">KR</option>
-            <option value="lan">LAN</option>
-            <option value="las">LAS</option>
-            <option value="na" selected>NA</option>
-            <option value="oce">OCE</option>
-            <option value="ru">RU</option>
-            <option value="tr">TR</option>
-        </select>
-        <button onclick="main()">Git muh datas!</button>
+        <form id="summonerForm">
+            <input type="text" id="summonerName" style="overflow:auto;resize:none" rows="1" cols="30" placeholder="Enter your summoner name"></textarea>
+            <select id="region">
+                <option value="br">BR</option>
+                <option value="eune">EUNE</option>
+                <option value="euw">EUW</option>
+                <option value="jp">JP</option>
+                <option value="kr">KR</option>
+                <option value="lan">LAN</option>
+                <option value="las">LAS</option>
+                <option value="na" selected>NA</option>
+                <option value="oce">OCE</option>
+                <option value="ru">RU</option>
+                <option value="tr">TR</option>
+            </select>
+            <button type="submit" id="go">Go!</button>
+        </form>
+        <button type="button" id="play" onclick="songBuilder.play();" class="button-green" disabled>Play</button>
+        <button type="button" id="stop" onclick="songBuilder.stop();" class="button-red" disabled>Stop</button>
     </body>
 </html>

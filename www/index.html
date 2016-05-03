@@ -24,30 +24,35 @@
         <meta name="keywords" content="urf tunes league of legends lol">
     </head>
     <body>
-        <br />
-        <br />
-        <div class="container">
-            <form id="summonerForm">
-                <div class="input-group">
-                    <input type="text" id="summonerName" class="form-control" style="width:calc(100% - 9rem);" placeholder="Enter your summoner name" />
-                    <select id="region" class="form-control" style="width:9rem;margin-left:-1px;">
-                        <option value="br">BR</option>
-                        <option value="eune">EUNE</option>
-                        <option value="euw">EUW</option>
-                        <option value="jp">JP</option>
-                        <option value="kr">KR</option>
-                        <option value="lan">LAN</option>
-                        <option value="las">LAS</option>
-                        <option value="na" selected>NA</option>
-                        <option value="oce">OCE</option>
-                        <option value="ru">RU</option>
-                        <option value="tr">TR</option>
-                    </select>
-                </div>
-                <div class="go-button">
-                    <button type="submit" id="go" class="btn btn-primary">Go!</button>
-                </div>
-            </form>
+        <div class="header">
+            <h1>Urf Tunes</h1>
+        </div>
+        <div class="urf-container">
+            <div class="description">
+                Procedural music generator based on champion mastery
+            </div>
+                <form id="summonerForm">
+                    <div class="input-group">
+                        <input type="text" id="summonerName" class="form-control" style="width:calc(100% - 9rem);" placeholder="Enter your summoner name" />
+                        <select id="region" class="form-control" style="width:9rem;margin-left:-1px;">
+                            <option value="br">BR</option>
+                            <option value="eune">EUNE</option>
+                            <option value="euw">EUW</option>
+                            <option value="jp">JP</option>
+                            <option value="kr">KR</option>
+                            <option value="lan">LAN</option>
+                            <option value="las">LAS</option>
+                            <option value="na" selected>NA</option>
+                            <option value="oce">OCE</option>
+                            <option value="ru">RU</option>
+                            <option value="tr">TR</option>
+                        </select>
+                    </div>
+                    <div class="go-button">
+                        <button type="submit" id="go" class="btn btn-primary">Get music!</button>
+                    </div>
+                </form>
+            </div>
             <div style="text-align:center;margin-top:1.5rem;">
                 <button type="button" id="play" class="btn btn-success" onclick="songBuilder.play();" disabled>Play</button>
                 <button type="button" id="stop" class="btn btn-danger" style="margin-left: 2rem;" onclick="songBuilder.stop();" disabled>Stop</button>

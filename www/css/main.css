@@ -1,5 +1,42 @@
+body {
+    background-color: #191920;
+    color: #DDE;
+    margin: 0;
+}
+h1 {
+    margin: 0;
+}
+
+.header {
+    background-color: #445;
+    padding: 2rem;
+    border-bottom: #EEF 4px solid;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    margin-bottom: 2rem;
+}
+.header h1 {
+    text-align: center;
+    color: #F5F5FB;
+    font-weight: bold;
+    font-size: 5rem;
+}
+
+.urf-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.description {
+    text-align: center;
+    font-style: italic;
+    font-size: 1.7rem;
+    margin-bottom: 1.8rem;
+}
+
 #summonerForm {
     max-width: 50rem;
+    min-width: 25rem;
     margin: auto;
     display: flex;
 }
@@ -9,4 +46,5 @@
 }
 #summonerForm > .go-button {
     flex: 0 0 auto;
+    margin-left: 0.2rem;
 }

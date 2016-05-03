@@ -150,22 +150,22 @@ var melodyRhythmRule = function (beat, prevRhythm) {
                 { value: { duration: 0.5 }, probability: 0.1 },
                 { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                 { value: { duration: 1 }, probability: 0.1 },
-                { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.3 },
+                { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.3 },
                 { value: { duration: 1.5 }, probability: 0.2 },
             ];
         case 0.5:
             return [
                 { value: { duration: 0.5 }, probability: 0.6 },
-                { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.2 },
+                { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.2 },
                 { value: { duration: 1.5 }, probability: 0.2 },
-                { value: { duration: 1.5, isRest: !prevRhythm.isRest  }, probability: 0.2 },
+                { value: { duration: 1.5, isRest: !prevRhythm.isRest }, probability: 0.2 },
             ];
         case 1:
             return [
                 { value: { duration: 0.5 }, probability: 0.4 },
-                { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.3 },
+                { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                 { value: { duration: 1 }, probability: 0.1 },
-                { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.2 },
+                { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.2 },
             ];
         case 1.5:
             return [
@@ -176,28 +176,28 @@ var melodyRhythmRule = function (beat, prevRhythm) {
         case 2:
             return [
                 { value: { duration: 0.5 }, probability: 0.4 },
-                { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.3 },
+                { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                 { value: { duration: 1 }, probability: 0.1 },
-                { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.2 },
+                { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.2 },
             ];
         case 2.5:
             return [
                 { value: { duration: 0.5 }, probability: 0.5 },
-                { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.3 },
+                { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
                 { value: { duration: 1 }, probability: 0.1 },
-                { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.1 },
+                { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.1 },
             ];
         case 3:
             return [
                 { value: { duration: 0.5 }, probability: 0.4 },
-                { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.2 },
+                { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.2 },
                 { value: { duration: 1 }, probability: 0.2 },
-                { value: { duration: 1, isRest: !prevRhythm.isRest  }, probability: 0.2 },
+                { value: { duration: 1, isRest: !prevRhythm.isRest }, probability: 0.2 },
             ];
         case 3.5:
             return [
                 { value: { duration: 0.5 }, probability: 0.7 },
-                { value: { duration: 0.5, isRest: !prevRhythm.isRest  }, probability: 0.3 },
+                { value: { duration: 0.5, isRest: !prevRhythm.isRest }, probability: 0.3 },
             ];
         default:
             return [
@@ -205,6 +205,62 @@ var melodyRhythmRule = function (beat, prevRhythm) {
             ];
     }
 }
+
+var backgroundRhythmRules = [
+    null,
+    function (beat, prevRhythm) {
+        // Mastery level 1
+        return [{ value: { duration: 1 }, probability: 1 }]
+    },
+    function (beat, prevRhythm) {
+        // Mastery level 2
+        switch (beat % 4) {
+            case 0:
+                return [
+                    { value: { duration: 1, isRest: true }, probability: 1 },
+                ];
+            case 0.5:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.6 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.4 },
+                ];
+            case 1:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.6 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.4 },
+                ];
+            case 1.5:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.6 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.4 },
+                ];
+            case 2:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.7 },
+                ];
+            case 2.5:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.7 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                ];
+            case 3:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.7 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+                ];
+            case 3.5:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.7 },
+                ];
+            default:
+                return [
+                    { value: { duration: 1 }, probability: 1 },
+                ];
+       }
+    },
+];
 
 // Pitch rules (0=A, 1=B, 2=C)
 var melodyPitchRule = function (prevNote, currentBeat, chord) {

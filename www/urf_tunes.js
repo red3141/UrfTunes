@@ -1,403 +1,3 @@
-var masteries = {
-    'aatrox' : 0,
-    'ahri' : 0,
-    'akali' : 0,
-    'alistar' : 0,
-    'amumu' : 5,
-    'anivia' : 0,
-    'annie' : 1,
-    'ashe' : 1,
-    'aurelionsol' : 0,
-    'azir' : 0,
-    'bard' : 1,
-    'blitzcrank' : 2,
-    'brand' : 1,
-    'braum' : 3,
-    'caitlyn' : 1,
-    'cassiopeia' : 0,
-    'chogath' : 3,
-    'corki' : 0,
-    'darius' : 2,
-    'diana' : 3,
-    'drmundo' : 0,
-    'draven' : 0,
-    'ekko' : 1,
-    'elise' : 1,
-    'evelynn' : 0,
-    'ezreal' : 0,
-    'fiddlesticks' : 2,
-    'fiora' : 2,
-    'fizz' : 2,
-    'galio' : 3,
-    'gangplank' : 0,
-    'garen' : 0,
-    'gnar' : 1,
-    'gragas' : 0,
-    'graves' : 0,
-    'hecarim' : 1,
-    'heimerdinger' : 0,
-    'illaoi' : 0,
-    'irelia' : 0,
-    'janna' : 1,
-    'jarvaniv' : 0,
-    'jax' : 0,
-    'jayce' : 0,
-    'jhin' : 0,
-    'jinx' : 1,
-    'kalista' : 1,
-    'karma' : 0,
-    'karthus' : 2,
-    'kassadin' : 0,
-    'katarina' : 0,
-    'kayle' : 0,
-    'kennen' : 0,
-    'khazix' : 2,
-    'kindred' : 1,
-    'kogmaw' : 1,
-    'leblanc' : 0,
-    'leesin' : 0,
-    'leona' : 3,
-    'lissandra' : 0,
-    'lucian' : 0,
-    'lulu' : 3,
-    'lux' : 4,
-    'malphite' : 5,
-    'malzahar' : 1,
-    'maokai' : 5,
-    'masteryi' : 2,
-    'missfortune' : 2,
-    'mordekaiser' : 2,
-    'morgana' : 2,
-    'nami' : 5,
-    'nasus' : 1,
-    'nautilus' : 5,
-    'nidalee' : 0,
-    'nocturne' : 3,
-    'nunu' : 0,
-    'olaf' : 0,
-    'orianna' : 0,
-    'pantheon' : 0,
-    'poppy' : 5,
-    'quinn' : 1,
-    'rammus' : 5,
-    'reksai' : 0,
-    'renekton' : 0,
-    'rengar' : 0,
-    'riven' : 0,
-    'rumble' : 0,
-    'ryze' : 0,
-    'sejuani' : 5,
-    'shaco' : 1,
-    'shen' : 0,
-    'shyvana' : 1,
-    'singed' : 0,
-    'sion' : 1,
-    'sivir' : 0,
-    'skarner' : 1,
-    'sona' : 4,
-    'soraka' : 0,
-    'swain' : 0,
-    'syndra' : 0,
-    'tahmkench' : 5,
-    'talon' : 0,
-    'taric' : 1,
-    'teemo' : 4,
-    'thresh' : 3,
-    'tristana' : 1,
-    'trundle' : 0,
-    'tryndamere' : 0,
-    'twistedfate' : 0,
-    'twitch' : 0,
-    'udyr' : 2,
-    'urgot' : 0,
-    'varus' : 1,
-    'vayne' : 1,
-    'veigar' : 0,
-    'velkoz' : 1,
-    'vi' : 4,
-    'viktor' : 0,
-    'vladimir' : 2,
-    'volibear' : 0,
-    'warwick' : 0,
-    'wukong' : 2,
-    'xerath' : 0,
-    'xinzhao' : 0,
-    'yasuo' : 1,
-    'yorick' : 0,
-    'zac' : 5,
-    'zed' : 0,
-    'ziggs' : 2,
-    'zilean' : 0,
-    'zyra' : 2
-}
-
-masteries = {
-    'aatrox' : 0,
-    'ahri' : 0,
-    'akali' : 0,
-    'alistar' : 2,
-    'amumu' : 2,
-    'anivia' : 0,
-    'annie' : 3,
-    'ashe' : 3,
-    'aurelionsol' : 0,
-    'azir' : 0,
-    'bard' : 3,
-    'blitzcrank' : 3,
-    'brand' : 0,
-    'braum' : 2,
-    'caitlyn' : 2,
-    'cassiopeia' : 0,
-    'chogath' : 1,
-    'corki' : 5,
-    'darius' : 0,
-    'diana' : 0,
-    'drmundo' : 0,
-    'draven' : 0,
-    'ekko' : 0,
-    'elise' : 0,
-    'evelynn' : 0,
-    'ezreal' : 1,
-    'fiddlesticks' : 1,
-    'fiora' : 0,
-    'fizz' : 0,
-    'galio' : 0,
-    'gangplank' : 0,
-    'garen' : 1,
-    'gnar' : 0,
-    'gragas' : 0,
-    'graves' : 0,
-    'hecarim' : 0,
-    'heimerdinger' : 0,
-    'illaoi' : 0,
-    'irelia' : 0,
-    'janna' : 3,
-    'jarvaniv' : 1,
-    'jax' : 0,
-    'jayce' : 0,
-    'jhin' : 1,
-    'jinx' : 5,
-    'kalista' : 2,
-    'karma' : 0,
-    'karthus' : 0,
-    'kassadin' : 0,
-    'katarina' : 0,
-    'kayle' : 0,
-    'kennen' : 1,
-    'khazix' : 0,
-    'kindred' : 0,
-    'kogmaw' : 4,
-    'leblanc' : 0,
-    'leesin' : 0,
-    'leona' : 2,
-    'lissandra' : 0,
-    'lucian' : 5,
-    'lulu' : 0,
-    'lux' : 0,
-    'malphite' : 2,
-    'malzahar' : 0,
-    'maokai' : 1,
-    'masteryi' : 0,
-    'missfortune' : 5,
-    'mordekaiser' : 0,
-    'morgana' : 4,
-    'nami' : 1,
-    'nasus' : 2,
-    'nautilus' : 2,
-    'nidalee' : 0,
-    'nocturne' : 0,
-    'nunu' : 0,
-    'olaf' : 0,
-    'orianna' : 0,
-    'pantheon' : 0,
-    'poppy' : 0,
-    'quinn' : 0,
-    'rammus' : 1,
-    'reksai' : 0,
-    'renekton' : 1,
-    'rengar' : 0,
-    'riven' : 0,
-    'rumble' : 0,
-    'ryze' : 0,
-    'sejuani' : 0,
-    'shaco' : 0,
-    'shen' : 0,
-    'shyvana' : 0,
-    'singed' : 0,
-    'sion' : 0,
-    'sivir' : 5,
-    'skarner' : 0,
-    'sona' : 1,
-    'soraka' : 1,
-    'swain' : 0,
-    'syndra' : 0,
-    'tahmkench' : 0,
-    'talon' : 0,
-    'taric' : 0,
-    'teemo' : 0,
-    'thresh' : 5,
-    'tristana' : 5,
-    'trundle' : 0,
-    'tryndamere' : 0,
-    'twistedfate' : 1,
-    'twitch' : 0,
-    'udyr' : 0,
-    'urgot' : 0,
-    'varus' : 0,
-    'vayne' : 1,
-    'veigar' : 0,
-    'velkoz' : 1,
-    'vi' : 1,
-    'viktor' : 0,
-    'vladimir' : 2,
-    'volibear' : 0,
-    'warwick' : 0,
-    'wukong' : 0,
-    'xerath' : 0,
-    'xinzhao' : 0,
-    'yasuo' : 0,
-    'yorick' : 0,
-    'zac' : 2,
-    'zed' : 0,
-    'ziggs' : 3,
-    'zilean' : 0,
-    'zyra' : 0
-}
-//*/
-
-var championNames = [
-    'aatrox',
-    'ahri',
-    'akali',
-    'alistar',
-    'amumu',
-    'anivia',
-    'annie',
-    'ashe',
-    'aurelionsol',
-    'azir',
-    'bard',
-    'blitzcrank',
-    'brand',
-    'braum',
-    'caitlyn',
-    'cassiopeia',
-    'chogath',
-    'corki',
-    'darius',
-    'diana',
-    'drmundo',
-    'draven',
-    'ekko',
-    'elise',
-    'evelynn',
-    'ezreal',
-    'fiddlesticks',
-    'fiora',
-    'fizz',
-    'galio',
-    'gangplank',
-    'garen',
-    'gnar',
-    'gragas',
-    'graves',
-    'hecarim',
-    'heimerdinger',
-    'illaoi',
-    'irelia',
-    'janna',
-    'jarvaniv',
-    'jax',
-    'jayce',
-    'jhin',
-    'jinx',
-    'kalista',
-    'karma',
-    'karthus',
-    'kassadin',
-    'katarina',
-    'kayle',
-    'kennen',
-    'khazix',
-    'kindred',
-    'kogmaw',
-    'leblanc',
-    'leesin',
-    'leona',
-    'lissandra',
-    'lucian',
-    'lulu',
-    'lux',
-    'malphite',
-    'malzahar',
-    'maokai',
-    'masteryi',
-    'missfortune',
-    'mordekaiser',
-    'morgana',
-    'nami',
-    'nasus',
-    'nautilus',
-    'nidalee',
-    'nocturne',
-    'nunu',
-    'olaf',
-    'orianna',
-    'pantheon',
-    'poppy',
-    'quinn',
-    'rammus',
-    'reksai',
-    'renekton',
-    'rengar',
-    'riven',
-    'rumble',
-    'ryze',
-    'sejuani',
-    'shaco',
-    'shen',
-    'shyvana',
-    'singed',
-    'sion',
-    'sivir',
-    'skarner',
-    'sona',
-    'soraka',
-    'swain',
-    'syndra',
-    'tahmkench',
-    'talon',
-    'taric',
-    'teemo',
-    'thresh',
-    'tristana',
-    'trundle',
-    'tryndamere',
-    'twistedfate',
-    'twitch',
-    'udyr',
-    'urgot',
-    'varus',
-    'vayne',
-    'veigar',
-    'velkoz',
-    'vi',
-    'viktor',
-    'vladimir',
-    'volibear',
-    'warwick',
-    'wukong',
-    'xerath',
-    'xinzhao',
-    'yasuo',
-    'yorick',
-    'zac',
-    'zed',
-    'ziggs',
-    'zilean',
-    'zyra'
-]
-
 const MAX_GAIN = 3;
 const BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
@@ -408,20 +8,6 @@ function init() {
     } catch(e) {
         alert('Your browser does not support Urf Tunes; we recommend using Google Chrome.');
     }
-};
-
-function playFrequency(context, frequency, startTime, duration) {
-    startTime = startTime || 0;
-    
-    var oscillator = context.createOscillator();
-    var gain = context.createGain();
-    gain.gain.setValueAtTime(0.25, 0);
-    oscillator.frequency.value = frequency;
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.start(startTime);
-    if (duration)
-        oscillator.stop(startTime + duration);
 };
 
 // Bass Drum
@@ -718,7 +304,8 @@ Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain
     fromGain = Math.max(fromGain, BASICALLY_ZERO);
     toGain = Math.max(toGain, BASICALLY_ZERO);
     
-    this.gain.gain.setValueAtTime(0, startTime);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
     this.gain.gain.exponentialRampToValueAtTime(fromGain, rampUpEndTime);
     this.gain.gain.linearRampToValueAtTime(toGain, rampDownStartTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
@@ -727,16 +314,9 @@ Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain
     this.oscillator.stop(endTime);
 };
 
-// White noise with a filter
-
-function WhiteNoiseWithAFilter(context) {
-    this.context = context;
-    this.noiseBuffer = this.createNoiseBuffer();
-}
-
-WhiteNoiseWithAFilter.prototype.createNoiseBuffer = function() {
-    var bufferSize = this.context.sampleRate;
-    var buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+function createNoiseBuffer(context) {
+    var bufferSize = context.sampleRate;
+    var buffer = context.createBuffer(1, bufferSize, context.sampleRate);
     var output = buffer.getChannelData(0);
     for (var i = 0; i < bufferSize; ++i) {
         output[i] = Math.random() * 2 - 1;
@@ -745,7 +325,20 @@ WhiteNoiseWithAFilter.prototype.createNoiseBuffer = function() {
     return buffer;
 };
 
-WhiteNoiseWithAFilter.prototype.init = function() {
+// White noise with a filter
+
+function WhiteNoiseWithFilter(context) {
+    this.baseConstructor(context);
+}
+
+WhiteNoiseWithFilter.prototype.baseConstructor = function(context) {
+    if (!context)
+        return;
+    this.context = context;
+    this.noiseBuffer = createNoiseBuffer(context);
+}
+
+WhiteNoiseWithFilter.prototype.baseInit = function() {
     this.noise = this.context.createBufferSource();
     this.noise.buffer = this.noiseBuffer;
     this.noise.loop = true;
@@ -757,60 +350,72 @@ WhiteNoiseWithAFilter.prototype.init = function() {
     
     this.noiseGain.connect(this.context.destination);
 };
+WhiteNoiseWithFilter.prototype.init = WhiteNoiseWithFilter.prototype.baseInit;
 
-WhiteNoiseWithAFilter.prototype.play = function(startTime, duration, frequency, qualityFactor) {
+WhiteNoiseWithFilter.prototype.play = function(options) {
+    options = options || {};
+    options.startTime = options.startTime || 0;
+    options.duration = options.duration || 1;
+    options.initialFrequency = options.initialFrequency || 440;
+    options.initialQ = options.initialQ || BASICALLY_ZERO;
+    options.finalFrequency = options.finalFrequency || options.initialFrequency;
+    options.finalQ = options.finalQ || options.initialQ;
+    
     this.init();
     
-    var rampUpTime = startTime + 0.02;
-    var rampDownTime = rampUpTime + duration;
+    var rampUpTime = options.startTime + 0.02;
+    var rampDownTime = rampUpTime + options.duration;
     var endTime = rampDownTime + 0.02;
     
-    this.noiseFilter.frequency.setValueAtTime(frequency, startTime);
-    this.noiseFilter.Q.setValueAtTime(qualityFactor, startTime);
+    this.noiseFilter.frequency.setValueAtTime(options.initialFrequency, options.startTime);
+    this.noiseFilter.Q.setValueAtTime(options.initialQ, options.startTime);
+    this.noiseFilter.frequency.exponentialRampToValueAtTime(options.finalFrequency, endTime);
+    this.noiseFilter.Q.exponentialRampToValueAtTime(options.finalQ, endTime);
     
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, options.startTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(1, rampUpTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(1, rampDownTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.noise.start(startTime);
+    this.noise.start(options.startTime);
     this.noise.stop(endTime);
 };
 
-WhiteNoiseWithAFilter.prototype.linearRampCenterPitchToValueAtBars = function(newValue, time) {
-    if (this.noiseFilter) {
-        this.noiseFilter.frequency.linearRampToValueAtTime(newValue, time);
-    }
-};
-
-WhiteNoiseWithAFilter.prototype.exponentialRampCenterPitchToValueAtBars = function(newValue, time) {
-    if (this.noiseFilter) {
-        this.noiseFilter.frequency.exponentialRampToValueAtTime(newValue, time);
-    }
-};
-
-WhiteNoiseWithAFilter.prototype.setCenterPitchToValueAtBars = function(newValue, time) {
-    if (this.noiseFilter) {
-        this.noiseFilter.frequency.setValueAtTime(newValue, time);
-    }
-};
-
-WhiteNoiseWithAFilter.prototype.linearRampQualityFactorToValueAtBars = function(newValue, time) {
-    if (this.noiseFilter) {
-        this.noiseFilter.Q.linearRampToValueAtTime(newValue, time);
-    }
-};
-
-WhiteNoiseWithAFilter.prototype.exponentialRampQualityFactorToValueAtBars = function(newValue, time) {
-    if (this.noiseFilter) {
-        this.noiseFilter.Q.exponentialRampToValueAtTime(newValue, time);
-    }
+function WhiteNoiseWithBandPass(context) {
+    this.baseConstructor(context);
 }
+WhiteNoiseWithBandPass.prototype = new WhiteNoiseWithFilter();
+WhiteNoiseWithBandPass.prototype.init = function() {
+    this.baseInit();
+    this.noiseFilter.type = 'bandpass';
+};
 
-WhiteNoiseWithAFilter.prototype.setQualityFactorToValueAtBars = function(newValue, time) {
-    if (this.noiseFilter) {
-        this.noiseFilter.Q.setValueAtTime(newValue, time);
-    }
+function WhiteNoiseWithNotch(context) {
+    this.baseConstructor(context);
+}
+WhiteNoiseWithNotch.prototype = new WhiteNoiseWithFilter();
+WhiteNoiseWithNotch.prototype.init = function() {
+    this.baseInit();
+    this.noiseFilter.type = 'notch';
+};
+
+function WhiteNoiseWithLowPass(context) {
+    this.baseConstructor(context);
+}
+WhiteNoiseWithLowPass.prototype = new WhiteNoiseWithFilter();
+WhiteNoiseWithLowPass.prototype.init = function() {
+    this.baseInit();
+    this.noiseFilter.type = 'lowpass';
+};
+
+function WhiteNoiseWithHighPass(context) {
+    this.baseConstructor(context);
+}
+WhiteNoiseWithHighPass.prototype = new WhiteNoiseWithFilter();
+WhiteNoiseWithHighPass.prototype.init = function() {
+    this.baseInit();
+    this.noiseFilter.type = 'highpass';
 };
 
 const A4 = 440;
@@ -857,16 +462,21 @@ function playSong() {
     var trumpet = new Trumpet(context);
     var bass = new Bass(context);
     var slider = new Slider(context);
-    var whiteNoiseWithAFilter = new WhiteNoiseWithAFilter(context);
+    //var whiteNoise = new WhiteNoiseWithBandPass(context);
+    var whiteNoise = new WhiteNoiseWithBandPass(context);
     
     function play(instrument, bar, note, durationBars) {
         instrument.play(bar * SECONDS_PER_BAR, note, durationBars * SECONDS_PER_BAR);
     }
     
-    whiteNoiseWithAFilter.play(0, 6, 440, BASICALLY_ZERO);
-    whiteNoiseWithAFilter.exponentialRampQualityFactorToValueAtBars(100, 3);
-    whiteNoiseWithAFilter.setQualityFactorToValueAtBars(100, 4);
-    whiteNoiseWithAFilter.linearRampQualityFactorToValueAtBars(BASICALLY_ZERO, 6);
+    whiteNoise.play({
+        startTime: 0,
+        duration: 0.3,
+        initialFrequency: 10000,
+        initialQ: 100, 
+        finalFrequency: 440,
+        finalQ: 10,
+    });
     
     // Megalovania
     /*play(trumpet, 0, D4, 1/16);
@@ -1019,4 +629,8 @@ function playSong() {
         delta /= 2;
         repeats *= 2;
     }*/
+    
+    setTimeout(function() { 
+        context.close();
+    }, 12000);
 };

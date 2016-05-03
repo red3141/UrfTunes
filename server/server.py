@@ -180,9 +180,13 @@ MAX_CACHE_TIME = 24 * 60 * 60; # One day in seconds
 
 # Based heavily on: http://stackoverflow.com/questions/14088294/multithreaded-web-server-in-python
 class Handler(BaseHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        BaseHTTPRequestHandler.end_headers(self)
+
     def do_GET(self):
         # Expects a path of the form /region/summonerName (possibly with a / on the end)
-        pathArgs = self.path.strip('/').split('/')
+        pathArgs = urllib2.unquote(self.path).strip('/').split('/')
         if len(pathArgs) != 2 or pathArgs[0] not in regionToLocationMap:
             # Error
             self.send_response(400)
@@ -198,15 +202,15 @@ class Handler(BaseHTTPRequestHandler):
                 if time.time() - cache[key][1] > MAX_CACHE_TIME:
                     del cache[key]
                 else:
-                    print "RETURNING FROM CACHE! :D"
                     self.send_response(200)
                     self.send_header("Content-type", "application/json")
                     self.end_headers()
                     json.dump(cache[key][0], self.wfile)
+                    # Reassign the cached value to mark it as recently used
+                    cache[key] = (cache[key][0], cache[key][1])
                     return
 
         try:
-            print region, standardizedSummonerName
             masteryLevels = self.__getChampionMastery(region, self.__getSummonerId(region, standardizedSummonerName))
 
             # Cache the mastery levels
@@ -235,7 +239,11 @@ class Handler(BaseHTTPRequestHandler):
         f = urllib2.urlopen("https://" + region + ".api.pvp.net/api/lol/" + region + "/v1.4/summoner/by-name/" +
             standardizedSummonerName + "?api_key=" + key)
         j = json.loads(f.read())
-        return j[standardizedSummonerName]["id"]
+
+        # Abuse the fact that the returned object only has one key (the summoner name)
+        # to get around some confusion with non-ascii characters.
+        for k in j.keys():
+            return j[k]["id"]
 
     def __getChampionMastery(self, region, summonerId):
         f = urllib2.urlopen("https://" + region + ".api.pvp.net/championmastery/location/" + regionToLocationMap[region] +

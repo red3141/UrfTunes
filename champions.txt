@@ -13,7 +13,7 @@ General instrument scaling - instruments should behave differently based on mast
 aatrox
   *1-5) +1 modulate pitch upward transition
 ahri
-  *1-5) +1 white noise backgrouns (high pass)
+  *1-5) +1 white noise backgrounds (high pass)
 akali
   *1-5) +1 quiet section
 alistar
@@ -35,12 +35,12 @@ brand
 braum
   *1-5) +1 Piano intro duration
 caitlyn
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 cassiopeia
 chogath
   *1-5) +1 loud funky instrument section
 corki
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 darius
   *1-5) +1 bass+percussion only section
 diana
@@ -66,7 +66,7 @@ gragas
 graves
   *1-5) +1 speeding up drum fill
 hecarim
-  *1-5) +1 tempo
+  1-5) +1 tempo
 heimerdinger
 illaoi
   *1-5) +1 bass+percussion only section
@@ -77,11 +77,11 @@ jarvaniv
 jax
 jayce
 jhin
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 jinx
   *1-5) +1 electric intro duration
 kalista
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 karma
 karthus
 kassadin
@@ -109,7 +109,7 @@ malzahar
 maokai
   *1-5) +1 speeding up drum fill
 masteryi
-  *1-5) +1 tempo
+  1-5) +1 tempo
 missfortune
   *1-5) +1 electric intro duration
 mordekaiser
@@ -129,9 +129,9 @@ orianna
 pantheon
 poppy
 quinn
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 rammus
-  *1-5) +1 tempo
+  1-5) +1 tempo
 reksai
 renekton
 rengar
@@ -148,7 +148,7 @@ singed
 sion
   *) Controls drum beat
 sivir
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 skarner
 sona
   *1-5) +1 string intro duration
@@ -162,17 +162,17 @@ taric
 teemo
 thresh
 tristana
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 trundle
 tryndamere
 twistedfate
 twitch
 udyr
-  *1-5) +1 tempo
+  1-5) +1 tempo
 urgot
 varus
 vayne
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 veigar
 velkoz
 vi

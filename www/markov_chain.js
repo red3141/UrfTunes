@@ -40,6 +40,7 @@ var markovChain = (function() {
     }
     
     function buildRhythm(rule, measures, prng) {
+        rule = rule || function() { return [{ value: { duration: 1 }, probability: 1 }] };
         prng = prng || Math.random;
         var beatsPerMeasure = 4; // Always use 4/4 time
         var state = 0;
@@ -48,7 +49,7 @@ var markovChain = (function() {
         var rhythms = [];
         var prevRhythm = { duration: 0 };
         while (currentMeasure < measures) {
-            var stateMap = rule(beatInMeasure, prevRhythm);
+            var stateMap = rule(beatInMeasure, currentMeasure, prevRhythm);
             rhythm = getNextStateComplex(stateMap, prng());
             rhythms.push(rhythm);
             beatInMeasure += rhythm.duration;

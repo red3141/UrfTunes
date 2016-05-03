@@ -490,31 +490,32 @@ WhiteNoiseWithFilter.prototype.init = WhiteNoiseWithFilter.prototype.baseInit;
 
 WhiteNoiseWithFilter.prototype.play = function(options) {
     options = options || {};
-    options.startTime = options.startTime || 0;
-    options.duration = options.duration || 1;
-    options.initialFrequency = options.initialFrequency || 440;
-    options.initialQ = options.initialQ || BASICALLY_ZERO;
-    options.finalFrequency = options.finalFrequency || options.initialFrequency;
-    options.finalQ = options.finalQ || options.initialQ;
+    var startTime = options.startTime || 0;
+    var duration = options.duration || 1;
+    var initialFrequency = options.initialFrequency || 440;
+    var initialQ = options.initialQ || BASICALLY_ZERO;
+    var finalFrequency = options.finalFrequency || initialFrequency;
+    var finalQ = options.finalQ || initialQ;
+    var volume = options.volume || 1;
     
     this.init();
     
-    var rampUpTime = options.startTime + 0.02;
-    var rampDownTime = rampUpTime + options.duration;
-    var endTime = rampDownTime + 0.02;
+    var rampUpStartTime = Math.max(startTime - 0.02, 0);
+    var rampDownStartTime = startTime + duration - 0.02;
+    var endTime = startTime + duration;
     
-    this.noiseFilter.frequency.setValueAtTime(options.initialFrequency, options.startTime);
-    this.noiseFilter.Q.setValueAtTime(options.initialQ, options.startTime);
-    this.noiseFilter.frequency.exponentialRampToValueAtTime(options.finalFrequency, endTime);
-    this.noiseFilter.Q.exponentialRampToValueAtTime(options.finalQ, endTime);
+    this.noiseFilter.frequency.setValueAtTime(initialFrequency, startTime);
+    this.noiseFilter.Q.setValueAtTime(initialQ, startTime);
+    this.noiseFilter.frequency.exponentialRampToValueAtTime(finalFrequency, endTime);
+    this.noiseFilter.Q.exponentialRampToValueAtTime(finalQ, endTime);
     
     this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, options.startTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(1, rampUpTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(1, rampDownTime);
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, rampUpStartTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(volume, startTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(volume, rampDownStartTime);
     this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.noise.start(options.startTime);
+    this.noise.start(rampUpStartTime);
     this.noise.stop(endTime);
 };
 

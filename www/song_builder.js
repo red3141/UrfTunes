@@ -114,9 +114,73 @@ var songBuilder = (function(seedrandom) {
             segment.backgrounds = [];
             if (masteries['caitlyn']) {
                 var background = {
-                    instrument: 'WhiteNoiseWithLowPass',
-                    options: { initialFrequency: 1000, finalFrequency: BASICALLY_ZERO, duration: 0.5 },
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 700, initialQ: 0.2, finalFrequency: 80, finalQ: 200, volume: 0.2, duration: 0.5 },
                     rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['caitlyn']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
+            if (masteries['corki']) {
+                var background = {
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 200, initialQ: 0.5, finalFrequency: 8, finalQ: 100, volume: 0.5, duration: 0.3, multishots:[0.25] },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['corki']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
+            if (masteries['jhin']) {
+                var background = {
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 440, initialQ: 0.2, finalFrequency: 8, finalQ: 100, volume: 0.3, duration: 2 },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['jhin']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
+            if (masteries['kalista']) {
+                var background = {
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 100, initialQ: 0.2, finalFrequency: 800, finalQ: 100, volume: 0.8, duration: 1.5 },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['kalista']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
+            if (masteries['quinn']) {
+                var background = {
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 100, initialQ: 1, finalFrequency: 50, finalQ: 0.1, volume: 0.5, duration: 2 },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['quinn']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
+            if (masteries['sivir']) {
+                var background = {
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 400, initialQ: 0.2, finalFrequency: 100, finalQ: 20, volume: 0.2, duration: 2 },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['sivir']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
+            if (masteries['tristana']) {
+                var background = {
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 200, initialQ: 0.2, finalFrequency: 50, finalQ: 1, volume: 0.2, duration: 3 },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['tristana']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
+            if (masteries['vayne']) {
+                var background = {
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 1000, initialQ: 0.7, finalFrequency: 500, finalQ: 1, volume: 0.5, duration: 0.4 },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['vayne']], 4, prng)
+                };
+                segment.backgrounds.push(background);
+            }
+            if (masteries['ahri']) {
+                var background = {
+                    instrument: WhiteNoiseWithBandPass,
+                    options: { initialFrequency: 1000, initialQ: 0.7, finalFrequency: 500, finalQ: 1, volume: 0.5, duration: 0.4 },
+                    rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['ahri']], 4, prng)
                 };
                 segment.backgrounds.push(background);
             }
@@ -165,18 +229,12 @@ var songBuilder = (function(seedrandom) {
     function getSeed(inputs) {
         var s = '';
         for (var i = 0; i < inputs.length; ++i)
-            s += masteries[inputs[i]];
+            s += masteries[inputs[i]] || 0;
         return s;
     }
     
-    function getInstrument(name) {
-        switch (name) {
-            case 'WhiteNoiseWithLowPass':
-                return new WhiteNoiseWithLowPass(context);
-            default:
-                console.error('Unexpected instrument name: ' + name);
-                return null;
-        }
+    function getInstrument(instrumentClass) {
+        return new instrumentClass(context);
     }
     
     function play(song)  {
@@ -199,6 +257,13 @@ var songBuilder = (function(seedrandom) {
         var bassInstrument = new Bass(context);
         var melodyInstrument = new SineTooth(context);
         
+        //var test = new WhiteNoiseWithBandPass(context);
+        //test.play({ startTime: 0.2, initialFrequency: 200, initialQ: 10, finalFrequency: 8, finalQ: 50, volume: 0.2, duration: 1 });
+        
+        // Have a slight delay before the start, otherwise the first note won't get played
+        var startTime = 0.3;
+        currentTime = startTime;
+
         // Intro
         /* Options:
           - SineTooth note only
@@ -216,10 +281,10 @@ var songBuilder = (function(seedrandom) {
             if (currentBeat >= 16 && i % 4 === 2)
                 snareDrum.play(currentTime);
             ++currentBeat;
-            currentTime = currentBeat * secondsPerBeat;
+            currentTime = currentBeat * secondsPerBeat + startTime;
         }
         currentBeat = 0;
-        currentTime = 0;
+        currentTime = startTime;
         var j = 0;
         var segment = song.segments[0];
         var measure = 0;
@@ -234,7 +299,7 @@ var songBuilder = (function(seedrandom) {
             }
             currentBeat += rhythm.duration;
             beatInMeasure += rhythm.duration;
-            currentTime = currentBeat * secondsPerBeat;
+            currentTime = currentBeat * secondsPerBeat + startTime;
             while (beatInMeasure >= beatsPerBar) {
                 ++measure;
                 beatInMeasure -= beatsPerBar;
@@ -316,22 +381,31 @@ var songBuilder = (function(seedrandom) {
             for (var j = 0; j < segment.backgrounds.length; ++j) {
                 var background = segment.backgrounds[j];
                 var backgroundInstrument = getInstrument(background.instrument);
-                currentBeat = i * measuresPerSegment * secondsPerBeat * beatsPerBar;
-                currentTime = currentBeat * secondsPerBeat + bodyStartTime;
-                for (var k = 0; k < background.rhythm.length; ++k) {
-                    var rhythm = background.rhythm[k];
-                    if (!rhythm.isRest) {
-                        var options = copy(background.options);
-                        options.startTime = currentTime;
-                        options.duration *= secondsPerBeat;
-                        backgroundInstrument.play(options);
+                var segmentStartBeat = i * measuresPerSegment * beatsPerBar;
+                currentBeat = 0;
+                currentTime = (currentBeat + segmentStartBeat) * secondsPerBeat + bodyStartTime;
+                while (currentBeat < measuresPerSegment * beatsPerBar) {
+                    for (var k = 0; k < background.rhythm.length; ++k) {
+                        var rhythm = background.rhythm[k];
+                        if (!rhythm.isRest) {
+                            var options = copy(background.options);
+                            options.startTime = currentTime;
+                            options.duration *= secondsPerBeat;
+                            backgroundInstrument.play(options);
+                            if (options.multishots) {
+                                for (var m = 0; m < options.multishots.length; ++m) {
+                                    options = copy(background.options);
+                                    options.startTime = currentTime + options.multishots[m] * secondsPerBeat;
+                                    backgroundInstrument.play(options);
+                                }
+                            }
+                        }
+                        currentBeat += rhythm.duration;
+                        currentTime = (currentBeat + segmentStartBeat) * secondsPerBeat + bodyStartTime;
                     }
-                    currentBeat += rhythm.duration;
-                    currentTime = currentBeat * secondsPerBeat + bodyStartTime;
                 }
             }
         }
-        console.log(currentBeat);
         
         // Add ending
         currentBeat = 0;

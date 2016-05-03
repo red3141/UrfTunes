@@ -266,7 +266,7 @@ var masteries = (function() {
     };
     
     var testchampion = {
-        'aatrox' : 5
+        'ahri' : 5
     };
     
     // Pick which set of test data to return here

@@ -357,7 +357,7 @@ var songBuilder = (function(seedrandom) {
           - String ensemble that transitions to electro
           - Low bass note followed by drums
         */
-        /*var introLength = 32;
+        var introLength = 32;
         for (var i = 0; i < introLength; ++i) {
             // Play bass drum on 1 and 3
             if (i % 2 === 0)
@@ -389,7 +389,7 @@ var songBuilder = (function(seedrandom) {
                 beatInMeasure -= beatsPerBar;
             }
             ++j;
-        }*/
+        }
         
         // Body
         var bodyStartTime = currentTime;

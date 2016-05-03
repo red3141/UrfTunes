@@ -14,7 +14,8 @@ function main() {
                     championMasteryLevels[championNames[i]] = 0;
                 }
             }
-            alert(JSON.stringify(championMasteryLevels));
+            window.masteries = championMasteryLevels;
+            songBuilder.buildAndPlay();
         }
     }
     xmlHttp.onerror = function() {

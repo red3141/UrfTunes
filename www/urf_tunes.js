@@ -238,8 +238,7 @@ Trumpet.prototype.play = function(options) {
 function Piano(context) {
     this.context = context;
     
-    var length = 9;
-    var coefs = [0.5, 1, 0.02, 0.01, 0.0003, 0.00000]
+    var coefs = [0, 1, 0.1, 0.31, 0.06, 0.05, 0.05, 0.0001, 0.02, 0.000001, 0.01, 0.00001];
     var real = new Float32Array(coefs);
     var imag = new Float32Array(coefs.length);
     
@@ -276,13 +275,13 @@ Piano.prototype.play = function(options) {
     var duration = options.duration || 1;
 
     var attackGain = 0.8;
-    var reduceGain = 0.1;
+    var reduceGain = 0.15;
     var maxDurationSeconds = 1;
 
-    var attackEndTime = startTime + 0.03;
-    var reduceEndTime = attackEndTime + 0.1;
+    var attackEndTime = startTime + 0.01;
+    var reduceEndTime = attackEndTime + 0.2;
     var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
-    var endTime = fallOffTime + 0.01;
+    var endTime = fallOffTime + 0.03;
     
     this.oscillator.frequency.setValueAtTime(pitch, startTime);
     
@@ -309,6 +308,139 @@ Piano.prototype.play = function(options) {
     this.oscillator.stop(endTime);
     this.noise.start(startTime);
     this.noise.stop(endTime);
+};
+
+function Guitar(context) {
+    this.context = context;
+    
+    var coefs = [1, 0.68, 1.25, 0.15, 0.15, 0.15, 0.0001, 0.01, 0.2, 0.08, 0.02, 0.000001, 0.01];
+    var real = new Float32Array(coefs);
+    var imag = new Float32Array(coefs.length);
+    
+    this.waveform = this.context.createPeriodicWave(real, imag);
+    this.noiseBuffer = createNoiseBuffer(context);
+}
+
+Guitar.prototype.init = function() {
+    this.oscillator = this.context.createOscillator();
+    this.oscillator.setPeriodicWave(this.waveform);
+
+    this.gain = this.context.createGain();
+    this.oscillator.connect(this.gain);
+
+    this.noise = this.context.createBufferSource();
+    this.noise.buffer = this.noiseBuffer;
+    this.noise.loop = true;
+    this.noiseFilter = this.context.createBiquadFilter();
+    this.noiseFilter.type = 'bandpass';
+    this.noise.connect(this.noiseFilter);
+
+    this.noiseGain = this.context.createGain();
+    this.noiseFilter.connect(this.noiseGain);
+
+    this.gain.connect(this.context.destination);
+    this.noiseGain.connect(this.context.destination);
+};
+
+Guitar.prototype.play = function(options) {
+    this.init();
+    
+    var startTime = options.startTime || 0;
+    var pitch = options.pitch || 440;
+    var duration = options.duration || 1;
+
+    var attackGain = 0.7;
+    var reduceGain = 0.15;
+    var maxDurationSeconds = 1;
+
+    var attackEndTime = startTime + 0.01;
+    var reduceEndTime = attackEndTime + 0.06;
+    var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
+    var endTime = fallOffTime + 0.03;
+    
+    this.oscillator.frequency.setValueAtTime(pitch, startTime);
+    
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    this.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+    this.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
+    
+    this.noiseFilter.frequency.setValueAtTime(pitch, startTime);
+    this.noiseFilter.Q.setValueAtTime(9, startTime);
+    
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
+    
+    // The piano can't be "held," it will fall off over time no matter what
+    this.gain.gain.exponentialRampToValueAtTime(
+        reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
+        fallOffTime);
+    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    
+    this.oscillator.start(startTime);
+    this.oscillator.stop(endTime);
+    this.noise.start(startTime);
+    this.noise.stop(endTime);
+};
+
+function Violin(context) {
+    this.context = context;
+    
+    var coefs = [1, 0.9, 0.5, 0.7, 0.4, 0.5, 0.55, 0.3, 0.2, 0.2, 0.25, 0.5, 0.2, 0.1, 0.5, 0.2, 0.1, 0.01, 0.000001, 0.002, 0.000001, 0.000001, 0.000001, 0.00001, 0.00002];
+    var real = new Float32Array(coefs);
+    var imag = new Float32Array(coefs.length);
+    
+    this.waveform = this.context.createPeriodicWave(real, imag);
+}
+
+Violin.prototype.init = function() {
+    this.oscillator1 = this.context.createOscillator();
+    this.oscillator1.setPeriodicWave(this.waveform);
+    this.oscillator2 = this.context.createOscillator();
+    this.oscillator2.setPeriodicWave(this.waveform);
+ 
+    this.gain = this.context.createGain();
+    this.oscillator1.connect(this.gain);
+    this.oscillator2.connect(this.gain);
+    
+    this.filter = this.context.createBiquadFilter();
+    this.filter.type = "lowpass";
+    this.filter.frequency.value = 2000;
+    
+    this.gain.connect(this.filter);
+    this.filter.connect(this.context.destination);
+};
+
+Violin.prototype.play = function(options) {
+    this.init();
+
+    var startTime = options.startTime || 0;
+    var pitch = options.pitch || 440;
+    var duration = options.duration || 1;
+    var volume = options.volume || 0.1;
+    var finalVolume = options.finalVolume || volume;
+
+    var attackEndTime = startTime + 0.1;
+    var fallOffTime = Math.max(attackEndTime, startTime + duration);
+    var endTime = fallOffTime + 0.05;
+    
+    this.oscillator1.frequency.setValueAtTime(pitch, startTime);
+    this.oscillator1.detune.value = 5;
+    this.oscillator2.frequency.setValueAtTime(pitch, startTime);
+    this.oscillator2.detune.value = -5;
+    
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    this.gain.gain.exponentialRampToValueAtTime(volume, attackEndTime);
+    this.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
+    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    
+    this.oscillator1.start(startTime);
+    this.oscillator1.stop(endTime);
+    this.oscillator2.start(startTime);
+    this.oscillator2.stop(endTime);
 };
 
 // Bass

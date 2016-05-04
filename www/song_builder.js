@@ -438,7 +438,7 @@ var songBuilder = (function(seedrandom) {
             currentTime = currentBeat * secondsPerBeat + startTime;
         }
         var bassNote = chords[chords.length - 1];
-        bassInstrument.play({ startTime: currentTime - beatsPerBar * secondsPerBeat, pitch: frequencies[bassNote] / 4, duration: beatsPerBar * secondsPerBeat, volume: 0.1, finalVolume: 3 });
+        bassInstrument.play({ startTime: currentTime - beatsPerBar * secondsPerBeat, pitch: frequencies[bassNote] / 4, duration: beatsPerBar * secondsPerBeat, volume: 0.1, finalVolume: 2.5 });
         console.log(currentBeat);
         
         
@@ -599,40 +599,12 @@ var songBuilder = (function(seedrandom) {
         
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
         
-        var introInstrument = new Piano(context);
+        var introInstrument = new Violin(context);
         
-        var startTime = 0.5;
-        // Add bass line
-        currentBeat = 0;
-        currentTime = startTime;
-        var segment = song.segments[0];
-        var measure = 0;
-        var beatInMeasure = 0;
-        for (var j = 0; j < segment.chordProgression; ++j) {
-            // Play the root note of the chord
-            var chord = segment.chordProgression[measure % segment.chordProgression.length];
-            var frequency = frequencies[chord] / 4;
-            introInstrument.play({ startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
-            currentBeat += beatsPerBar;
-            currentTime = currentBeat * secondsPerBeat + startTime;
-        }
-        console.log(currentBeat);
-        
-        // Add melody
-        currentBeat = 0;
-        currentTime = startTime;
-        for (var j = 0; j < song.intro.melodyNotes.length; ++j) {
-            var rhythm = segment.melodyRhythm[j];
-            if (!rhythm.isRest) {
-                var note = segment.melodyNotes[j];
-                introInstrument.play({ startTime: currentTime, pitch: frequencies[note], duration: rhythm.duration * secondsPerBeat });
-            }
-            currentBeat += rhythm.duration;
-            currentTime = currentBeat * secondsPerBeat + startTime;
-        }
-        console.log(currentBeat);
-        
-        var endingStartTime = currentTime;
+        introInstrument.play({ startTime: 0.5, duration: 0.5, pitch: C4 });
+        introInstrument.play({ startTime: 1, duration: 0.5, pitch: D4 });
+        introInstrument.play({ startTime: 1.5, duration: 0.5, pitch: E4 });
+        introInstrument.play({ startTime: 2, duration: 0.5, pitch: F4 });
         
     }
     

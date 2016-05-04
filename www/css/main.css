@@ -47,6 +47,10 @@ button, button:focus {
     margin-left: 0.2rem;
 }
 
+#visualizationArea {
+    margin-top: 1rem;
+}
+
 .footer {
     max-width: 80rem;
     margin: auto;

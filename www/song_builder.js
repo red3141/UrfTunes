@@ -1,5 +1,6 @@
 var songBuilder = (function(seedrandom) {
     var context;
+    var analyzer;
     var currentSong;
     var currentInstruments = [];
     var measuresPerSegment = 16;
@@ -62,18 +63,27 @@ var songBuilder = (function(seedrandom) {
             segments[i].bassLineRhythm = markovChain.buildRhythm(bassLineRhythmRule, 2, prng);
         }
         
-        var introScores = [
+        var introChampions = [
             // 0 = bass
-            masteries['aatrox'] + masteries['alistar'] + masteries['drmundo'] + masteries['nautilus'] + masteries['zac'],
+            [masteries['aatrox'], masteries['alistar'], masteries['drmundo'], masteries['nautilus'], masteries['zac']],
             // 1 = piano
-            masteries['anivia'] + masteries['ashe'] + masteries['braum'] + masteries['lissandra'] + masteries['sejuani'],
+            [masteries['anivia'], masteries['ashe'], masteries['braum'], masteries['lissandra'], masteries['sejuani']],
             // 3 = electric
-            masteries['draven'] + masteries['ezreal'] + masteries['jinx'] + masteries['missfortune'] + masteries['xinzhao'],
+            [masteries['draven'], masteries['ezreal'], masteries['jinx'], masteries['missfortune'], masteries['xinzhao']],
             // 4 = strings (violins)
-            masteries['morgana'] + masteries['nami'] + masteries['sona'] + masteries['soraka'] + masteries['drmuzyrando'],
+            [masteries['morgana'], masteries['nami'], masteries['sona'], masteries['soraka'], masteries['zyra']],
             // 5 = melody only
-            masteries['fizz'] + masteries['orianna'] + masteries['velkoz'] + masteries['viktor'] + masteries['xerath'],
+            [masteries['fizz'], masteries['orianna'], masteries['velkoz'], masteries['viktor'], masteries['xerath']],
         ];
+        
+        var introScores = [];
+        for (var i = 0; i < introChampions.length; ++i) {
+            introScores[i] = 0;
+            for (var j = 0; j < introChampions[i].length; ++j)
+                introScores[i] += introChampions[i][j];
+        }
+        var introSeedInputs = [].concat.apply([], introChampions);
+        prng = seedrandom(getSeed(introSeedInputs), { global: false });
         
         // Generate intro
         var intro = {};
@@ -341,7 +351,7 @@ var songBuilder = (function(seedrandom) {
     }
     
     function getInstrument(instrumentClass) {
-        return new instrumentClass(context);
+        return new instrumentClass(context, analyzer);
     }
     
     function play(song)  {
@@ -352,7 +362,7 @@ var songBuilder = (function(seedrandom) {
         if (context)
             context.close();
         context = new AudioContext();
-        const analyzer = context.createAnalyser();
+        analyzer = context.createAnalyser();
         analyzer.connect(context.destination);
         doVisualization(analyzer);
         
@@ -366,10 +376,16 @@ var songBuilder = (function(seedrandom) {
         var snareDrum = new SnareDrum(context, analyzer);
         var bassInstrument = new Bass(context, analyzer);
         var introInstrument = new Piano(context, analyzer);
-        var melodyInstrument = new SineTooth(context, analyzer, 0);
-        
-        //var test = new WhiteNoiseWithBandPass(context);
-        //test.play({ startTime: 0.2, initialFrequency: 200, initialQ: 10, finalFrequency: 8, finalQ: 50, volume: 0.2, duration: 1 });
+        var melodyInstruments = [
+            new SineTooth(context, analyzer, 0),
+            new SineTooth(context, analyzer, 1),
+            new SineTooth(context, analyzer, 2),
+            new SineTooth(context, analyzer, 3),
+            new SineTooth(context, analyzer, 4),
+            new SineTooth(context, analyzer, 2),
+            new SineTooth(context, analyzer, 3),
+            new SineTooth(context, analyzer, 4),
+        ];
         
         // Have a slight delay before the start, otherwise the first note won't get played
         var startTime = 0.3;
@@ -497,6 +513,7 @@ var songBuilder = (function(seedrandom) {
         currentTime = bodyStartTime;
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
+            var melodyInstrument = melodyInstruments[i];
             for (var j = 0; j < segment.melodyNotes.length; ++j) {
                 var rhythm = segment.melodyRhythm[j];
                 if (!rhythm.isRest) {
@@ -548,6 +565,7 @@ var songBuilder = (function(seedrandom) {
         // Add ending
         currentBeat = 0;
         currentTime = endingStartTime;
+        var melodyInstrument = melodyInstruments[melodyInstruments.length - 1];
         for (var j = 0; j < song.ending.melodyNotes.length; ++j) {
             var rhythm = song.ending.melodyRhythm[j];
             if (!rhythm.isRest) {
@@ -599,10 +617,12 @@ var songBuilder = (function(seedrandom) {
         if (context)
             context.close();
         context = new AudioContext();
+        analyzer = context.createAnalyser();
+        analyzer.connect(context.destination);
         
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
         
-        var introInstrument = new Violin(context);
+        var introInstrument = new Violin(context, analyzer);
         
         introInstrument.play({ startTime: 0.5, duration: 0.5, pitch: C4 });
         introInstrument.play({ startTime: 1, duration: 0.5, pitch: D4 });

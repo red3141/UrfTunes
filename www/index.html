@@ -15,7 +15,7 @@
         <script src="song_builder.js"></script>
         <script src="main.js"></script>
         
-        <title>Urf Tunes</title>
+        <title>Urf Tunes - Ultra Random Frequencies</title>
         
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="application-name" content="Urf Tunes">
@@ -25,8 +25,8 @@
     </head>
     <body>
         <div class="header">
-            <img src="img/urf_tunes.png" />
-            <img src="img/urf_tunes_text.png" />
+            <img src="img/urf_tunes.png" title="Ultra Random Frequency Tunes" />
+            <img src="img/urf_tunes_text.png" title="Ultra Random Frequency Tunes" />
         </div>
         <div class="urf-container">
             <div class="description">
@@ -55,12 +55,12 @@
                 </form>
             </div>
             <div style="text-align:center;margin-top:1.5rem;">
-                <button type="button" id="play" class="btn btn-success" onclick="songBuilder.test();" disabled>Play</button>
+                <button type="button" id="play" class="btn btn-success" onclick="songBuilder.play();" disabled>Play</button>
                 <button type="button" id="stop" class="btn btn-danger" style="margin-left: 2rem;" onclick="songBuilder.stop();" disabled>Stop</button>
                 <button type="button" id="asdf" class="btn btn-danger" style="margin-left: 2rem;" onclick="playSong();">WUBWUBWUB</button>
             </div>
         </div>
-        <canvas id="visualizationArea"></canvas>
+        <canvas id="visualizationArea" height="256"></canvas>
         <div class="footer">
             Urf Tunes isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends &copy; Riot Games, Inc.
         </div>

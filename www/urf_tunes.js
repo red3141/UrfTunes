@@ -635,8 +635,8 @@ WhiteNoiseWithFilter.prototype.play = function(options) {
     this.noise.stop(endTime);
 };
 
-function WhiteNoiseWithBandPass(context) {
-    this.baseConstructor(context);
+function WhiteNoiseWithBandPass(context, analyzer) {
+    this.baseConstructor(context, analyzer);
 }
 WhiteNoiseWithBandPass.prototype = new WhiteNoiseWithFilter();
 WhiteNoiseWithBandPass.prototype.init = function() {
@@ -644,8 +644,8 @@ WhiteNoiseWithBandPass.prototype.init = function() {
     this.noiseFilter.type = 'bandpass';
 };
 
-function WhiteNoiseWithNotch(context) {
-    this.baseConstructor(context);
+function WhiteNoiseWithNotch(context, analyzer) {
+    this.baseConstructor(context, analyzer);
 }
 WhiteNoiseWithNotch.prototype = new WhiteNoiseWithFilter();
 WhiteNoiseWithNotch.prototype.init = function() {
@@ -653,8 +653,8 @@ WhiteNoiseWithNotch.prototype.init = function() {
     this.noiseFilter.type = 'notch';
 };
 
-function WhiteNoiseWithLowPass(context) {
-    this.baseConstructor(context);
+function WhiteNoiseWithLowPass(context, analyzer) {
+    this.baseConstructor(context, analyzer);
 }
 WhiteNoiseWithLowPass.prototype = new WhiteNoiseWithFilter();
 WhiteNoiseWithLowPass.prototype.init = function() {
@@ -662,8 +662,8 @@ WhiteNoiseWithLowPass.prototype.init = function() {
     this.noiseFilter.type = 'lowpass';
 };
 
-function WhiteNoiseWithHighPass(context) {
-    this.baseConstructor(context);
+function WhiteNoiseWithHighPass(context, analyzer) {
+    this.baseConstructor(context, analyzer);
 }
 WhiteNoiseWithHighPass.prototype = new WhiteNoiseWithFilter();
 WhiteNoiseWithHighPass.prototype.init = function() {
@@ -706,7 +706,6 @@ function doVisualization(analyzer) {
     
     const draw = function() {
         canvasContext.canvas.width = Math.max(512, window.innerWidth);
-        canvasContext.canvas.height = 256;
     
         width = canvas.width;
         height = canvas.height;

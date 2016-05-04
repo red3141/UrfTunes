@@ -16,6 +16,7 @@ var songBuilder = (function(seedrandom) {
             segments.push({});
         }
         
+        
         var bassSeedInputs = ['jax',
             'jayce',
             'jhin',
@@ -56,10 +57,29 @@ var songBuilder = (function(seedrandom) {
             segments[i].chordProgression = markovChain.build(chordRule, 4, prng);
         }
         
-        // Generate rhythms for each section
+        // Generate bass rhythms for each section
         for (var i = 0; i < segments.length; ++i) {
             segments[i].bassLineRhythm = markovChain.buildRhythm(bassLineRhythmRule, 2, prng);
         }
+        
+        var introScores = [
+            // 0 = bass
+            masteries['aatrox'] + masteries['alistar'] + masteries['drmundo'] + masteries['nautilus'] + masteries['zac'],
+            // 1 = piano
+            masteries['anivia'] + masteries['ashe'] + masteries['braum'] + masteries['lissandra'] + masteries['sejuani'],
+            // 3 = electric
+            masteries['draven'] + masteries['ezreal'] + masteries['jinx'] + masteries['missfortune'] + masteries['xinzhao'],
+            // 4 = strings (violins)
+            masteries['morgana'] + masteries['nami'] + masteries['sona'] + masteries['soraka'] + masteries['drmuzyrando'],
+            // 5 = melody only
+            masteries['fizz'] + masteries['orianna'] + masteries['velkoz'] + masteries['viktor'] + masteries['xerath'],
+        ];
+        
+        // Generate intro
+        var intro = {};
+        var introRhythm = markovChain.buildRhythm(introRhythmRule, 4, prng);
+        intro.melodyRhythm = introRhythm.concat(introRhythm);
+        intro.melodyNotes = markovChain.buildNotes(introPitchRule, intro.melodyRhythm, segments[0].chordProgression, prng);
         
         var melodySeedInputs = ['olaf',
             'orianna',
@@ -94,6 +114,7 @@ var songBuilder = (function(seedrandom) {
             'trundle',
             'tryndamere'];
         prng = seedrandom(getSeed(melodySeedInputs), { global: false });
+        
         
         // Generate rhythms for each section
         for (var i = 0; i < segments.length; ++i) {
@@ -305,6 +326,7 @@ var songBuilder = (function(seedrandom) {
         
         currentSong = {
             form: form,
+            intro: intro,
             segments: segments,
             ending: ending,
         };
@@ -343,6 +365,7 @@ var songBuilder = (function(seedrandom) {
         var bassDrum = new BassDrum(context, analyzer);
         var snareDrum = new SnareDrum(context, analyzer);
         var bassInstrument = new Bass(context, analyzer);
+        var introInstrument = new Piano(context, analyzer);
         var melodyInstrument = new SineTooth(context, analyzer, 0);
         
         //var test = new WhiteNoiseWithBandPass(context);
@@ -364,16 +387,16 @@ var songBuilder = (function(seedrandom) {
         var introLength = 32;
         for (var i = 0; i < introLength; ++i) {
             // Play bass drum on 1 and 3
-            if (i % 2 === 0)
-                bassDrum.play(currentTime);
+            /*if (i % 2 === 0)
+                bassDrum.play({ startTime: currentTime });
             if (currentBeat >= 16 && i % 4 === 2)
-                snareDrum.play(currentTime);
+                snareDrum.play({ startTime: currentTime });*/
             ++currentBeat;
             currentTime = currentBeat * secondsPerBeat + startTime;
         }
         currentBeat = 0;
         currentTime = startTime;
-        var j = 0;
+        /*var j = 0;
         var segment = song.segments[0];
         var measure = 0;
         var beatInMeasure = 0;
@@ -382,8 +405,8 @@ var songBuilder = (function(seedrandom) {
             if (!rhythm.isRest) {
                 // Play the root note of the chord
                 var chord = segment.chordProgression[measure % segment.chordProgression.length];
-                var frequency = frequencies[chord] / 4;
-                bassInstrument.play(currentTime, frequency, rhythm.duration * secondsPerBeat);
+                var frequency = frequencies[chord] / 2;
+                introInstrument.play({ startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
             }
             currentBeat += rhythm.duration;
             beatInMeasure += rhythm.duration;
@@ -393,7 +416,34 @@ var songBuilder = (function(seedrandom) {
                 beatInMeasure -= beatsPerBar;
             }
             ++j;
+        }*/
+        
+        // Add intro melody
+        currentBeat = 0;
+        currentTime = startTime;
+        var chords = song.segments[0].chordProgression;
+        for (var j = 0; j < song.intro.melodyNotes.length; ++j) {
+            var rhythm = song.intro.melodyRhythm[j];
+            if (!rhythm.isRest) {
+                var note = song.intro.melodyNotes[j];
+                if (note < 0)
+                    console.warn('Invalid note!');
+                else
+                    introInstrument.play({ startTime: currentTime, pitch: frequencies[note], duration: rhythm.duration * secondsPerBeat });
+            }
+            if (currentBeat % 4 === 0) {
+                var measure = currentBeat / beatsPerBar;
+                var chord = chords[measure % chords.length];
+                var frequency = frequencies[chord] / 2;
+                introInstrument.play({ startTime: currentTime, pitch: frequency, duration: secondsPerBeat });
+            }
+            currentBeat += rhythm.duration;
+            currentTime = currentBeat * secondsPerBeat + startTime;
         }
+        var bassNote = chords[chords.length - 1];
+        bassInstrument.play({ startTime: currentTime - beatsPerBar * secondsPerBeat, pitch: frequencies[bassNote] / 4, duration: beatsPerBar * secondsPerBeat, volume: 0.1, finalVolume: 2.5 });
+        console.log(currentBeat);
+        
         
         // Body
         var bodyStartTime = currentTime;
@@ -404,10 +454,10 @@ var songBuilder = (function(seedrandom) {
             var segment = song.segments[song.form[i]];
             for (var j = 0; j < measuresPerSegment; ++j) {
                 // Play bass drum on 1 and 3
-                bassDrum.play(currentTime);
-                bassDrum.play(currentTime + 2 * secondsPerBeat);
+                bassDrum.play({ startTime: currentTime });
+                bassDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
                 // Snare on 3
-                snareDrum.play(currentTime + 2 * secondsPerBeat);
+                snareDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
                 currentBeat += beatsPerBar;
                 currentTime = currentBeat * secondsPerBeat + bodyStartTime;
             }
@@ -428,7 +478,7 @@ var songBuilder = (function(seedrandom) {
                     // Play the root note of the chord
                     var chord = segment.chordProgression[measure % segment.chordProgression.length];
                     var frequency = frequencies[chord] / 4;
-                    bassInstrument.play(currentTime, frequency, rhythm.duration * secondsPerBeat);
+                    bassInstrument.play({ startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
                 }
                 currentBeat += rhythm.duration;
                 beatInMeasure += rhythm.duration;
@@ -451,7 +501,7 @@ var songBuilder = (function(seedrandom) {
                 var rhythm = segment.melodyRhythm[j];
                 if (!rhythm.isRest) {
                     var note = segment.melodyNotes[j];
-                    melodyInstrument.play(currentTime, frequencies[note], rhythm.duration * secondsPerBeat);
+                    melodyInstrument.play({ startTime: currentTime, pitch: frequencies[note], duration: rhythm.duration * secondsPerBeat });
                 }
                 currentBeat += rhythm.duration;
                 currentTime = currentBeat * secondsPerBeat + bodyStartTime;
@@ -502,7 +552,7 @@ var songBuilder = (function(seedrandom) {
             var rhythm = song.ending.melodyRhythm[j];
             if (!rhythm.isRest) {
                 var note = song.ending.melodyNotes[j];
-                melodyInstrument.play(currentTime, frequencies[note], rhythm.duration * secondsPerBeat);
+                melodyInstrument.play({ startTime: currentTime, pitch: frequencies[note], duration: rhythm.duration * secondsPerBeat });
             }
             currentBeat += rhythm.duration;
             currentTime = currentBeat * secondsPerBeat + endingStartTime;
@@ -518,7 +568,7 @@ var songBuilder = (function(seedrandom) {
                 // Play the root note of the chord
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
                 var frequency = frequencies[chord] / 4;
-                bassInstrument.play(currentTime, frequency, rhythm.duration * secondsPerBeat);
+                bassInstrument.play({startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
             }
             currentBeat += rhythm.duration;
             beatInMeasure += rhythm.duration;
@@ -537,7 +587,6 @@ var songBuilder = (function(seedrandom) {
         currentSong = song;
         play(song);
     }
-    
     function stop()  {
         if (!context)
             return;
@@ -545,6 +594,23 @@ var songBuilder = (function(seedrandom) {
         context = null;
     }
 
+    
+    function test()  {
+        if (context)
+            context.close();
+        context = new AudioContext();
+        
+        var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
+        
+        var introInstrument = new Violin(context);
+        
+        introInstrument.play({ startTime: 0.5, duration: 0.5, pitch: C4 });
+        introInstrument.play({ startTime: 1, duration: 0.5, pitch: D4 });
+        introInstrument.play({ startTime: 1.5, duration: 0.5, pitch: E4 });
+        introInstrument.play({ startTime: 2, duration: 0.5, pitch: F4 });
+        
+    }
+    
     currentSong = build();
     
     return {
@@ -552,6 +618,7 @@ var songBuilder = (function(seedrandom) {
         play: play,
         buildAndPlay: buildAndPlay,
         stop: stop,
+        test: test,
     }
 })(
     Math.seedrandom

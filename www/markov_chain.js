@@ -85,6 +85,8 @@ var markovChain = (function() {
                 } else {
                     // Use repetition
                     notes[i] = firstTimeNotes[i2];
+                    if (notes[i] < 0)
+                        console.warn('Bad repeated note!');
                 }
                 prevNote = notes[i];
             }

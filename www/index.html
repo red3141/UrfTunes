@@ -17,7 +17,7 @@
         
         <title>Urf Tunes</title>
         
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="application-name" content="Urf Tunes">
         <meta name="author" content="KirkBerkley and RndmInternetMan">
         <meta name="description" content="Listen to your personalized Urf tune. There's a different song for each summoner!">
@@ -50,16 +50,19 @@
                         </select>
                     </div>
                     <div class="go-button">
-                        <button type="submit" id="go" class="btn btn-primary">Get music!</button>
+                        <button type="submit" id="go" class="btn btn-primary">Get Music!</button>
                     </div>
                 </form>
             </div>
             <div style="text-align:center;margin-top:1.5rem;">
-                <button type="button" id="play" class="btn btn-success" onclick="songBuilder.play();" disabled>Play</button>
+                <button type="button" id="play" class="btn btn-success" onclick="songBuilder.test();" disabled>Play</button>
                 <button type="button" id="stop" class="btn btn-danger" style="margin-left: 2rem;" onclick="songBuilder.stop();" disabled>Stop</button>
                 <button type="button" id="asdf" class="btn btn-danger" style="margin-left: 2rem;" onclick="playSong();">WUBWUBWUB</button>
             </div>
         </div>
         <canvas id="visualizationArea"></canvas>
+        <div class="footer">
+            Urf Tunes isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends &copy; Riot Games, Inc.
+        </div>
     </body>
 </html>

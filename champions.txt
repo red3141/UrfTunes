@@ -52,6 +52,7 @@ fiddlesticks
   *1-5) +1 guitar backgrounds
 fiora
 fizz
+  *1-5) +1 melody only intro duration
 galio
 gangplank
 garen
@@ -123,6 +124,7 @@ nocturne
 nunu
 olaf
 orianna
+  *1-5) +1 melody only intro duration
 pantheon
 poppy
 quinn
@@ -175,14 +177,18 @@ vayne
 veigar
   1-5) +1 white noise backgrounds (band pass)
 velkoz
+  *1-5) +1 melody only intro duration
 vi
 viktor
+  *1-5) +1 melody only intro duration
 vladimir
 volibear
 warwick
 wukong
 xerath
+  *1-5) +1 melody only intro duration
 xinzhao
+  *1-5) +1 electric intro duration
 yasuo
   *1-5) +1 white noise backgrounds
 yorick

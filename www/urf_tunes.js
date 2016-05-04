@@ -25,9 +25,10 @@ BassDrum.prototype.init = function() {
     this.gain.connect(this.context.destination);
 };
 
-BassDrum.prototype.play = function(startTime) {
+BassDrum.prototype.play = function(options) {
     this.init();
     
+    var startTime = options.startTime || 0;
     var endTime = startTime + this.duration;
     
     this.oscillator.frequency.setValueAtTime(this.pitch, startTime);
@@ -83,9 +84,11 @@ SnareDrum.prototype.init = function() {
     this.oscillatorGain.connect(this.context.destination);
 };
 
-SnareDrum.prototype.play = function(startTime) {
+SnareDrum.prototype.play = function(options) {
     this.init();
     
+    var startTime = options.startTime || 0;
+
     var oscillatorEndTime = startTime + this.oscillatorDuration;
     var noiseEndTime = startTime + this.noiseDuration;
     var endTime = Math.max(oscillatorEndTime, noiseEndTime);
@@ -139,9 +142,13 @@ SineTooth.prototype.init = function() {
     this.gain.connect(this.context.destination);
 };
 
-SineTooth.prototype.play = function(startTime, pitch, duration) {
+SineTooth.prototype.play = function(options) {
     this.init();
     
+    var startTime = options.startTime || 0;
+    var pitch = options.pitch || 440;
+    var duration = options.duration || 1;
+
     var attackEndTime = startTime + 0.02;
     var reduceEndTime = attackEndTime + 0.02;
     var fallOffTime = Math.max(reduceEndTime, startTime + duration);
@@ -160,7 +167,6 @@ SineTooth.prototype.play = function(startTime, pitch, duration) {
     this.oscillator.stop(endTime);
 };
 
-// Trumpet
 
 function Trumpet(context) {
     this.context = context;
@@ -198,8 +204,12 @@ Trumpet.prototype.init = function() {
     this.filter.connect(this.context.destination);
 };
 
-Trumpet.prototype.play = function(startTime, pitch, duration) {
+Trumpet.prototype.play = function(options) {
     this.init();
+
+    var startTime = options.startTime || 0;
+    var pitch = options.pitch || 440;
+    var duration = options.duration || 1;
 
     var attackEndTime = startTime + 0.02;
     var reduceEndTime = attackEndTime + 0.02;
@@ -224,6 +234,83 @@ Trumpet.prototype.play = function(startTime, pitch, duration) {
     this.oscillator2.stop(endTime);
 };
 
+
+function Piano(context) {
+    this.context = context;
+    
+    var length = 9;
+    var coefs = [0.5, 1, 0.02, 0.01, 0.0003, 0.00000]
+    var real = new Float32Array(coefs);
+    var imag = new Float32Array(coefs.length);
+    
+    this.waveform = this.context.createPeriodicWave(real, imag);
+    this.noiseBuffer = createNoiseBuffer(context);
+}
+
+Piano.prototype.init = function() {
+    this.oscillator = this.context.createOscillator();
+    this.oscillator.setPeriodicWave(this.waveform);
+ 
+    this.gain = this.context.createGain();
+    this.oscillator.connect(this.gain);
+    
+    this.noise = this.context.createBufferSource();
+    this.noise.buffer = this.noiseBuffer;
+    this.noise.loop = true;
+    this.noiseFilter = this.context.createBiquadFilter();
+    this.noiseFilter.type = 'bandpass';
+    this.noise.connect(this.noiseFilter);
+    
+    this.noiseGain = this.context.createGain();
+    this.noiseFilter.connect(this.noiseGain);
+    
+    this.gain.connect(this.context.destination);
+    this.noiseGain.connect(this.context.destination);
+};
+
+Piano.prototype.play = function(options) {
+    this.init();
+    
+    var startTime = options.startTime || 0;
+    var pitch = options.pitch || 440;
+    var duration = options.duration || 1;
+
+    var attackGain = 0.8;
+    var reduceGain = 0.1;
+    var maxDurationSeconds = 1;
+
+    var attackEndTime = startTime + 0.03;
+    var reduceEndTime = attackEndTime + 0.1;
+    var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
+    var endTime = fallOffTime + 0.01;
+    
+    this.oscillator.frequency.setValueAtTime(pitch, startTime);
+    
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    this.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+    this.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
+    
+    this.noiseFilter.frequency.setValueAtTime(pitch, startTime);
+    this.noiseFilter.Q.setValueAtTime(9, startTime);
+    
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
+    this.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
+    
+    // The piano can't be "held," it will fall off over time no matter what
+    this.gain.gain.exponentialRampToValueAtTime(
+        reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
+        fallOffTime);
+    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    
+    this.oscillator.start(startTime);
+    this.oscillator.stop(endTime);
+    this.noise.start(startTime);
+    this.noise.stop(endTime);
+};
+
 // Bass
 // If you use this instrument for non-low notes, you're gonna have a bad time :sans:
 
@@ -241,11 +328,17 @@ Bass.prototype.init = function() {
     this.gain.connect(this.context.destination);
 };
 
-Bass.prototype.play = function(startTime, pitch, duration) {
+Bass.prototype.play = function(options) {
     this.init();
-        
-    var attackGain = 0.9;
-    var reduceGain = 0.5;
+
+    var startTime = options.startTime || 0;
+    var pitch = options.pitch || 440;
+    var duration = options.duration || 1;
+    var volume = options.volume || 0.5;
+    var finalVolume = options.finalVolume || 0;
+
+    var attackGain = volume * 1.8;
+    var reduceGain = volume;
     var maxDurationSeconds = 3.0;
 
     var attackEndTime = startTime + 0.02;
@@ -257,12 +350,15 @@ Bass.prototype.play = function(startTime, pitch, duration) {
     
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.linearRampToValueAtTime(attackGain, attackEndTime);
-    this.gain.gain.linearRampToValueAtTime(reduceGain, reduceEndTime);
-    // The bass can't be "held," it will fall off over time no matter what
-    this.gain.gain.exponentialRampToValueAtTime(
-        reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
-        fallOffTime);
+    this.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+    if (!finalVolume) {
+        // The bass can't be "held," it will fall off over time no matter what
+        this.gain.gain.exponentialRampToValueAtTime(
+            reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
+            fallOffTime);
+    } else {
+        this.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
+    }
     this.gain.gain.linearRampToValueAtTime(0, endTime);
     
     this.oscillator.start(startTime);
@@ -287,6 +383,13 @@ Slider.prototype.init = function() {
 
 Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain, duration) {
     this.init();
+
+    var startTime = options.startTime || 0;
+    var fromPitch = options.fromPitch || 440;
+    var toPitch = options.toPitch || options.fromPitch;
+    var fromGain = options.fromGain || 1;
+    var toGain = options.toGain || options.fromGain;
+    var duration = options.duration || 1;
 
     // Ramp up/down at the beginning/end of being played to avoid clicks.
     var rampUpTime = 0.02;
@@ -463,11 +566,10 @@ function playSong() {
     var trumpet = new Trumpet(context);
     var bass = new Bass(context);
     var slider = new Slider(context);
-    //var whiteNoise = new WhiteNoiseWithBandPass(context);
     var whiteNoise = new WhiteNoiseWithBandPass(context);
     
     function play(instrument, bar, note, durationBars) {
-        instrument.play(bar * SECONDS_PER_BAR, note, durationBars * SECONDS_PER_BAR);
+        instrument.play({ startTime: bar * SECONDS_PER_BAR, pitch: note, duration: durationBars * SECONDS_PER_BAR });
     }
     
     whiteNoise.play({

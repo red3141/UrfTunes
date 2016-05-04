@@ -11,7 +11,7 @@ button, button:focus {
 }
 
 .header {
-    background-color: #445;
+    background-color: #111;
     padding: 2rem;
     border-bottom: #EEF 4px solid;
     border-bottom-left-radius: 15px;

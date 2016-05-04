@@ -83,7 +83,7 @@ var chordRule = function (prevStates) {
 
 // Rhythm rules
 var bassLineRhythmRule = function (beat, measure, prevRhythm) {
-    switch (beat % 4) {
+    switch (beat) {
         case 0:
             return [
                 { value: { duration: 0.5 }, probability: 0.1 },
@@ -143,8 +143,27 @@ var bassLineRhythmRule = function (beat, measure, prevRhythm) {
             ];
     }
 }
+var introRhythmRule = function (beat, measure, prevRhythm) {
+    if (measure === 0)
+        return  [{ value: { duration: 0.5 }, probability: 1 }];
+    
+    switch (beat) {
+        case 0.5:
+        case 1.5:
+        case 2.5:
+        case 3.5:
+            return [
+                { value: { duration: 0.5 }, probability: 0.7 },
+                { value: { duration: 0.5, isRest: true }, probability: 0.3 },
+            ];
+        default:
+            return  [
+                { value: { duration: 0.5 }, probability: 1 }
+            ];
+    }
+}
 var melodyRhythmRule = function (beat, measure, prevRhythm) {
-    switch (beat % 4) {
+    switch (beat) {
         case 0:
             return [
                 { value: { duration: 0.5 }, probability: 0.1 },
@@ -206,7 +225,7 @@ var melodyRhythmRule = function (beat, measure, prevRhythm) {
     }
 }
 
-function getAdcRule(level) {
+function getBackgroundRule(level) {
     var duration;
     switch (level) {
         case 5:
@@ -276,90 +295,112 @@ function getAdcRule(level) {
 
 var backgroundRhythmRules = [
     null,
-    getAdcRule(1),
-    getAdcRule(2),
-    getAdcRule(3),
-    getAdcRule(4),
-    getAdcRule(5),
+    getBackgroundRule(1),
+    getBackgroundRule(2),
+    getBackgroundRule(3),
+    getBackgroundRule(4),
+    getBackgroundRule(5),
 ];
-
-var gravesBackgroundRhythmRules = [
-    null,
-    function (beat, measure, prevRhythm) {
-        // Mastery level 1
-        return [{ value: { duration: 1 }, probability: 1 }];
-    },
-    function (beat, measure, prevRhythm) {
-        // Mastery level 2
-        if (measure % 2 === 1)
-            return [{ value: { duration: 1, isRest: true }, probability: 1 }];
-            
-        switch (beat % 4) {
-            case 0:
-                return [
-                    { value: { duration: 1 }, probability: 0.5 },
-                    { value: { duration: 1, isRest: true }, probability: 0.5 },
-                ];
-            case 1:
-                return [
-                    { value: { duration: 1 }, probability: 0.6 },
-                    { value: { duration: 1, isRest: true }, probability: 0.4 },
-                ];
-            case 2:
-                return [
-                    { value: { duration: 1 }, probability: 0.3 },
-                    { value: { duration: 1, isRest: true }, probability: 0.7 },
-                ];
-            case 3:
-                return [
-                    { value: { duration: 1 }, probability: 0.2 },
-                    { value: { duration: 1, isRest: true }, probability: 0.8 },
-                ];
-            default:
-                return [
-                    { value: { duration: 1 }, probability: 1 },
-                ];
-       }
-    },
-];
-/*
-var jhinBackgroundRhythmRules = [
-    null,
-    function (beat, measure, prevRhythm) {
-        // Mastery level 1
-        return [{ value: { duration: 4 }, probability: 1 }];
-    },
-    function (beat, measure, prevRhythm) {
-        if (measure % 4 < 2)
-            return [{ value: { duration: 2 }, probability: 1 }];
-        else
-            return [{ value: { duration: 2 }, probability: 1 }];
-    },
-    function (beat, measure, prevRhythm) {
-        if (measure % 2 === 0)
-            return [{ value: { duration: 1, isRest: true }, probability: 1 }];
-        else
-            return [{ value: { duration: 1 }, probability: 1 }];
-    },
-    function (beat, measure, prevRhythm) {
-        if (measure % 2 === 0)
-            return [{ value: { duration: 1, isRest: true }, probability: 1 }];
-        else
-            return [{ value: { duration: 1 }, probability: 1 }];
-    },
-    function (beat, measure, prevRhythm) {
-        if (Math.abs(beat % 1) > 1e-3) {
-            return [{ value: { duration: 0.25 }, probability: 1 }];
-        } else {
-            return [
-                { value: { duration: 0.25 }, probability: 0.3 },
-                { value: { duration: 1, isRest: true }, probability: 0.7 },
-            ];
-        }
-    },
-];*/
 
 // Pitch rules (0=A, 1=B, 2=C)
+var introPitchRule = function (prevNote, currentBeat, chord) {
+    // prevNote is a numeric value representing a note in a scale (0=Do, 1=Re, 2=Mi, etc.)
+    // Start with numbers representing the note in the current chord.
+    var stateMap;
+    var prevNoteInChord = prevNote - chord;
+    switch (prevNoteInChord) {
+        case -6:
+        case -5:
+        case -4:
+        case -3:
+        case -2:
+        case -1:
+        case 0:
+        case 1:
+            switch (currentBeat % 4) {
+                case 0:
+                case 0.5:
+                case 2:
+                case 2.5:
+                    // Ensure that strong beats land on 1, 3, or 5 in the chord
+                    stateMap = [0.5, 0, 0.3, 0, 0.2, 0, 0, 0];
+                    break;
+                default:
+                    stateMap = [0.3, 0.3, 0.2, 0.2, 0.0, 0.0, 0.0, 0.0];
+                    break;
+            }
+            break;
+        case 2:
+        case 3:
+            switch (currentBeat % 4) {
+                case 0:
+                case 0.5:
+                case 2:
+                case 2.5:
+                    stateMap = [0.1, 0, 0.3, 0, 0.6, 0, 0, 0];
+                    break;
+                default:
+                    stateMap = [0.0, 0.2, 0.2, 0.2, 0.4, 0.0, 0.0, 0.0];
+                    break;
+            }
+        case 4:
+            switch (currentBeat % 4) {
+                case 0:
+                case 0.5:
+                case 2:
+                case 2.5:
+                    stateMap = [0.0, 0, 0.2, 0, 0.8, 0, 0, 0];
+                    break;
+                default:
+                    stateMap = [0.0, 0.1, 0.2, 0.3, 0.2, 0.2, 0.0, 0.0];
+                    break;
+            }
+            break;
+        case 5:
+            switch (currentBeat % 4) {
+                case 0:
+                case 0.5:
+                case 2:
+                case 2.5:
+                    stateMap = [0.0, 0, 0, 0, 0.6, 0, 0, 0.4];
+                    break;
+                default:
+                    stateMap = [0.0, 0.0, 0.2, 0.3, 0.4, 0.0, 0.1, 0.0];
+                    break;
+            }
+            break;
+        case 6:
+            switch (currentBeat % 4) {
+                case 0:
+                case 0.5:
+                case 2:
+                case 2.5:
+                    stateMap = [0, 0, 0, 0, 0.4, 0, 0, 0.6];
+                    break;
+                default:
+                    stateMap = [0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.5];
+                    break;
+            }
+            break;
+        default:
+            switch (currentBeat % 4) {
+                case 0:
+                case 0.5:
+                case 2:
+                case 2.5:
+                    stateMap = [0.0, 0, 0.0, 0, 0.4, 0, 0, 0.6];
+                    break;
+                default:
+                    stateMap = [0.0, 0.0, 0.0, 0.0, 0.3, 0.0, 0.4, 0.3];
+                    break;
+            }
+            break;
+    }
+    // Translate the stateMap to actual notes based on the current chord
+    for (var i = 0; i < chord; ++i)
+        stateMap.unshift(0);
+    return stateMap;
+}
 var melodyPitchRule = function (prevNote, currentBeat, chord) {
     // prevNote is a numeric value representing a note in a scale (0=Do, 1=Re, 2=Mi, etc.)
     // Start with numbers representing the note in the current chord.

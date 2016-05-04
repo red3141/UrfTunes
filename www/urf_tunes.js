@@ -11,8 +11,9 @@ function init() {
 };
 
 // Bass Drum
-function BassDrum(context) {
+function BassDrum(context, analyzer) {
     this.context = context;
+    this.analyzer = analyzer;
     this.pitch = 150;
     this.duration = 0.1;
 };
@@ -22,7 +23,7 @@ BassDrum.prototype.init = function() {
     this.oscillator.type = 'triangle';
     this.gain = this.context.createGain();
     this.oscillator.connect(this.gain);
-    this.gain.connect(this.context.destination);
+    this.gain.connect(this.analyzer);
 };
 
 BassDrum.prototype.play = function(startTime) {
@@ -43,8 +44,9 @@ BassDrum.prototype.play = function(startTime) {
 };
 
 // Snare Drum
-function SnareDrum(context) {
+function SnareDrum(context, analyzer) {
     this.context = context;
+    this.analyzer = analyzer;
     this.noiseBuffer = this.createNoiseBuffer();
     this.pitch = 100;
     this.oscillatorDuration = 0.1;
@@ -73,14 +75,14 @@ SnareDrum.prototype.init = function() {
     this.noiseGain = this.context.createGain();
     noiseFilter.connect(this.noiseGain);
     
-    this.noiseGain.connect(this.context.destination);
+    this.noiseGain.connect(this.analyzer);
     
     this.oscillator = this.context.createOscillator();
     this.oscillator.type = 'triangle';
     
     this.oscillatorGain = this.context.createGain();
     this.oscillator.connect(this.oscillatorGain);
-    this.oscillatorGain.connect(this.context.destination);
+    this.oscillatorGain.connect(this.analyzer);
 };
 
 SnareDrum.prototype.play = function(startTime) {
@@ -105,26 +107,34 @@ SnareDrum.prototype.play = function(startTime) {
 }
 
 // SineTooth
+// Build a wave from 26 (= 130/5) of the champion mastery levels. 26 was chosen due to restrictions
+// in how many harmonics can be using the AnalyserNode at normal pitches.
+// Note: this is pretty reliant on there being exactly 130 champions right now. RIP Taliyah.
 
-function SineTooth(context) {
+function SineTooth(context, analyzer, mode) {
     this.context = context;
+    this.analyzer = analyzer;
     
-    var length = championNames.length + 2;
+    const NUMBER_OF_MODES = 5;
+    const CHAMPS_PER_MODE = championNames.length / NUMBER_OF_MODES;
+    mode %= NUMBER_OF_MODES;
+    
+    var length = CHAMPS_PER_MODE + 2;
     var real = new Float32Array(length);
     var imag = new Float32Array(length);
     
     // Build on top of a pure sine wave
     real[0] = 0;
     imag[0] = 0;
-    real[1] = 1;
-    imag[1] = 0;
-    var power;
-    for (var i = 2; i < length; ++i) {
-        power = masteries[championNames[i]];
-        power *= power;
-        power /= 25.0;
-        real[i] = (1/i) * power;
-        imag[i] = 0;
+    real[1] = 0;
+    imag[1] = 1;
+    var power, championName;
+    for (var i = 2; i < CHAMPS_PER_MODE; ++i) {
+        championName = championNames[i - 2 + (mode * CHAMPS_PER_MODE)];
+        power = masteries[championName];
+        power /= 5.0;
+        imag[i] = power;
+        real[i] = 0;
     }
     
     this.waveform = this.context.createPeriodicWave(real, imag);
@@ -136,7 +146,7 @@ SineTooth.prototype.init = function() {
     
     this.gain = this.context.createGain();
     this.oscillator.connect(this.gain);
-    this.gain.connect(this.context.destination);
+    this.gain.connect(this.analyzer);
 };
 
 SineTooth.prototype.play = function(startTime, pitch, duration) {
@@ -147,7 +157,7 @@ SineTooth.prototype.play = function(startTime, pitch, duration) {
     var fallOffTime = Math.max(reduceEndTime, startTime + duration);
     var endTime = fallOffTime + 0.01;
     
-    this.oscillator.frequency.value = pitch;
+    this.oscillator.frequency.setValueAtTime(pitch, startTime);
     
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
@@ -162,8 +172,9 @@ SineTooth.prototype.play = function(startTime, pitch, duration) {
 
 // Trumpet
 
-function Trumpet(context) {
+function Trumpet(context, analyzer) {
     this.context = context;
+    this.analyzer = analyzer;
     
     var length = 9;
     var real = new Float32Array(length);
@@ -195,7 +206,7 @@ Trumpet.prototype.init = function() {
     this.filter.frequency.value = 2000;
     
     this.gain.connect(this.filter);
-    this.filter.connect(this.context.destination);
+    this.filter.connect(this.analyzer);
 };
 
 Trumpet.prototype.play = function(startTime, pitch, duration) {
@@ -227,8 +238,9 @@ Trumpet.prototype.play = function(startTime, pitch, duration) {
 // Bass
 // If you use this instrument for non-low notes, you're gonna have a bad time :sans:
 
-function Bass(context) {
+function Bass(context, analyzer) {
     this.context = context;
+    this.analyzer = analyzer;
 }
 
 Bass.prototype.init = function() {
@@ -238,7 +250,7 @@ Bass.prototype.init = function() {
     this.gain = this.context.createGain();
     this.oscillator.connect(this.gain);
     
-    this.gain.connect(this.context.destination);
+    this.gain.connect(this.analyzer);
 };
 
 Bass.prototype.play = function(startTime, pitch, duration) {
@@ -271,8 +283,9 @@ Bass.prototype.play = function(startTime, pitch, duration) {
 
 // Slider
 
-function Slider(context) {
+function Slider(context, analyzer) {
     this.context = context;
+    this.analyzer = analyzer;
 }
 
 Slider.prototype.init = function() {
@@ -282,7 +295,7 @@ Slider.prototype.init = function() {
     this.gain = this.context.createGain();
     this.oscillator.connect(this.gain);
     
-    this.gain.connect(this.context.destination);
+    this.gain.connect(this.analyzer);
 };
 
 Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain, duration) {
@@ -327,14 +340,15 @@ function createNoiseBuffer(context) {
 
 // White noise with a filter
 
-function WhiteNoiseWithFilter(context) {
-    this.baseConstructor(context);
+function WhiteNoiseWithFilter(context, analyzer) {
+    this.baseConstructor(context, analyzer);
 }
 
-WhiteNoiseWithFilter.prototype.baseConstructor = function(context) {
-    if (!context)
+WhiteNoiseWithFilter.prototype.baseConstructor = function(context, analyzer) {
+    if (!context || !analyzer)
         return;
     this.context = context;
+    this.analyzer = analyzer;
     this.noiseBuffer = createNoiseBuffer(context);
 }
 
@@ -348,7 +362,7 @@ WhiteNoiseWithFilter.prototype.baseInit = function() {
     this.noiseGain = this.context.createGain();
     this.noiseFilter.connect(this.noiseGain);
     
-    this.noiseGain.connect(this.context.destination);
+    this.noiseGain.connect(this.analyzer);
 };
 WhiteNoiseWithFilter.prototype.init = WhiteNoiseWithFilter.prototype.baseInit;
 
@@ -448,50 +462,97 @@ const C3 = A2 * Math.pow(2, 3/12);
 const Cs3 = A2 * Math.pow(2, 4/12);
 const D3 = A2 * Math.pow(2, 5/12);
 
+function doVisualization(analyzer) {
+    const canvas = document.getElementById('visualizationArea');
+    const canvasContext = canvas.getContext('2d');
+    
+    const draw = function() {
+        canvasContext.canvas.width = Math.max(512, window.innerWidth);
+        canvasContext.canvas.height = 256;
+    
+        width = canvas.width;
+        height = canvas.height;
+    
+        analyzer.fftSize = 1024;
+        var bufferLength = analyzer.frequencyBinCount;
+        var dataArray = new Uint8Array(bufferLength);
+        analyzer.getByteFrequencyData(dataArray);
+        
+        canvasContext.fillStyle = 'rgb(9, 9, 9)';
+        canvasContext.fillRect(0, 0, width, height);
+        
+        var barWidth = (width / bufferLength);
+        var barHeight;
+        var x = 0;
+        
+        for (var i = 0; i < bufferLength; ++i) {
+            barHeight = dataArray[i];
+            
+            canvasContext.fillStyle = 'rgb(0,' + barHeight + ',' + (255 - barHeight) + ')';
+            canvasContext.fillRect(x, height-barHeight, barWidth, barHeight);
+            
+            x += barWidth + 1;
+        }
+
+        window.requestAnimationFrame(draw);
+    };
+    
+    draw();
+}
+
 function playSong() {
     const BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
     const BEATS_PER_MINUTE = 80 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
     const SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
     const SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
 
-    var context = new AudioContext();
+    const context = new AudioContext();
+    const analyzer = context.createAnalyser();
+    analyzer.connect(context.destination);
+    
+    doVisualization(analyzer);
     
     // Create the instruments for the song.
-    var bassDrum = new BassDrum(context);
-    var snareDrum = new SnareDrum(context);
-    var sineTooth = new SineTooth(context);
-    var trumpet = new Trumpet(context);
-    var bass = new Bass(context);
-    var slider = new Slider(context);
-    //var whiteNoise = new WhiteNoiseWithBandPass(context);
-    var whiteNoise = new WhiteNoiseWithBandPass(context);
+    var bassDrum = new BassDrum(context, analyzer);
+    var snareDrum = new SnareDrum(context, analyzer);
+    var sineTooth0 = new SineTooth(context, analyzer, 0);
+    var sineTooth1 = new SineTooth(context, analyzer, 1);
+    var sineTooth2 = new SineTooth(context, analyzer, 2);
+    var sineTooth3 = new SineTooth(context, analyzer, 3);
+    var sineTooth4 = new SineTooth(context, analyzer, 4);
+    var trumpet = new Trumpet(context, analyzer);
+    var bass = new Bass(context, analyzer);
+    var slider = new Slider(context, analyzer);
+    var whiteNoise = new WhiteNoiseWithBandPass(context, analyzer);
     
     function play(instrument, bar, note, durationBars) {
         instrument.play(bar * SECONDS_PER_BAR, note, durationBars * SECONDS_PER_BAR);
     }
     
-    whiteNoise.play({
+    //play(sineTooth, 0, 261.63, 2);
+    
+    /*whiteNoise.play({
         startTime: 0,
         duration: 0.3,
         initialFrequency: 10000,
         initialQ: 100, 
         finalFrequency: 440,
         finalQ: 10,
-    });
+    });*/
     
     // Megalovania
-    /*play(trumpet, 0, D4, 1/16);
-    play(trumpet, 0, A4, 1/16);
-    play(trumpet, 1/16, D4, 1/16);
-    play(trumpet, 1/16, A4, 1/16);
-    play(trumpet, 1/8, D5, 1/8);
-    play(trumpet, 1/4, A4, 3/16);
-    play(trumpet, 7/16, Gs4, 1/8);
-    play(trumpet, 9/16, G4, 1/8);
-    play(trumpet, 11/16, F4, 1/8);
-    play(trumpet, 13/16, D4, 1/16);
-    play(trumpet, 14/16, F4, 1/16);
-    play(trumpet, 15/16, G4, 1/16);
+    play(sineTooth0, 0, D4, 1/16);
+    play(sineTooth0, 0, A4, 1/16);
+    play(sineTooth0, 1/16, D4, 1/16);
+    play(sineTooth0, 1/16, A4, 1/16);
+    play(sineTooth0, 1/8, D5, 1/8);
+    play(sineTooth0, 1/4, A4, 3/16);
+    play(sineTooth0, 7/16, Gs4, 1/8);
+    play(sineTooth0, 9/16, G4, 1/8);
+    play(sineTooth0, 11/16, F4, 1/8);
+    play(sineTooth0, 13/16, D4, 1/16);
+    play(sineTooth0, 14/16, F4, 1/16);
+    play(sineTooth0, 15/16, G4, 1/16);
     
     play(bass, 0, D3, 1/8);
     play(bass, 1/8, D3, 1/8);
@@ -504,18 +565,18 @@ function playSong() {
     play(bass, 13/16, D3, 1/16);
     play(bass, 14/16, D3, 1/8);
     
-    play(sineTooth, 1+0, C4, 1/16);
-    play(sineTooth, 1+0, G4, 1/16);
-    play(sineTooth, 1+1/16, C4, 1/16);
-    play(sineTooth, 1+1/16, G4, 1/16);
-    play(sineTooth, 1+1/8, D5, 1/8);
-    play(sineTooth, 1+1/4, A4, 3/16);
-    play(sineTooth, 1+7/16, Gs4, 1/8);
-    play(sineTooth, 1+9/16, G4, 1/8);
-    play(sineTooth, 1+11/16, F4, 1/8);
-    play(sineTooth, 1+13/16, D4, 1/16);
-    play(sineTooth, 1+14/16, F4, 1/16);
-    play(sineTooth, 1+15/16, G4, 1/16);
+    play(sineTooth1, 1+0, C4, 1/16);
+    play(sineTooth1, 1+0, G4, 1/16);
+    play(sineTooth1, 1+1/16, C4, 1/16);
+    play(sineTooth1, 1+1/16, G4, 1/16);
+    play(sineTooth1, 1+1/8, D5, 1/8);
+    play(sineTooth1, 1+1/4, A4, 3/16);
+    play(sineTooth1, 1+7/16, Gs4, 1/8);
+    play(sineTooth1, 1+9/16, G4, 1/8);
+    play(sineTooth1, 1+11/16, F4, 1/8);
+    play(sineTooth1, 1+13/16, D4, 1/16);
+    play(sineTooth1, 1+14/16, F4, 1/16);
+    play(sineTooth1, 1+15/16, G4, 1/16);
     
     play(bass, 1+0, C3, 1/8);
     play(bass, 1+1/8, C3, 1/8);
@@ -528,18 +589,18 @@ function playSong() {
     play(bass, 1+13/16, C3, 1/16);
     play(bass, 1+14/16, C3, 1/8);
     
-    play(sineTooth, 2+0, B3, 1/16);
-    play(sineTooth, 2+0, Fs4, 1/16);
-    play(sineTooth, 2+1/16, B3, 1/16);
-    play(sineTooth, 2+1/16, Fs4, 1/16);
-    play(sineTooth, 2+1/8, D5, 1/8);
-    play(sineTooth, 2+1/4, A4, 3/16);
-    play(sineTooth, 2+7/16, Gs4, 1/8);
-    play(sineTooth, 2+9/16, G4, 1/8);
-    play(sineTooth, 2+11/16, F4, 1/8);
-    play(sineTooth, 2+13/16, D4, 1/16);
-    play(sineTooth, 2+14/16, F4, 1/16);
-    play(sineTooth, 2+15/16, G4, 1/16);
+    play(sineTooth2, 2+0, B3, 1/16);
+    play(sineTooth2, 2+0, Fs4, 1/16);
+    play(sineTooth2, 2+1/16, B3, 1/16);
+    play(sineTooth2, 2+1/16, Fs4, 1/16);
+    play(sineTooth2, 2+1/8, D5, 1/8);
+    play(sineTooth2, 2+1/4, A4, 3/16);
+    play(sineTooth2, 2+7/16, Gs4, 1/8);
+    play(sineTooth2, 2+9/16, G4, 1/8);
+    play(sineTooth2, 2+11/16, F4, 1/8);
+    play(sineTooth2, 2+13/16, D4, 1/16);
+    play(sineTooth2, 2+14/16, F4, 1/16);
+    play(sineTooth2, 2+15/16, G4, 1/16);
     
     play(bass, 2+0, B2, 1/8);
     play(bass, 2+1/8, B2, 1/8);
@@ -552,18 +613,18 @@ function playSong() {
     play(bass, 2+13/16, B2, 1/16);
     play(bass, 2+14/16, B2, 1/8);
     
-    play(sineTooth, 3+0, As3, 1/16);
-    play(sineTooth, 3+0, F4, 1/16);
-    play(sineTooth, 3+1/16, As3, 1/16);
-    play(sineTooth, 3+1/16, F4, 1/16);
-    play(sineTooth, 3+1/8, D5, 1/8);
-    play(sineTooth, 3+1/4, A4, 3/16);
-    play(sineTooth, 3+7/16, Gs4, 1/8);
-    play(sineTooth, 3+9/16, G4, 1/8);
-    play(sineTooth, 3+11/16, F4, 1/8);
-    play(sineTooth, 3+13/16, D4, 1/16);
-    play(sineTooth, 3+14/16, F4, 1/16);
-    play(sineTooth, 3+15/16, G4, 1/16);
+    play(sineTooth4, 3+0, As3, 1/16);
+    play(sineTooth4, 3+0, F4, 1/16);
+    play(sineTooth4, 3+1/16, As3, 1/16);
+    play(sineTooth4, 3+1/16, F4, 1/16);
+    play(sineTooth4, 3+1/8, D5, 1/8);
+    play(sineTooth4, 3+1/4, A4, 3/16);
+    play(sineTooth4, 3+7/16, Gs4, 1/8);
+    play(sineTooth4, 3+9/16, G4, 1/8);
+    play(sineTooth4, 3+11/16, F4, 1/8);
+    play(sineTooth4, 3+13/16, D4, 1/16);
+    play(sineTooth4, 3+14/16, F4, 1/16);
+    play(sineTooth4, 3+15/16, G4, 1/16);
     
     play(bass, 3+0, As2, 1/8);
     play(bass, 3+1/8, As2, 1/8);
@@ -608,7 +669,7 @@ function playSong() {
     play(bassDrum, 3+3/16);
     play(snareDrum, 3+4/16);
     play(snareDrum, 3+6/16);
-    play(snareDrum, 3+8/16);*/
+    play(snareDrum, 3+8/16);
     
     
     

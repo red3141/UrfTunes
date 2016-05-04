@@ -1,5 +1,5 @@
 body {
-    background-color: #191920;
+    background-color: #090909;
     color: #DDE;
     margin: 0;
 }
@@ -8,18 +8,13 @@ h1 {
 }
 
 .header {
-    background-color: #445;
+    background-color: #191919;
     padding: 2rem;
     border-bottom: #EEF 4px solid;
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 15px;
     margin-bottom: 2rem;
-}
-.header h1 {
     text-align: center;
-    color: #F5F5FB;
-    font-weight: bold;
-    font-size: 5rem;
 }
 
 .urf-container {

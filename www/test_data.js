@@ -272,7 +272,7 @@ var masteries = (function() {
         testchampion[championNames[i]] = testchampion[championNames[i]] || 0;
     
     // Pick which set of test data to return here
-    //return rndminternetman;
+    return rndminternetman;
     //return kirkberkley;
-    return testchampion;
+    //return testchampion;
 })();

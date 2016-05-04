@@ -330,6 +330,9 @@ var songBuilder = (function(seedrandom) {
         if (context)
             context.close();
         context = new AudioContext();
+        const analyzer = context.createAnalyser();
+        analyzer.connect(context.destination);
+        doVisualization(analyzer);
         
         var beatsPerBar = 4 // Use 4/4 time
         var beatsPerMinute = 180 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
@@ -337,10 +340,10 @@ var songBuilder = (function(seedrandom) {
         var currentBeat = 0;
         var currentTime = 0;
         
-        var bassDrum = new BassDrum(context);
-        var snareDrum = new SnareDrum(context);
-        var bassInstrument = new Bass(context);
-        var melodyInstrument = new SineTooth(context);
+        var bassDrum = new BassDrum(context, analyzer);
+        var snareDrum = new SnareDrum(context, analyzer);
+        var bassInstrument = new Bass(context, analyzer);
+        var melodyInstrument = new SineTooth(context, analyzer, 0);
         
         //var test = new WhiteNoiseWithBandPass(context);
         //test.play({ startTime: 0.2, initialFrequency: 200, initialQ: 10, finalFrequency: 8, finalQ: 50, volume: 0.2, duration: 1 });

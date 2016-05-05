@@ -133,8 +133,7 @@ var songBuilder = (function(seedrandom) {
         
         // Generate rhythms for each section
         for (var i = 0; i < segments.length; ++i) {
-            var rhythm = markovChain.buildRhythm(melodyRhythmRule, 4, prng);
-            rhythm = rhythm.concat(rhythm).concat(rhythm).concat(rhythm);
+            var rhythm = markovChain.buildRhythm(melodyRhythmRule, 16, prng);
             segments[i].melodyRhythm = rhythm;
         }
         
@@ -413,7 +412,7 @@ var songBuilder = (function(seedrandom) {
         var startTime = 0.3;
         currentTime = startTime;
 
-        var minVolume = 0.05;
+        var minVolume = 0.08;
         var peakVolume = 0.2;
         // Intro
         if (song.intro.mode === 0) {
@@ -601,7 +600,12 @@ var songBuilder = (function(seedrandom) {
             var rhythm = song.ending.melodyRhythm[j];
             if (!rhythm.isRest) {
                 var note = song.ending.melodyNotes[j];
-                melodyInstrument.play({ startTime: currentTime, pitch: frequencies[note], duration: rhythm.duration * secondsPerBeat });
+                melodyInstrument.play({
+                    startTime: currentTime,
+                    pitch: frequencies[note],
+                    duration: rhythm.duration * secondsPerBeat,
+                    finalVolume: 0.05,
+                });
             }
             currentBeat += rhythm.duration;
             currentTime = currentBeat * secondsPerBeat + endingStartTime;
@@ -617,7 +621,12 @@ var songBuilder = (function(seedrandom) {
                 // Play the root note of the chord
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
                 var frequency = frequencies[chord] / 4;
-                bassInstrument.play({startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
+                bassInstrument.play({
+                    startTime: currentTime,
+                    pitch: frequency,
+                    duration: rhythm.duration * secondsPerBeat,
+                    finalVolume: 0.05,
+                });
             }
             currentBeat += rhythm.duration;
             beatInMeasure += rhythm.duration;

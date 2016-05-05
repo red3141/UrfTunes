@@ -47,17 +47,31 @@ var markovChain = (function() {
         var beatInMeasure = 0;
         var currentMeasure = 0;
         var rhythms = [];
+        var firstTimeRhythms = [];
         var prevRhythm = { duration: 0 };
+        var i2 = 0;
         while (currentMeasure < measures) {
-            var stateMap = rule(beatInMeasure, currentMeasure, prevRhythm);
-            rhythm = getNextStateComplex(stateMap, prng());
+            var currentGroup = Math.floor(currentMeasure / 4);
+            var rhythm;
+            if (currentGroup == 0 || currentGroup == 2 || (currentMeasure % 4) >= 2) {
+                var stateMap = rule(beatInMeasure, currentMeasure, prevRhythm);
+                rhythm = getNextStateComplex(stateMap, prng());
+            } else {
+                // Use repetition
+                rhythm = firstTimeRhythms[i2];
+            }
             rhythms.push(rhythm);
             beatInMeasure += rhythm.duration;
             while (beatInMeasure >= 4 - 1e-2) {
                 beatInMeasure -= 4;
                 ++currentMeasure;
             }
+            if (currentMeasure < 4)
+                firstTimeRhythms.push(rhythm);
             prevRhythm = rhythm;
+            ++i2;
+            if (currentMeasure >= 4 && i2 >= firstTimeRhythms.length)
+                i2 = 0;
         }
         return rhythms;
     }
@@ -80,7 +94,7 @@ var markovChain = (function() {
                     // Generate note
                     // For now assume that each chord is one measure long
                     var chord = chordProgression[currentMeasure % chordProgression.length];
-                    var stateMap = rule(prevNote, beatInMeasure, chord);
+                    var stateMap = rule(prevNote, beatInMeasure, currentMeasure, chord);
                     notes[i] = getNextState(stateMap, prng());
                 } else {
                     // Use repetition

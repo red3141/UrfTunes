@@ -10,6 +10,14 @@ button, button:focus {
     outline: 0 !important;
 }
 
+a[disabled] {
+    pointer-events: none;
+}
+
+.btn-default[disabled] {
+    color: #999;
+}
+
 .header {
     background-color: #191919;
     padding: 2rem;

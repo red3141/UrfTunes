@@ -4,6 +4,7 @@ var songBuilder = (function(seedrandom) {
     var currentSong;
     var currentInstruments = [];
     var measuresPerSegment = 16;
+    var recordedSongBlob;
     function build()  {
         var formSeedInputs = ['aatrox', 'ahri', 'akali', 'alistar', 'amumu', 'anivia', 'annie', 'ashe', 'aurelionsol', 'azir', 'bard', 'blitzcrank', 'brand', 'braum', 'caitlyn', 'cassiopeia', 'chogath', 'corki', 'darius', 'diana', 'drmundo', 'draven', 'ekko', 'elise', 'evelynn', 'ezreal', 'fiddlesticks', 'fiora', 'fizz', 'galio', 'gangplank', 'garen', 'gnar', 'gragas', 'graves', 'hecarim', 'heimerdinger', 'illaoi', 'irelia', 'janna', 'jarvaniv'];
         var prng = seedrandom(getSeed(formSeedInputs), { global: false });
@@ -370,6 +371,32 @@ var songBuilder = (function(seedrandom) {
         analyzer.connect(context.destination);
         doVisualization(analyzer);
         
+        audioRecorder = new WebAudioRecorder(analyzer, {
+            workerDir: "./",
+        });
+        audioRecorder.setEncoding('wav');
+        audioRecorder.setOptions({
+            timeLimit:600 // Allow recording for up to 10 minutes; we probably won't need this much time.
+        });
+        audioRecorder.onComplete = function(recorder, blob) {
+            recordedSongBlob = blob;
+            var summonerName = $('#summonerName').val().replace(/\s+/g, '').toLowerCase();
+            var totalMasteryLevel = 0;
+            for (var i = 0; i < championNames.length; ++i) {
+                totalMasteryLevel += masteries[championNames[i]]
+            }
+            var a = $('#downloadSongButton');
+            a.attr('href', URL.createObjectURL(recordedSongBlob));
+            a.attr('download', summonerName + '_' + totalMasteryLevel + '.wav');
+            a.attr('disabled', null);
+        };
+        recordedSongBlob = null;
+        var a = $('#downloadSongButton');
+        a.attr('href', '');
+        a.attr('download', '');
+        a.attr('disabled', 'disabled');
+        audioRecorder.startRecording();
+        
         var beatsPerBar = 4 // Use 4/4 time
         var beatsPerMinute = 180 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
         var secondsPerBeat = 60.0 / beatsPerMinute;
@@ -559,7 +586,7 @@ var songBuilder = (function(seedrandom) {
         var endingStartTime = currentTime;
         /*
         // Add backgrounds
-        currentBeat = 0;
+        /*currentBeat = 0;
         currentTime = bodyStartTime;
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
@@ -638,6 +665,8 @@ var songBuilder = (function(seedrandom) {
             ++j;
         }
         
+        setTimeout(function() {audioRecorder.finishRecording();}, (currentTime - context.currentTime + 4 * secondsPerBeat) * 1000);
+        
     }
     
     function buildAndPlay()  {
@@ -678,7 +707,7 @@ var songBuilder = (function(seedrandom) {
         play: play,
         buildAndPlay: buildAndPlay,
         stop: stop,
-        test: test,
+        test: test
     }
 })(
     Math.seedrandom

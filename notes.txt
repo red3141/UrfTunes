@@ -83,8 +83,11 @@ TODO before cutoff date:
 Must have:
 - Share on social media buttons
 - Pre-saved json data in case the server goes down
+- Pause button, don't show buttons until you load the first song
 - Fix background sounds
 - Write-up of what it does & development process
 Nice to have:
-- Record button
 - Fix seeding so each champion is only part of one seed
+- Variation on drum beat
+- Special section types
+- Special transitions

@@ -63,30 +63,35 @@ var songBuilder = (function(seedrandom) {
             segments[i].bassLineRhythm = markovChain.buildRhythm(bassLineRhythmRule, 2, prng);
         }
         
+        // Generate intro
         var introChampions = [
             // 0 = bass
             [masteries['aatrox'], masteries['alistar'], masteries['drmundo'], masteries['nautilus'], masteries['zac']],
             // 1 = piano
-            [masteries['anivia'], masteries['ashe'], masteries['braum'], masteries['lissandra'], masteries['sejuani']],
-            // 3 = electric
             [masteries['draven'], masteries['ezreal'], masteries['jinx'], masteries['missfortune'], masteries['xinzhao']],
-            // 4 = strings (violins)
-            [masteries['morgana'], masteries['nami'], masteries['sona'], masteries['soraka'], masteries['zyra']],
-            // 5 = melody only
+            // 2 = electric
             [masteries['fizz'], masteries['orianna'], masteries['velkoz'], masteries['viktor'], masteries['xerath']],
+            // 3 = strings (violins)
+            [masteries['morgana'], masteries['nami'], masteries['sona'], masteries['soraka'], masteries['zyra']],
+            // 4 = melody only
+            [masteries['anivia'], masteries['ashe'], masteries['braum'], masteries['lissandra'], masteries['sejuani']],
         ];
         
-        var introScores = [];
+        var maxIntroScore = -1;
+        var maxIntroIndex = 0;
         for (var i = 0; i < introChampions.length; ++i) {
-            introScores[i] = 0;
+            var introScore = 0;
             for (var j = 0; j < introChampions[i].length; ++j)
-                introScores[i] += introChampions[i][j];
+                introScore += introChampions[i][j];
+            if (introScore > maxIntroScore) {
+                maxIntroIndex = i;
+                maxIntroScore = introScore;
+            }
         }
         var introSeedInputs = [].concat.apply([], introChampions);
         prng = seedrandom(getSeed(introSeedInputs), { global: false });
         
-        // Generate intro
-        var intro = {};
+        var intro = { mode: maxIntroIndex };
         var introRhythm = markovChain.buildRhythm(introRhythmRule, 4, prng);
         intro.melodyRhythm = introRhythm.concat(introRhythm);
         intro.melodyNotes = markovChain.buildNotes(introPitchRule, intro.melodyRhythm, segments[0].chordProgression, prng);
@@ -375,7 +380,24 @@ var songBuilder = (function(seedrandom) {
         var bassDrum = new BassDrum(context, analyzer);
         var snareDrum = new SnareDrum(context, analyzer);
         var bassInstrument = new Bass(context, analyzer);
-        var introInstrument = new Piano(context, analyzer);
+        var introInstrument;
+        switch (song.intro.mode) {
+            case 0: // 0 = bass
+                introInstrument = new Bass(context, analyzer);
+                break;
+            case 1: // 1 = piano
+                introInstrument = new Piano(context, analyzer);
+                break;
+            case 2: // 2 =TODO: electric
+                introInstrument = new Bass(context, analyzer);
+                break;
+            case 3: // 3 = strings (violins)
+                introInstrument = new Violin(context, analyzer);
+                break;
+            case 4: // 4 = melody only
+                introInstrument = new SineTooth(context, analyzer, 0);
+                break;
+        }
         var melodyInstruments = [
             new SineTooth(context, analyzer, 0),
             new SineTooth(context, analyzer, 1),
@@ -391,75 +413,84 @@ var songBuilder = (function(seedrandom) {
         var startTime = 0.3;
         currentTime = startTime;
 
+        var minVolume = 0.05;
+        var peakVolume = 0.2;
         // Intro
-        /* Options:
-          - SineTooth note only
-          - Basic: start with bottom instruments and build up
-          - Start with melody instrument only and add supporting lines later
-          - Piano intro that transitions to electro
-          - String ensemble that transitions to electro
-          - Low bass note followed by drums
-        */
-        var introLength = 32;
-        for (var i = 0; i < introLength; ++i) {
-            // Play bass drum on 1 and 3
-            /*if (i % 2 === 0)
-                bassDrum.play({ startTime: currentTime });
-            if (currentBeat >= 16 && i % 4 === 2)
-                snareDrum.play({ startTime: currentTime });*/
-            ++currentBeat;
-            currentTime = currentBeat * secondsPerBeat + startTime;
+        if (song.intro.mode === 0) {
+            // Basic intro - start with bass & bass drum, add snare
+            var introLength = 32;
+            for (var i = 0; i < introLength; ++i) {
+                // Play bass drum on 1 and 3
+                if (i % 2 === 0)
+                    bassDrum.play({ startTime: currentTime });
+                if (currentBeat >= 16 && i % 4 === 2)
+                    snareDrum.play({ startTime: currentTime });
+                ++currentBeat;
+                currentTime = currentBeat * secondsPerBeat + startTime;
+            }
+            currentBeat = 0;
+            currentTime = startTime;
+            var j = 0;
+            var segment = song.segments[0];
+            var measure = 0;
+            var beatInMeasure = 0;
+            while (currentBeat < introLength) {
+                var rhythm = segment.bassLineRhythm[j % segment.bassLineRhythm.length];
+                if (!rhythm.isRest) {
+                    // Play the root note of the chord
+                    var chord = segment.chordProgression[measure % segment.chordProgression.length];
+                    var frequency = frequencies[chord] / 2;
+                    introInstrument.play({ startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
+                }
+                currentBeat += rhythm.duration;
+                beatInMeasure += rhythm.duration;
+                currentTime = currentBeat * secondsPerBeat + startTime;
+                while (beatInMeasure >= beatsPerBar) {
+                    ++measure;
+                    beatInMeasure -= beatsPerBar;
+                }
+                ++j;
+            }
+        } else {
+            // Add intro melody
+            currentBeat = 0;
+            currentTime = startTime;
+            var chords = song.segments[0].chordProgression;
+            for (var j = 0; j < song.intro.melodyNotes.length; ++j) {
+                var rhythm = song.intro.melodyRhythm[j];
+                var phraseBeat = 8 - Math.abs((currentBeat % 16) - 8);
+                var volume = minVolume + (peakVolume - minVolume) * (phraseBeat / 8);
+                if (currentBeat >= 6 * beatsPerBar)
+                    volume = peakVolume + 0.05;
+                if (!rhythm.isRest) {
+                    var note = song.intro.melodyNotes[j];
+                    if (note < 0)
+                        console.warn('Invalid note!');
+                    else
+                        introInstrument.play({
+                            startTime: currentTime,
+                            pitch: frequencies[note],
+                            duration: rhythm.duration * secondsPerBeat,
+                            volume: volume,
+                        });
+                }
+                if (currentBeat % 4 === 0) {
+                    var measure = currentBeat / beatsPerBar;
+                    var chord = chords[measure % chords.length];
+                    var frequency = frequencies[chord] / 2;
+                    introInstrument.play({
+                        startTime: currentTime,
+                        pitch: frequency,
+                        duration: secondsPerBeat,
+                        volume: volume,
+                    });
+                }
+                currentBeat += rhythm.duration;
+                currentTime = currentBeat * secondsPerBeat + startTime;
+            }
+            var bassNote = chords[chords.length - 1];
+            bassInstrument.play({ startTime: currentTime - beatsPerBar * secondsPerBeat, pitch: frequencies[bassNote] / 4, duration: beatsPerBar * secondsPerBeat, volume: 0.1, finalVolume: 2.5 });
         }
-        currentBeat = 0;
-        currentTime = startTime;
-        /*var j = 0;
-        var segment = song.segments[0];
-        var measure = 0;
-        var beatInMeasure = 0;
-        while (currentBeat < introLength) {
-            var rhythm = segment.bassLineRhythm[j % segment.bassLineRhythm.length];
-            if (!rhythm.isRest) {
-                // Play the root note of the chord
-                var chord = segment.chordProgression[measure % segment.chordProgression.length];
-                var frequency = frequencies[chord] / 2;
-                introInstrument.play({ startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
-            }
-            currentBeat += rhythm.duration;
-            beatInMeasure += rhythm.duration;
-            currentTime = currentBeat * secondsPerBeat + startTime;
-            while (beatInMeasure >= beatsPerBar) {
-                ++measure;
-                beatInMeasure -= beatsPerBar;
-            }
-            ++j;
-        }*/
-        
-        // Add intro melody
-        currentBeat = 0;
-        currentTime = startTime;
-        var chords = song.segments[0].chordProgression;
-        for (var j = 0; j < song.intro.melodyNotes.length; ++j) {
-            var rhythm = song.intro.melodyRhythm[j];
-            if (!rhythm.isRest) {
-                var note = song.intro.melodyNotes[j];
-                if (note < 0)
-                    console.warn('Invalid note!');
-                else
-                    introInstrument.play({ startTime: currentTime, pitch: frequencies[note], duration: rhythm.duration * secondsPerBeat });
-            }
-            if (currentBeat % 4 === 0) {
-                var measure = currentBeat / beatsPerBar;
-                var chord = chords[measure % chords.length];
-                var frequency = frequencies[chord] / 2;
-                introInstrument.play({ startTime: currentTime, pitch: frequency, duration: secondsPerBeat });
-            }
-            currentBeat += rhythm.duration;
-            currentTime = currentBeat * secondsPerBeat + startTime;
-        }
-        var bassNote = chords[chords.length - 1];
-        bassInstrument.play({ startTime: currentTime - beatsPerBar * secondsPerBeat, pitch: frequencies[bassNote] / 4, duration: beatsPerBar * secondsPerBeat, volume: 0.1, finalVolume: 2.5 });
-        console.log(currentBeat);
-        
         
         // Body
         var bodyStartTime = currentTime;
@@ -527,7 +558,7 @@ var songBuilder = (function(seedrandom) {
         console.log(currentBeat);
         
         var endingStartTime = currentTime;
-        
+        /*
         // Add backgrounds
         currentBeat = 0;
         currentTime = bodyStartTime;
@@ -560,7 +591,7 @@ var songBuilder = (function(seedrandom) {
                     }
                 }
             }
-        }
+        }*/
         
         // Add ending
         currentBeat = 0;

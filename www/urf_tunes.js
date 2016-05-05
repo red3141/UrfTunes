@@ -158,6 +158,10 @@ SineTooth.prototype.play = function(options) {
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
+    var volume = options.volume || 0.15;
+    
+    var attackGain = volume * 2;
+    var reduceGain = volume;
 
     var attackEndTime = startTime + 0.02;
     var reduceEndTime = attackEndTime + 0.02;
@@ -168,9 +172,9 @@ SineTooth.prototype.play = function(options) {
     
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
     this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.linearRampToValueAtTime(0.3, attackEndTime);
-    this.gain.gain.linearRampToValueAtTime(0.15, reduceEndTime);
-    this.gain.gain.setValueAtTime(0.15, fallOffTime);
+    this.gain.gain.linearRampToValueAtTime(attackGain, attackEndTime);
+    this.gain.gain.linearRampToValueAtTime(reduceGain, reduceEndTime);
+    this.gain.gain.setValueAtTime(reduceGain, fallOffTime);
     this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
     this.oscillator.start(startTime);
@@ -285,9 +289,10 @@ Piano.prototype.play = function(options) {
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
+    var volume = options.volume || 0.15;
 
-    var attackGain = 0.8;
-    var reduceGain = 0.15;
+    var attackGain = volume * 5.3;
+    var reduceGain = volume;
     var maxDurationSeconds = 1;
 
     var attackEndTime = startTime + 0.01;
@@ -361,9 +366,10 @@ Guitar.prototype.play = function(options) {
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
+    var volume = options.volume || 0.15;
 
-    var attackGain = 0.7;
-    var reduceGain = 0.15;
+    var attackGain = volume * 4.5;
+    var reduceGain = volume;
     var maxDurationSeconds = 1;
 
     var attackEndTime = startTime + 0.01;

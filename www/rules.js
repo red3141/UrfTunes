@@ -147,19 +147,43 @@ var introRhythmRule = function (beat, measure, prevRhythm) {
     if (measure === 0)
         return  [{ value: { duration: 0.5 }, probability: 1 }];
     
-    switch (beat) {
-        case 0.5:
-        case 1.5:
-        case 2.5:
-        case 3.5:
-            return [
-                { value: { duration: 0.5 }, probability: 0.7 },
-                { value: { duration: 0.5, isRest: true }, probability: 0.3 },
-            ];
-        default:
-            return  [
-                { value: { duration: 0.5 }, probability: 1 }
-            ];
+    if ((measure % 4) < 3) {
+        switch (beat) {
+            case 0.5:
+            case 1.5:
+            case 2.5:
+            case 3.5:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.5 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.5 },
+                ];
+            default:
+                return  [
+                    { value: { duration: 0.5 }, probability: 0.8 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.2 },
+                ];
+        }
+    } else {
+        switch (beat) {
+            case 0.5:
+            case 1.5:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.5 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.5 },
+                ];
+            case 0:
+            case 1:
+            case 2:
+                return  [
+                    { value: { duration: 0.5 }, probability: 0.8 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.2 },
+                ];
+            default:
+                return  [
+                    { value: { duration: 0.5 }, probability: 0.2 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.8 },
+                ];
+        }
     }
 }
 var melodyRhythmRule = function (beat, measure, prevRhythm) {
@@ -316,6 +340,19 @@ var introPitchRule = function (prevNote, currentBeat, chord) {
         case -2:
         case -1:
         case 0:
+            switch (currentBeat % 4) {
+                case 0:
+                case 0.5:
+                case 2:
+                case 2.5:
+                    // Ensure that strong beats land on 1, 3, or 5 in the chord
+                    stateMap = [0.5, 0, 0.3, 0, 0.2, 0, 0, 0];
+                    break;
+                default:
+                    stateMap = [0.1, 0.4, 0.3, 0.2, 0.0, 0.0, 0.0, 0.0];
+                    break;
+            }
+            break;
         case 1:
             switch (currentBeat % 4) {
                 case 0:
@@ -326,11 +363,23 @@ var introPitchRule = function (prevNote, currentBeat, chord) {
                     stateMap = [0.5, 0, 0.3, 0, 0.2, 0, 0, 0];
                     break;
                 default:
-                    stateMap = [0.3, 0.3, 0.2, 0.2, 0.0, 0.0, 0.0, 0.0];
+                    stateMap = [0.4, 0.1, 0.3, 0.2, 0.0, 0.0, 0.0, 0.0];
                     break;
             }
             break;
         case 2:
+            switch (currentBeat % 4) {
+                case 0:
+                case 0.5:
+                case 2:
+                case 2.5:
+                    stateMap = [0.1, 0, 0.3, 0, 0.6, 0, 0, 0];
+                    break;
+                default:
+                    stateMap = [0.1, 0.2, 0.1, 0.2, 0.4, 0.0, 0.0, 0.0];
+                    break;
+            }
+            break;
         case 3:
             switch (currentBeat % 4) {
                 case 0:
@@ -340,9 +389,10 @@ var introPitchRule = function (prevNote, currentBeat, chord) {
                     stateMap = [0.1, 0, 0.3, 0, 0.6, 0, 0, 0];
                     break;
                 default:
-                    stateMap = [0.0, 0.2, 0.2, 0.2, 0.4, 0.0, 0.0, 0.0];
+                    stateMap = [0.1, 0.1, 0.3, 0.1, 0.4, 0.0, 0.0, 0.0];
                     break;
             }
+            break;
         case 4:
             switch (currentBeat % 4) {
                 case 0:
@@ -352,7 +402,7 @@ var introPitchRule = function (prevNote, currentBeat, chord) {
                     stateMap = [0.0, 0, 0.2, 0, 0.8, 0, 0, 0];
                     break;
                 default:
-                    stateMap = [0.0, 0.1, 0.2, 0.3, 0.2, 0.2, 0.0, 0.0];
+                    stateMap = [0.0, 0.1, 0.2, 0.3, 0.1, 0.3, 0.0, 0.0];
                     break;
             }
             break;
@@ -391,7 +441,7 @@ var introPitchRule = function (prevNote, currentBeat, chord) {
                     stateMap = [0.0, 0, 0.0, 0, 0.4, 0, 0, 0.6];
                     break;
                 default:
-                    stateMap = [0.0, 0.0, 0.0, 0.0, 0.3, 0.0, 0.4, 0.3];
+                    stateMap = [0.0, 0.0, 0.0, 0.0, 0.4, 0.0, 0.5, 0.1];
                     break;
             }
             break;
@@ -441,6 +491,7 @@ var melodyPitchRule = function (prevNote, currentBeat, chord) {
                     stateMap = [0.0, 0.2, 0.2, 0.2, 0.4, 0.0, 0.0, 0.0];
                     break;
             }
+            break;
         case 4:
             switch (currentBeat % 4) {
                 case 0:

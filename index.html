@@ -5,6 +5,7 @@
         <link href="css/main.css" rel="stylesheet" />
         
         <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+        <script src="WebAudioRecorder.min.js"></script>
         <script src="seedrandom.min.js"></script>
         <script src="championNames.js"></script>
         <script src="common_functions.js"></script>
@@ -57,7 +58,7 @@
             <div style="text-align:center;margin-top:1.5rem;">
                 <button type="button" id="play" class="btn btn-success" onclick="songBuilder.play();" disabled>Play</button>
                 <button type="button" id="stop" class="btn btn-danger" style="margin-left: 2rem;" onclick="songBuilder.stop();" disabled>Stop</button>
-                <button type="button" id="asdf" class="btn btn-danger" style="margin-left: 2rem;" onclick="playSong();">WUBWUBWUB</button>
+                <a id="downloadSongButton" class="btn btn-default" style="margin-left: 2rem;" disabled>Download Song</a>
             </div>
         </div>
         <canvas id="visualizationArea" height="256"></canvas>

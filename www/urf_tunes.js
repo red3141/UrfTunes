@@ -1,6 +1,8 @@
 const MAX_GAIN = 3;
 const BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
+var currentSineTooth = -1;
+
 window.addEventListener('load', init, false);
 function init() {
     try {
@@ -122,6 +124,8 @@ function SineTooth(context, analyzer, mode) {
     const CHAMPS_PER_MODE = championNames.length / NUMBER_OF_MODES;
     mode %= NUMBER_OF_MODES;
     
+    this.mode = mode;
+    
     var length = CHAMPS_PER_MODE + 2;
     var real = new Float32Array(length);
     var imag = new Float32Array(length);
@@ -133,7 +137,7 @@ function SineTooth(context, analyzer, mode) {
     imag[1] = 1;
     var power, championName;
     for (var i = 0; i < CHAMPS_PER_MODE; ++i) {
-        championName = championNames[i + (mode * CHAMPS_PER_MODE)];
+        championName = championNames[i + (this.mode * CHAMPS_PER_MODE)];
         power =  Math.pow(2, masteries[championName]);
         power /= 32.0;
         power = power == 1/32 ? 0 : power;
@@ -181,6 +185,10 @@ SineTooth.prototype.play = function(options) {
     
     this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
+    
+    var mode = this.mode;
+    
+    this.oscillator.onended = function() {window.currentSineTooth = mode;};
 };
 
 
@@ -713,7 +721,8 @@ function doVisualization(analyzer) {
     const canvasContext = canvas.getContext('2d');
     
     const draw = function() {
-        canvasContext.canvas.width = Math.max(512, window.innerWidth);
+        canvasContext.canvas.width = 0;
+        canvasContext.canvas.width = Math.max(512, $(document).width());
     
         width = canvas.width;
         height = canvas.height;
@@ -737,6 +746,15 @@ function doVisualization(analyzer) {
             canvasContext.fillRect(x, height-barHeight, barWidth, barHeight);
             
             x += barWidth + 1;
+        }
+        
+        // Show the right set of champions
+        if (window.currentSineTooth >= 0) {
+            for (var i = 0; i < 5; ++i) {
+                $('#champions' + i).toggle(i == window.currentSineTooth);
+            }
+            // No need to do this again until the currentSineTooth changes again
+            window.currentSineTooth = -1;
         }
 
         window.requestAnimationFrame(draw);

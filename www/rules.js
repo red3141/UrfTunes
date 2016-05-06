@@ -188,9 +188,6 @@ var bassLineRhythmRule = function (beat, measure, prevRhythm) {
     }
 }
 var introRhythmRule = function (beat, measure, prevRhythm) {
-    if (measure === 0)
-        return [{ value: { duration: 0.5 }, probability: 1 }];
-
     if ((measure % 4) < 3) {
         switch (beat) {
             case 0.5:
@@ -203,7 +200,8 @@ var introRhythmRule = function (beat, measure, prevRhythm) {
                 ];
             default:
                 return [
-                    { value: { duration: 0.5 }, probability: 0.8 },
+                    { value: { duration: 0.5 }, probability: 0.4 },
+                    { value: { duration: 1 }, probability: 0.4 },
                     { value: { duration: 0.5, isRest: true }, probability: 0.2 },
                 ];
         }
@@ -212,8 +210,8 @@ var introRhythmRule = function (beat, measure, prevRhythm) {
             case 0.5:
             case 1.5:
                 return [
-                    { value: { duration: 0.5 }, probability: 0.5 },
-                    { value: { duration: 0.5, isRest: true }, probability: 0.5 },
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.7 },
                 ];
             case 0:
             case 1:
@@ -399,7 +397,8 @@ var introPitchRule = function (prevNote, currentBeat, measure, chord) {
     // Start with numbers representing the note in the current chord.
     var stateMap;
     var prevNoteInChord = prevNote - chord;
-    var isStrongBeat = (measure % 4 >= 3 && currentBeat >= 2) || currentBeat === 0 || currentBeat === 0.5 || currentBeat === 2 || currentBeat === 2.5;
+    var isStrongBeat = (measure % 4 >= 3 && currentBeat >= 2) || currentBeat === 0 || currentBeat === 2
+        || (prevNote.isRest && (currentBeat === 0.5 || currentBeat === 2.5));
     switch (prevNoteInChord) {
         case -6:
         case -5:

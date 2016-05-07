@@ -28,12 +28,14 @@ var runBefore = (function() {
     var timerInstrument;
     var currentContext;
     function createTimerInstrument(context, index) {
+        console.log('Creating silent timer at index ' + index);
         if (index === 0) {
             deferredObjects[index].resolve();
         }
         timerInstrument = new TimerInstrument(context);
         var oscillator = timerInstrument.play({ endTime: timeDelta * index });
         $(oscillator).on('ended', function() {
+            console.log('Resolving deferred object at index ' + (index + 1));
             if (index + 1 >= deferredObjects.length)
                 return;
             deferredObjects[index + 1].resolve();
@@ -47,8 +49,10 @@ var runBefore = (function() {
             createTimerInstrument(context, 0);
         }
         var index = Math.max(0, Math.floor((time - 2) / timeDelta));
-        while (index >= deferredObjects.length)
+        while (index >= deferredObjects.length) {
+            console.log('Adding deferred object at index ' + deferredObjects.length);
             deferredObjects.push($.Deferred());
+        }
         return deferredObjects[index].promise();
     };
 })();

@@ -106,6 +106,7 @@
             if (playOnLoad)
                 songBuilder.play();
             $('#playbackButtons').css('visibility', 'visible');
+            $('.social-media-buttons').show();
             $('#errorMessage').hide();
             $('#play').prop('disabled', false);
             $('#stop').prop('disabled', false);
@@ -118,6 +119,7 @@
             $('#play').prop('disabled', true);
             $('#stop').prop('disabled', true);
             $('#playbackButtons').css('visibility', 'hidden');
+            $('.social-media-buttons').hide();
             $('#errorMessage').show();
             if (connectionSucceeded)
                 $('#errorMessage').text('That summoner name was not found in the selected region. Check that the name is spelled correctly and that you are in the right region.');

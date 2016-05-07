@@ -98,6 +98,7 @@ div.champRow {
 .social-media-buttons {
     margin-top: 1.5rem;
     text-align: center;
+    display: none;
 }
 .fb-share-button {
     position: relative;

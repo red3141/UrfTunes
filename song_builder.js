@@ -549,7 +549,6 @@ var songBuilder = (function (seedrandom) {
                 currentBeat += beatsPerBar;
                 currentTime = currentBeat * secondsPerBeat + segmentStartTime;
             }
-            console.log(currentBeat);
 
             // Add bass line
             currentBeat = 0;
@@ -575,7 +574,6 @@ var songBuilder = (function (seedrandom) {
                 }
                 ++j;
             }
-            console.log(currentBeat);
 
             // Add melody
             currentBeat = 0;
@@ -590,7 +588,6 @@ var songBuilder = (function (seedrandom) {
                 currentBeat += note.duration;
                 currentTime = currentBeat * secondsPerBeat + segmentStartTime;
             }
-            console.log(currentBeat);
         }
 
         var endingStartTime = bodyStartTime + song.form.length * measuresPerSegment * beatsPerBar * secondsPerBeat;;

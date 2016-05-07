@@ -14,6 +14,17 @@ a[disabled] {
     pointer-events: none;
 }
 
+img.champImage {
+    max-width: 3.4%;
+    min-width: 30px;
+    height: auto;
+}
+
+div.champRow {
+    display: none;
+    text-align: center;
+}
+
 .btn-default[disabled] {
     color: #999;
 }
@@ -53,6 +64,16 @@ a[disabled] {
 #summonerForm > .go-button {
     flex: 0 0 auto;
     margin-left: 0.2rem;
+}
+
+#playbackButtons {
+    text-align: center;
+    margin-top: 1.5rem;
+    visibility: hidden;
+}
+#play, #stop {
+    /* Impose a min width on the button, mainly so when the play button changes its text to 'Pause' things don't shift around */
+    min-width: 7rem;
 }
 
 #visualizationArea {

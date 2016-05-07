@@ -1,6 +1,8 @@
 const MAX_GAIN = 3;
 const BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
+var currentSineTooth = -1;
+
 window.addEventListener('load', init, false);
 function init() {
     try {
@@ -42,6 +44,8 @@ BassDrum.prototype.play = function(options) {
     
     this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
+    
+    return this.oscillator;
 };
 
 // Snare Drum
@@ -107,6 +111,8 @@ SnareDrum.prototype.play = function(options) {
     
     this.noise.stop(endTime);
     this.oscillator.stop(endTime);
+    
+    return this.oscillator;
 }
 
 // SineTooth
@@ -122,6 +128,8 @@ function SineTooth(context, analyzer, mode) {
     const CHAMPS_PER_MODE = championNames.length / NUMBER_OF_MODES;
     mode %= NUMBER_OF_MODES;
     
+    this.mode = mode;
+    
     var length = CHAMPS_PER_MODE + 2;
     var real = new Float32Array(length);
     var imag = new Float32Array(length);
@@ -133,7 +141,7 @@ function SineTooth(context, analyzer, mode) {
     imag[1] = 1;
     var power, championName;
     for (var i = 0; i < CHAMPS_PER_MODE; ++i) {
-        championName = championNames[i + (mode * CHAMPS_PER_MODE)];
+        championName = championNames[i + (this.mode * CHAMPS_PER_MODE)];
         power =  Math.pow(2, masteries[championName]);
         power /= 32.0;
         power = power == 1/32 ? 0 : power;
@@ -181,6 +189,14 @@ SineTooth.prototype.play = function(options) {
     
     this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
+    
+    var mode = this.mode;
+    
+    $(this.oscillator).on('ended', function() {
+        window.currentSineTooth = mode;
+    });
+    
+    return this.oscillator;
 };
 
 
@@ -249,6 +265,8 @@ Trumpet.prototype.play = function(options) {
     this.oscillator1.stop(endTime);
     this.oscillator2.start(startTime);
     this.oscillator2.stop(endTime);
+    
+    return this.oscillator1;
 };
 
 
@@ -327,6 +345,8 @@ Piano.prototype.play = function(options) {
     this.oscillator.stop(endTime);
     this.noise.start(startTime);
     this.noise.stop(endTime);
+    
+    return this.oscillator;
 };
 
 function Guitar(context, analyzer) {
@@ -404,6 +424,8 @@ Guitar.prototype.play = function(options) {
     this.oscillator.stop(endTime);
     this.noise.start(startTime);
     this.noise.stop(endTime);
+    
+    return this.oscillator;
 };
 
 function Violin(context, analyzer) {
@@ -463,6 +485,8 @@ Violin.prototype.play = function(options) {
     this.oscillator1.stop(endTime);
     this.oscillator2.start(startTime);
     this.oscillator2.stop(endTime);
+    
+    return this.oscillator1;
 };
 
 // Bass
@@ -518,6 +542,8 @@ Bass.prototype.play = function(options) {
     
     this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
+    
+    return this.oscillator;
 };
 
 // Slider
@@ -571,6 +597,8 @@ Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain
     
     this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
+    
+    return this.oscillator;
 };
 
 function createNoiseBuffer(context) {
@@ -641,6 +669,8 @@ WhiteNoiseWithFilter.prototype.play = function(options) {
     
     this.noise.start(rampUpStartTime);
     this.noise.stop(endTime);
+    
+    return this.noise;
 };
 
 function WhiteNoiseWithBandPass(context, analyzer) {
@@ -713,7 +743,8 @@ function doVisualization(analyzer) {
     const canvasContext = canvas.getContext('2d');
     
     const draw = function() {
-        canvasContext.canvas.width = Math.max(512, window.innerWidth);
+        canvasContext.canvas.width = 0;
+        canvasContext.canvas.width = Math.max(512, $(document).width());
     
         width = canvas.width;
         height = canvas.height;
@@ -737,6 +768,15 @@ function doVisualization(analyzer) {
             canvasContext.fillRect(x, height-barHeight, barWidth, barHeight);
             
             x += barWidth + 1;
+        }
+        
+        // Show the right set of champions
+        if (window.currentSineTooth >= 0) {
+            for (var i = 0; i < 5; ++i) {
+                $('#champions' + i).toggle(i == window.currentSineTooth);
+            }
+            // No need to do this again until the currentSineTooth changes again
+            window.currentSineTooth = -1;
         }
 
         window.requestAnimationFrame(draw);

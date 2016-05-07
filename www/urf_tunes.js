@@ -30,17 +30,21 @@ var runBefore = (function() {
     function createTimerInstrument(context, index) {
         console.log('Creating silent timer at index ' + index);
         if (index === 0) {
-            deferredObjects[index].resolve();
-        }
-        timerInstrument = new TimerInstrument(context);
-        var oscillator = timerInstrument.play({ endTime: timeDelta * index });
-        $(oscillator).on('ended', function() {
-            console.log('Resolving deferred object at index ' + (index + 1));
-            if (index + 1 >= deferredObjects.length)
+            if (index >= deferredObjects.length)
                 return;
-            deferredObjects[index + 1].resolve();
+            deferredObjects[index].resolve();
             createTimerInstrument(context, index + 1);
-        });
+        } else {
+            timerInstrument = new TimerInstrument(context);
+            var oscillator = timerInstrument.play({ endTime: timeDelta * index });
+            $(oscillator).on('ended', function() {
+                console.log('Resolving deferred object at index ' + index);
+                if (index >= deferredObjects.length)
+                    return;
+                deferredObjects[index].resolve();
+                createTimerInstrument(context, index + 1);
+            });
+        }
     }
     return function runBefore(context, time) {
         if (context !== currentContext) {

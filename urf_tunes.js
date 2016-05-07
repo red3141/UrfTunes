@@ -738,7 +738,10 @@ const C3 = A2 * Math.pow(2, 3/12);
 const Cs3 = A2 * Math.pow(2, 4/12);
 const D3 = A2 * Math.pow(2, 5/12);
 
+var isVisualizationStopped = true;
+
 function doVisualization(analyzer) {
+    isVisualizationStopped = false;
     const canvas = document.getElementById('visualizationArea');
     const canvasContext = canvas.getContext('2d');
     
@@ -778,11 +781,16 @@ function doVisualization(analyzer) {
             // No need to do this again until the currentSineTooth changes again
             window.currentSineTooth = -1;
         }
-
-        window.requestAnimationFrame(draw);
+        
+        if (!isVisualizationStopped)
+            window.requestAnimationFrame(draw);
     };
     
     draw();
+}
+
+function stopVisualization() {
+    isVisualizationStopped = true;
 }
 
 function playSong() {

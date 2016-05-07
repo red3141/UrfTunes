@@ -632,7 +632,7 @@ var songBuilder = (function (seedrandom) {
         currentBeat = 0;
         currentTime = endingStartTime;
         var melodyInstrument = melodyInstruments[melodyInstruments.length - 1];
-        var lastSource;
+        var lastSourcePromise;
         for (var j = 0; j < song.ending.melody.length; ++j) {
             var note = song.ending.melody[j];
             if (!note.isRest) {
@@ -659,7 +659,7 @@ var songBuilder = (function (seedrandom) {
                 // Play the root note of the chord
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
                 var frequency = frequencies[chord] / 4;
-                lastSource = bassInstrument.play({
+                lastSourcePromise = bassInstrument.play({
                     startTime: currentTime,
                     pitch: frequency,
                     duration: rhythm.duration * secondsPerBeat,
@@ -675,14 +675,13 @@ var songBuilder = (function (seedrandom) {
             }
             ++j;
         }
-        
-        $(lastSource).on('ended', function() {
-            audioRecorder.finishRecording();
-            // Kill the context to clean up resources
-            context.close();
-            context = null;
-            stopVisualization();
-        });
+        lastSourcePromise.then(function(lastSource) {
+            $(lastSource).on('ended', function() {
+                audioRecorder.finishRecording();
+                // Kill the context to clean up resources
+                stop();
+            });
+        })
     }
 
     function pause() {

@@ -290,7 +290,7 @@ Trumpet.prototype.createSource = function() {
     filter.frequency.value = 2000;
     
     gain.connect(filter);
-    filter.connect(analyzer);
+    filter.connect(this.analyzer);
     
     return {
         oscillator1: oscillator1,
@@ -541,7 +541,7 @@ Violin.prototype.createSource = function() {
     filter.frequency.value = 2000;
     
     gain.connect(filter);
-    filter.connect(analyzer);
+    filter.connect(this.analyzer);
     
     return {
         oscillator: oscillator,

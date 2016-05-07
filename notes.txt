@@ -81,11 +81,10 @@ Ways to make songs more interesting / varying
 
 TODO before cutoff date:
 Must have:
-- Share on social media buttons
-- Fix background sounds
 - Write-up of what it does & development process
 Nice to have:
-- Fix seeding so each champion is only part of one seed
+- Fix background sounds
+- Fix seeding so each champion is only part of one seed?
 - Variation on drum beat
 - Special section types
 - Special transitions

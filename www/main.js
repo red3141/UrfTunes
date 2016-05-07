@@ -75,19 +75,20 @@
             $('#summonerName').focus();
             return;
         }
-            
+        songBuilder.stop();
+
         // Get the standardized summoner name, which has spaces removed and is lowercase.
-        summonerName = summonerName.replace(/\s+/g, '').toLowerCase();
+        normalizedSummonerName = summonerName.replace(/\s+/g, '').toLowerCase();
         
         var connectionSucceeded = false;
         $.ajax({
-            url: 'http://172.81.178.14:8080/' + region + '/' + summonerName,
+            url: 'http://172.81.178.14:8080/' + region + '/' + normalizedSummonerName,
             dataType: 'json'
         }).then(null, function(response) {
             // If the request failed, maybe the server is down. Try to get pre-cached data.
             connectionSucceeded = response && response.readyState === 4;
             return $.ajax({
-                url: 'json/' + summonerName + '-' + region + ".json",
+                url: 'json/' + normalizedSummonerName + '-' + region + ".json",
                 dataType: 'json'
             });
         }).then(function(championMasteryLevels) {

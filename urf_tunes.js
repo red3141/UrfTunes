@@ -28,99 +28,101 @@ function BassDrum(context, analyzer) {
     this.duration = 0.1;
 };
 
-BassDrum.prototype.init = function() {
-    this.oscillator = this.context.createOscillator();
-    this.oscillator.type = 'triangle';
-    this.gain = this.context.createGain();
-    this.oscillator.connect(this.gain);
-    this.gain.connect(this.analyzer);
+BassDrum.prototype.createSource = function() {
+    var oscillator = this.context.createOscillator();
+    oscillator.type = 'triangle';
+    var gain = this.context.createGain();
+    oscillator.connect(gain);
+    gain.connect(this.analyzer);
+    
+    return {
+        oscillator: oscillator,
+        gain: gain,
+    };
 };
 
 BassDrum.prototype.play = function(options) {
-    this.init();
-    
+    options = options || {};
     var startTime = options.startTime || 0;
     var endTime = startTime + this.duration;
     
-    this.oscillator.frequency.setValueAtTime(this.pitch, startTime);
-    this.oscillator.frequency.setValueAtTime(this.pitch, startTime + 0.01);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.01);
-    this.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    var source = this.createSource();
+    const pitch = 150;
+    source.oscillator.frequency.setValueAtTime(this.pitch, startTime);
+    source.oscillator.frequency.setValueAtTime(this.pitch, startTime + 0.01);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.01);
+    source.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator.start(startTime);
-    this.oscillator.stop(endTime);
+    source.oscillator.start(startTime);
+    source.oscillator.stop(endTime);
     
-    return this.oscillator;
+    return source.oscillator;
 };
 
 // Snare Drum
 function SnareDrum(context, analyzer) {
     this.context = context;
     this.analyzer = analyzer;
-    this.noiseBuffer = this.createNoiseBuffer();
+    this.noiseBuffer = createNoiseBuffer(context);
     this.pitch = 100;
     this.oscillatorDuration = 0.1;
     this.noiseDuration = 0.2;
     this.filterMinPitch = 1500;
 }
 
-SnareDrum.prototype.createNoiseBuffer = function() {
-    var bufferSize = this.context.sampleRate;
-    var buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
-    var output = buffer.getChannelData(0);
-    for (var i = 0; i < bufferSize; ++i) {
-        output[i] = Math.random() * 2 - 1;
-    }
-    
-    return buffer;
-};
-
-SnareDrum.prototype.init = function() {
-    this.noise = this.context.createBufferSource();
-    this.noise.buffer = this.noiseBuffer;
+SnareDrum.prototype.createSource = function() {
+    var noise = this.context.createBufferSource();
+    noise.buffer = this.noiseBuffer;
     var noiseFilter = this.context.createBiquadFilter();
     noiseFilter.type = 'highpass';
     noiseFilter.frequency.value = this.filterMinPitch;
-    this.noise.connect(noiseFilter);
-    this.noiseGain = this.context.createGain();
-    noiseFilter.connect(this.noiseGain);
+    noise.connect(noiseFilter);
+    var noiseGain = this.context.createGain();
+    noiseFilter.connect(noiseGain);
     
-    this.noiseGain.connect(this.analyzer);
+    noiseGain.connect(this.analyzer);
     
-    this.oscillator = this.context.createOscillator();
-    this.oscillator.type = 'triangle';
+    var oscillator = this.context.createOscillator();
+    oscillator.type = 'triangle';
     
-    this.oscillatorGain = this.context.createGain();
-    this.oscillator.connect(this.oscillatorGain);
-    this.oscillatorGain.connect(this.analyzer);
+    var oscillatorGain = this.context.createGain();
+    oscillator.connect(oscillatorGain);
+    oscillatorGain.connect(this.analyzer);
+    
+    return {
+        oscillator: oscillator,
+        noise: noise,
+        oscillatorGain: oscillatorGain,
+        noiseGain: noiseGain,
+    };
 };
 
 SnareDrum.prototype.play = function(options) {
-    this.init();
-    
+    options = options || {};
     var startTime = options.startTime || 0;
+    var volume = options.volume || 0.3;
 
     var oscillatorEndTime = startTime + this.oscillatorDuration;
     var noiseEndTime = startTime + this.noiseDuration;
     var endTime = Math.max(oscillatorEndTime, noiseEndTime);
     
-    var volume = 0.3;
-    this.noiseGain.gain.setValueAtTime(volume, startTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, noiseEndTime);
-    this.noise.start(startTime);
+    var source = this.createSource();
+    source.noiseGain.gain.setValueAtTime(volume, startTime);
+    source.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, noiseEndTime);
+    source.noise.start(startTime);
     
-    this.oscillator.frequency.setValueAtTime(this.pitch, startTime);
-    this.oscillatorGain.gain.setValueAtTime(volume, startTime);
-    this.oscillatorGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, oscillatorEndTime);
-    this.oscillator.start(startTime);
+    source.oscillator.frequency.setValueAtTime(this.pitch, startTime);
+    source.oscillatorGain.gain.setValueAtTime(volume, startTime);
+    source.oscillatorGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, oscillatorEndTime);
+    source.oscillator.start(startTime);
     
-    this.noise.stop(endTime);
-    this.oscillator.stop(endTime);
+    source.noise.stop(endTime);
+    source.oscillator.stop(endTime);
     
-    return this.oscillator;
+    return source.oscillator;
 }
 
 // SineTooth
@@ -160,18 +162,22 @@ function SineTooth(context, analyzer, mode) {
     this.waveform = this.context.createPeriodicWave(real, imag);
 }
 
-SineTooth.prototype.init = function() {
-    this.oscillator = this.context.createOscillator();
-    this.oscillator.setPeriodicWave(this.waveform);
+SineTooth.prototype.createSource = function() {
+    var oscillator = this.context.createOscillator();
+    oscillator.setPeriodicWave(this.waveform);
     
-    this.gain = this.context.createGain();
-    this.oscillator.connect(this.gain);
-    this.gain.connect(this.analyzer);
+    var gain = this.context.createGain();
+    oscillator.connect(gain);
+    gain.connect(this.analyzer);
+    
+    return {
+        oscillator: oscillator,
+        gain:gain,
+    };
 };
 
 SineTooth.prototype.play = function(options) {
-    this.init();
-    
+    options = options || {};
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
@@ -186,25 +192,26 @@ SineTooth.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, startTime + duration);
     var endTime = fallOffTime + 0.01;
     
-    this.oscillator.frequency.setValueAtTime(pitch, startTime);
+    var source = this.createSource();
+    source.oscillator.frequency.setValueAtTime(pitch, startTime);
     
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
-    this.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
-    this.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
-    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+    source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
+    source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
+    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator.start(startTime);
-    this.oscillator.stop(endTime);
+    source.oscillator.start(startTime);
+    source.oscillator.stop(endTime);
     
     var mode = this.mode;
     
-    $(this.oscillator).on('ended', function() {
+    $(source.oscillator).on('ended', function() {
         displayChampionSet(mode);
     });
     
-    return this.oscillator;
+    return source.oscillator;
 };
 
 
@@ -227,27 +234,32 @@ function Trumpet(context, analyzer) {
     this.waveform = this.context.createPeriodicWave(real, imag);
 }
 
-Trumpet.prototype.init = function() {
-    this.oscillator1 = this.context.createOscillator();
-    this.oscillator1.setPeriodicWave(this.waveform);
-    this.oscillator2 = this.context.createOscillator();
-    this.oscillator2.setPeriodicWave(this.waveform);
+Trumpet.prototype.createSource = function() {
+    var oscillator1 = this.context.createOscillator();
+    oscillator1.setPeriodicWave(this.waveform);
+    var oscillator2 = this.context.createOscillator();
+    oscillator2.setPeriodicWave(this.waveform);
  
-    this.gain = this.context.createGain();
-    this.oscillator1.connect(this.gain);
-    this.oscillator2.connect(this.gain);
+    var gain = this.context.createGain();
+    oscillator1.connect(gain);
+    oscillator2.connect(gain);
     
-    this.filter = this.context.createBiquadFilter();
-    this.filter.type = "lowpass";
-    this.filter.frequency.value = 2000;
+    var filter = this.context.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 2000;
     
-    this.gain.connect(this.filter);
-    this.filter.connect(this.analyzer);
+    gain.connect(filter);
+    filter.connect(analyzer);
+    
+    return {
+        oscillator1: oscillator1,
+        oscillator2: oscillator2,
+        gain:gain,
+    };
 };
 
 Trumpet.prototype.play = function(options) {
-    this.init();
-
+    options = options || {};
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
@@ -257,24 +269,25 @@ Trumpet.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, startTime + duration);
     var endTime = fallOffTime + 0.01;
     
-    this.oscillator1.frequency.setValueAtTime(pitch, startTime);
-    this.oscillator1.detune.value = 10;
-    this.oscillator2.frequency.setValueAtTime(pitch, startTime);
-    this.oscillator2.detune.value = -10;
+    var source = this.createSource();
+    source.oscillator1.frequency.setValueAtTime(pitch, startTime);
+    source.oscillator1.detune.value = 10;
+    source.oscillator2.frequency.setValueAtTime(pitch, startTime);
+    source.oscillator2.detune.value = -10;
     
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
-    this.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
-    this.gain.gain.exponentialRampToValueAtTime(0.4, fallOffTime);
-    this.gain.gain.linearRampToValueAtTime(0, endTime);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
+    source.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
+    source.gain.gain.exponentialRampToValueAtTime(0.4, fallOffTime);
+    source.gain.gain.linearRampToValueAtTime(0, endTime);
     
-    this.oscillator1.start(startTime);
-    this.oscillator1.stop(endTime);
-    this.oscillator2.start(startTime);
-    this.oscillator2.stop(endTime);
+    source.oscillator1.start(startTime);
+    source.oscillator1.stop(endTime);
+    source.oscillator2.start(startTime);
+    source.oscillator2.stop(endTime);
     
-    return this.oscillator1;
+    return source.oscillator1;
 };
 
 
@@ -290,30 +303,37 @@ function Piano(context, analyzer) {
     this.noiseBuffer = createNoiseBuffer(context);
 }
 
-Piano.prototype.init = function() {
-    this.oscillator = this.context.createOscillator();
-    this.oscillator.setPeriodicWave(this.waveform);
+Piano.prototype.createSource = function() {
+    var oscillator = this.context.createOscillator();
+    oscillator.setPeriodicWave(this.waveform);
  
-    this.gain = this.context.createGain();
-    this.oscillator.connect(this.gain);
+    var gain = this.context.createGain();
+    oscillator.connect(gain);
     
-    this.noise = this.context.createBufferSource();
-    this.noise.buffer = this.noiseBuffer;
-    this.noise.loop = true;
-    this.noiseFilter = this.context.createBiquadFilter();
-    this.noiseFilter.type = 'bandpass';
-    this.noise.connect(this.noiseFilter);
+    var noise = this.context.createBufferSource();
+    noise.buffer = this.noiseBuffer;
+    noise.loop = true;
+    var noiseFilter = this.context.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noise.connect(noiseFilter);
     
-    this.noiseGain = this.context.createGain();
-    this.noiseFilter.connect(this.noiseGain);
+    var noiseGain = this.context.createGain();
+    noiseFilter.connect(noiseGain);
     
-    this.gain.connect(this.analyzer);
-    this.noiseGain.connect(this.analyzer);
+    gain.connect(this.analyzer);
+    noiseGain.connect(this.analyzer);
+    
+    return {
+        oscillator: oscillator,
+        gain: gain,
+        noise: noise,
+        noiseGain: noiseGain,
+        noiseFilter: noiseFilter,
+    };
 };
 
 Piano.prototype.play = function(options) {
-    this.init();
-    
+    options = options || {};
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
@@ -328,33 +348,35 @@ Piano.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
     var endTime = fallOffTime + 0.03;
     
-    this.oscillator.frequency.setValueAtTime(pitch, startTime);
+    var source = this.createSource();
     
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
-    this.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
+    source.oscillator.frequency.setValueAtTime(pitch, startTime);
     
-    this.noiseFilter.frequency.setValueAtTime(pitch, startTime);
-    this.noiseFilter.Q.setValueAtTime(9, startTime);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+    source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
     
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
+    source.noiseFilter.frequency.setValueAtTime(pitch, startTime);
+    source.noiseFilter.Q.setValueAtTime(9, startTime);
+    
+    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
+    source.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
     
     // The piano can't be "held," it will fall off over time no matter what
-    this.gain.gain.exponentialRampToValueAtTime(
+    source.gain.gain.exponentialRampToValueAtTime(
         reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
         fallOffTime);
-    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator.start(startTime);
-    this.oscillator.stop(endTime);
-    this.noise.start(startTime);
-    this.noise.stop(endTime);
+    source.oscillator.start(startTime);
+    source.oscillator.stop(endTime);
+    source.noise.start(startTime);
+    source.noise.stop(endTime);
     
-    return this.oscillator;
+    return source.oscillator;
 };
 
 function Guitar(context, analyzer) {
@@ -369,30 +391,36 @@ function Guitar(context, analyzer) {
     this.noiseBuffer = createNoiseBuffer(context);
 }
 
-Guitar.prototype.init = function() {
-    this.oscillator = this.context.createOscillator();
-    this.oscillator.setPeriodicWave(this.waveform);
+Guitar.prototype.createSource = function() {
+    var oscillator = this.context.createOscillator();
+    oscillator.setPeriodicWave(this.waveform);
 
-    this.gain = this.context.createGain();
-    this.oscillator.connect(this.gain);
+    var gain = this.context.createGain();
+    oscillator.connect(this.gain);
 
-    this.noise = this.context.createBufferSource();
-    this.noise.buffer = this.noiseBuffer;
-    this.noise.loop = true;
-    this.noiseFilter = this.context.createBiquadFilter();
-    this.noiseFilter.type = 'bandpass';
-    this.noise.connect(this.noiseFilter);
+    var noise = this.context.createBufferSource();
+    noise.buffer = this.noiseBuffer;
+    noise.loop = true;
+    var noiseFilter = this.context.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noise.connect(this.noiseFilter);
 
-    this.noiseGain = this.context.createGain();
-    this.noiseFilter.connect(this.noiseGain);
+    var noiseGain = this.context.createGain();
+    noiseFilter.connect(noiseGain);
 
-    this.gain.connect(this.analyzer);
-    this.noiseGain.connect(this.analyzer);
+    gain.connect(this.analyzer);
+    noiseGain.connect(this.analyzer);
+    
+    return {
+        oscillator: oscillator,
+        gain: gain,
+        noise: noise,
+        noiseGain: noiseGain,
+    };
 };
 
 Guitar.prototype.play = function(options) {
-    this.init();
-    
+    options = options || {};
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
@@ -407,33 +435,34 @@ Guitar.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
     var endTime = fallOffTime + 0.03;
     
-    this.oscillator.frequency.setValueAtTime(pitch, startTime);
+    var source = this.createSource();
+    source.oscillator.frequency.setValueAtTime(pitch, startTime);
     
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
-    this.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+    source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
     
-    this.noiseFilter.frequency.setValueAtTime(pitch, startTime);
-    this.noiseFilter.Q.setValueAtTime(9, startTime);
+    source.noiseFilter.frequency.setValueAtTime(pitch, startTime);
+    source.noiseFilter.Q.setValueAtTime(9, startTime);
     
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
+    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
+    source.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
     
     // The guitar can't be "held," it will fall off over time no matter what
-    this.gain.gain.exponentialRampToValueAtTime(
+    source.gain.gain.exponentialRampToValueAtTime(
         reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
         fallOffTime);
-    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator.start(startTime);
-    this.oscillator.stop(endTime);
-    this.noise.start(startTime);
-    this.noise.stop(endTime);
+    source.oscillator.start(startTime);
+    source.oscillator.stop(endTime);
+    source.noise.start(startTime);
+    source.noise.stop(endTime);
     
-    return this.oscillator;
+    return source.oscillator;
 };
 
 function Violin(context, analyzer) {
@@ -447,27 +476,33 @@ function Violin(context, analyzer) {
     this.waveform = this.context.createPeriodicWave(real, imag);
 }
 
-Violin.prototype.init = function() {
-    this.oscillator1 = this.context.createOscillator();
-    this.oscillator1.setPeriodicWave(this.waveform);
-    this.oscillator2 = this.context.createOscillator();
-    this.oscillator2.setPeriodicWave(this.waveform);
+Violin.prototype.createSource = function() {
+    var oscillator1 = this.context.createOscillator();
+    oscillator1.setPeriodicWave(this.waveform);
+    var oscillator2 = this.context.createOscillator();
+    oscillator2.setPeriodicWave(this.waveform);
  
-    this.gain = this.context.createGain();
-    this.oscillator1.connect(this.gain);
-    this.oscillator2.connect(this.gain);
+    var gain = this.context.createGain();
+    oscillator1.connect(gain);
+    oscillator2.connect(gain);
     
-    this.filter = this.context.createBiquadFilter();
-    this.filter.type = "lowpass";
-    this.filter.frequency.value = 2000;
+    var filter = this.context.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 2000;
     
-    this.gain.connect(this.filter);
-    this.filter.connect(this.analyzer);
+    gain.connect(filter);
+    filter.connect(analyzer);
+    
+    return {
+        oscillator: oscillator,
+        gain: gain,
+        noise: noise,
+        noiseGain: noiseGain,
+    };
 };
 
 Violin.prototype.play = function(options) {
-    this.init();
-
+    options = options || {};
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
@@ -478,23 +513,25 @@ Violin.prototype.play = function(options) {
     var fallOffTime = Math.max(attackEndTime, startTime + duration);
     var endTime = fallOffTime + 0.05;
     
-    this.oscillator1.frequency.setValueAtTime(pitch, startTime);
-    this.oscillator1.detune.value = 5;
-    this.oscillator2.frequency.setValueAtTime(pitch, startTime);
-    this.oscillator2.detune.value = -5;
+    var source = this.createSource();
+
+    source.oscillator1.frequency.setValueAtTime(pitch, startTime);
+    source.oscillator1.detune.value = 5;
+    source.oscillator2.frequency.setValueAtTime(pitch, startTime);
+    source.oscillator2.detune.value = -5;
     
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.exponentialRampToValueAtTime(volume, attackEndTime);
-    this.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
-    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.gain.gain.exponentialRampToValueAtTime(volume, attackEndTime);
+    source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
+    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator1.start(startTime);
-    this.oscillator1.stop(endTime);
-    this.oscillator2.start(startTime);
-    this.oscillator2.stop(endTime);
+    source.oscillator1.start(startTime);
+    source.oscillator1.stop(endTime);
+    source.oscillator2.start(startTime);
+    source.oscillator2.stop(endTime);
     
-    return this.oscillator1;
+    return source.oscillator1;
 };
 
 // Bass
@@ -505,19 +542,22 @@ function Bass(context, analyzer) {
     this.analyzer = analyzer;
 }
 
-Bass.prototype.init = function() {
-    this.oscillator = this.context.createOscillator();
-    this.oscillator.type = 'triangle';
+Bass.prototype.createSource = function() {
+    var oscillator = this.context.createOscillator();
+    oscillator.type = 'triangle';
  
-    this.gain = this.context.createGain();
-    this.oscillator.connect(this.gain);
+    var gain = this.context.createGain();
+    oscillator.connect(gain);
+    gain.connect(this.analyzer);
     
-    this.gain.connect(this.analyzer);
+    return {
+        oscillator: oscillator,
+        gain: gain,
+    };
 };
 
 Bass.prototype.play = function(options) {
-    this.init();
-
+    options = options || {};
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
     var duration = options.duration || 1;
@@ -533,25 +573,26 @@ Bass.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
     var endTime = fallOffTime + 0.01;
     
-    this.oscillator.frequency.setValueAtTime(pitch, startTime);
+    var source = this.createSource();
+    source.oscillator.frequency.setValueAtTime(pitch, startTime);
     
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
     if (!finalVolume) {
         // The bass can't be "held," it will fall off over time no matter what
-        this.gain.gain.exponentialRampToValueAtTime(
+        source.gain.gain.exponentialRampToValueAtTime(
             reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
             fallOffTime);
     } else {
-        this.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
+        source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
     }
-    this.gain.gain.linearRampToValueAtTime(0, endTime);
+    source.gain.gain.linearRampToValueAtTime(0, endTime);
     
-    this.oscillator.start(startTime);
-    this.oscillator.stop(endTime);
+    source.oscillator.start(startTime);
+    source.oscillator.stop(endTime);
     
-    return this.oscillator;
+    return source.oscillator;
 };
 
 // Slider
@@ -561,19 +602,22 @@ function Slider(context, analyzer) {
     this.analyzer = analyzer;
 }
 
-Slider.prototype.init = function() {
-    this.oscillator = this.context.createOscillator();
-    this.oscillator.type = 'sine';
+Slider.prototype.createSource = function() {
+    var oscillator = this.context.createOscillator();
+    oscillator.type = 'sine';
  
-    this.gain = this.context.createGain();
-    this.oscillator.connect(this.gain);
+    var gain = this.context.createGain();
+    oscillator.connect(gain);
+    gain.connect(this.analyzer);
     
-    this.gain.connect(this.analyzer);
+    return {
+        oscillator: oscillator,
+        gain: gain,
+    }
 };
 
-Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain, duration) {
-    this.init();
-
+Slider.prototype.play = function(options) {
+    options = options || {};
     var startTime = options.startTime || 0;
     var fromPitch = options.fromPitch || 440;
     var toPitch = options.toPitch || options.fromPitch;
@@ -581,6 +625,7 @@ Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain
     var toGain = options.toGain || options.fromGain;
     var duration = options.duration || 1;
 
+    var source = this.createSource();
     // Ramp up/down at the beginning/end of being played to avoid clicks.
     var rampUpTime = 0.02;
     var rampDownTime = 0.02;
@@ -590,23 +635,23 @@ Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain
     var rampDownStartTime = startTime + holdTime;
     var endTime = rampDownStartTime + rampDownTime;
     
-    this.oscillator.frequency.setValueAtTime(fromPitch, tstartTimeime);
-    this.oscillator.frequency.linearRampToValueAtTime(toPitch, endTime);
+    source.oscillator.frequency.setValueAtTime(fromPitch, tstartTimeime);
+    source.oscillator.frequency.linearRampToValueAtTime(toPitch, endTime);
     
     // Avoid errors if fromGain or toGain is 0
     fromGain = Math.max(fromGain, BASICALLY_ZERO);
     toGain = Math.max(toGain, BASICALLY_ZERO);
     
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    this.gain.gain.exponentialRampToValueAtTime(fromGain, rampUpEndTime);
-    this.gain.gain.linearRampToValueAtTime(toGain, rampDownStartTime);
-    this.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+    source.gain.gain.exponentialRampToValueAtTime(fromGain, rampUpEndTime);
+    source.gain.gain.linearRampToValueAtTime(toGain, rampDownStartTime);
+    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.oscillator.start(startTime);
-    this.oscillator.stop(endTime);
+    source.oscillator.start(startTime);
+    source.oscillator.stop(endTime);
     
-    return this.oscillator;
+    return source.oscillator;
 };
 
 function createNoiseBuffer(context) {
@@ -634,17 +679,22 @@ WhiteNoiseWithFilter.prototype.baseConstructor = function(context, analyzer) {
     this.noiseBuffer = createNoiseBuffer(context);
 }
 
-WhiteNoiseWithFilter.prototype.baseInit = function() {
-    this.noise = this.context.createBufferSource();
-    this.noise.buffer = this.noiseBuffer;
-    this.noise.loop = true;
-    this.noiseFilter = this.context.createBiquadFilter();
-    this.noiseFilter.type = 'bandpass';
-    this.noise.connect(this.noiseFilter);
-    this.noiseGain = this.context.createGain();
-    this.noiseFilter.connect(this.noiseGain);
+WhiteNoiseWithFilter.prototype.baseCreateSource = function() {
+    var noise = this.context.createBufferSource();
+    noise.buffer = this.noiseBuffer;
+    noise.loop = true;
+    var noiseFilter = this.context.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noise.connect(noiseFilter);
+    var noiseGain = this.context.createGain();
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(this.analyzer);
     
-    this.noiseGain.connect(this.analyzer);
+    return {
+        noise: noise,
+        noiseFilter: noiseFilter,
+        noiseGain: noiseGain,
+    }
 };
 WhiteNoiseWithFilter.prototype.init = WhiteNoiseWithFilter.prototype.baseInit;
 
@@ -658,27 +708,27 @@ WhiteNoiseWithFilter.prototype.play = function(options) {
     var finalQ = options.finalQ || initialQ;
     var volume = options.volume || 1;
     
-    this.init();
+    var source = this.createSource();
     
     var rampUpStartTime = Math.max(startTime - 0.02, 0);
     var rampDownStartTime = startTime + duration - 0.02;
     var endTime = startTime + duration;
     
-    this.noiseFilter.frequency.setValueAtTime(initialFrequency, startTime);
-    this.noiseFilter.Q.setValueAtTime(initialQ, startTime);
-    this.noiseFilter.frequency.exponentialRampToValueAtTime(finalFrequency, endTime);
-    this.noiseFilter.Q.exponentialRampToValueAtTime(finalQ, endTime);
+    source.noiseFilter.frequency.setValueAtTime(initialFrequency, startTime);
+    source.noiseFilter.Q.setValueAtTime(initialQ, startTime);
+    source.noiseFilter.frequency.exponentialRampToValueAtTime(finalFrequency, endTime);
+    source.noiseFilter.Q.exponentialRampToValueAtTime(finalQ, endTime);
     
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    this.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, rampUpStartTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(volume, startTime);
-    this.noiseGain.gain.setValueAtTime(volume, rampDownStartTime);
-    this.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, rampUpStartTime);
+    source.noiseGain.gain.exponentialRampToValueAtTime(volume, startTime);
+    source.noiseGain.gain.setValueAtTime(volume, rampDownStartTime);
+    source.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
     
-    this.noise.start(rampUpStartTime);
-    this.noise.stop(endTime);
+    source.noise.start(rampUpStartTime);
+    source.noise.stop(endTime);
     
-    return this.noise;
+    return source.noise;
 };
 
 function WhiteNoiseWithBandPass(context, analyzer) {
@@ -686,8 +736,8 @@ function WhiteNoiseWithBandPass(context, analyzer) {
 }
 WhiteNoiseWithBandPass.prototype = new WhiteNoiseWithFilter();
 WhiteNoiseWithBandPass.prototype.init = function() {
-    this.baseInit();
-    this.noiseFilter.type = 'bandpass';
+    var source = this.baseCreateSource();
+    source.noiseFilter.type = 'bandpass';
 };
 
 function WhiteNoiseWithNotch(context, analyzer) {
@@ -695,8 +745,8 @@ function WhiteNoiseWithNotch(context, analyzer) {
 }
 WhiteNoiseWithNotch.prototype = new WhiteNoiseWithFilter();
 WhiteNoiseWithNotch.prototype.init = function() {
-    this.baseInit();
-    this.noiseFilter.type = 'notch';
+    var source = this.baseCreateSource();
+    source.noiseFilter.type = 'notch';
 };
 
 function WhiteNoiseWithLowPass(context, analyzer) {
@@ -704,8 +754,8 @@ function WhiteNoiseWithLowPass(context, analyzer) {
 }
 WhiteNoiseWithLowPass.prototype = new WhiteNoiseWithFilter();
 WhiteNoiseWithLowPass.prototype.init = function() {
-    this.baseInit();
-    this.noiseFilter.type = 'lowpass';
+    var source = this.baseCreateSource();
+    source.noiseFilter.type = 'lowpass';
 };
 
 function WhiteNoiseWithHighPass(context, analyzer) {
@@ -713,8 +763,8 @@ function WhiteNoiseWithHighPass(context, analyzer) {
 }
 WhiteNoiseWithHighPass.prototype = new WhiteNoiseWithFilter();
 WhiteNoiseWithHighPass.prototype.init = function() {
-    this.baseInit();
-    this.noiseFilter.type = 'highpass';
+    var source = this.baseCreateSource();
+    source.noiseFilter.type = 'highpass';
 };
 
 const A4 = 440;

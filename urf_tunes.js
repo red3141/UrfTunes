@@ -1,5 +1,5 @@
-const MAX_GAIN = 3;
-const BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
+var MAX_GAIN = 3;
+var BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
 var currentChampionSet = -1;
 
@@ -19,6 +19,39 @@ function displayChampionSet(n) {
     for (var i = 0; i < 5; ++i)
         $('#champions' + i).toggle(i === n);
 }
+
+// Runs a function before the specified time is reached in the AudioContext
+// Some devices (like phones) can't handle too many nodes at once, so we use this function to delay the creation of those nodes.
+var runBefore = (function() {
+    var timeDelta = 12;
+    var deferredObjects = [];
+    var timerInstrument;
+    var currentContext;
+    function createTimerInstrument(context, index) {
+        if (index === 0) {
+            deferredObjects[index].resolve();
+        }
+        timerInstrument = new TimerInstrument(context);
+        var oscillator = timerInstrument.play({ endTime: timeDelta * index });
+        $(oscillator).on('ended', function() {
+            if (index + 1 >= deferredObjects.length)
+                return;
+            deferredObjects[index + 1].resolve();
+            createTimerInstrument(context, index + 1);
+        });
+    }
+    return function runBefore(context, time) {
+        if (context !== currentContext) {
+            currentContext = context;
+            deferredObjects = [$.Deferred()];
+            createTimerInstrument(context, 0);
+        }
+        var index = Math.max(0, Math.floor((time - 2) / timeDelta));
+        while (index >= deferredObjects.length)
+            deferredObjects.push($.Deferred());
+        return deferredObjects[index].promise();
+    };
+})();
 
 // Bass Drum
 function BassDrum(context, analyzer) {
@@ -46,20 +79,22 @@ BassDrum.prototype.play = function(options) {
     var startTime = options.startTime || 0;
     var endTime = startTime + this.duration;
     
-    var source = this.createSource();
-    const pitch = 150;
-    source.oscillator.frequency.setValueAtTime(this.pitch, startTime);
-    source.oscillator.frequency.setValueAtTime(this.pitch, startTime + 0.01);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.01);
-    source.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    
-    source.oscillator.start(startTime);
-    source.oscillator.stop(endTime);
-    
-    return source.oscillator;
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
+        source.oscillator.frequency.setValueAtTime(_this.pitch, startTime);
+        source.oscillator.frequency.setValueAtTime(_this.pitch, startTime + 0.01);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.01);
+        source.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+        source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+        
+        source.oscillator.start(startTime);
+        source.oscillator.stop(endTime);
+        
+        return source.oscillator;
+    });
 };
 
 // Snare Drum
@@ -109,20 +144,23 @@ SnareDrum.prototype.play = function(options) {
     var noiseEndTime = startTime + this.noiseDuration;
     var endTime = Math.max(oscillatorEndTime, noiseEndTime);
     
-    var source = this.createSource();
-    source.noiseGain.gain.setValueAtTime(volume, startTime);
-    source.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, noiseEndTime);
-    source.noise.start(startTime);
-    
-    source.oscillator.frequency.setValueAtTime(this.pitch, startTime);
-    source.oscillatorGain.gain.setValueAtTime(volume, startTime);
-    source.oscillatorGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, oscillatorEndTime);
-    source.oscillator.start(startTime);
-    
-    source.noise.stop(endTime);
-    source.oscillator.stop(endTime);
-    
-    return source.oscillator;
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
+        source.noiseGain.gain.setValueAtTime(volume, startTime);
+        source.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, noiseEndTime);
+        source.noise.start(startTime);
+        
+        source.oscillator.frequency.setValueAtTime(_this.pitch, startTime);
+        source.oscillatorGain.gain.setValueAtTime(volume, startTime);
+        source.oscillatorGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, oscillatorEndTime);
+        source.oscillator.start(startTime);
+        
+        source.noise.stop(endTime);
+        source.oscillator.stop(endTime);
+        
+        return source.oscillator;
+    });
 }
 
 // SineTooth
@@ -134,8 +172,8 @@ function SineTooth(context, analyzer, mode) {
     this.context = context;
     this.analyzer = analyzer;
     
-    const NUMBER_OF_MODES = 5;
-    const CHAMPS_PER_MODE = championNames.length / NUMBER_OF_MODES;
+    var NUMBER_OF_MODES = 5;
+    var CHAMPS_PER_MODE = championNames.length / NUMBER_OF_MODES;
     mode %= NUMBER_OF_MODES;
     
     this.mode = mode;
@@ -192,26 +230,29 @@ SineTooth.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, startTime + duration);
     var endTime = fallOffTime + 0.01;
     
-    var source = this.createSource();
-    source.oscillator.frequency.setValueAtTime(pitch, startTime);
-    
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
-    source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
-    source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
-    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    
-    source.oscillator.start(startTime);
-    source.oscillator.stop(endTime);
-    
-    var mode = this.mode;
-    
-    $(source.oscillator).on('ended', function() {
-        displayChampionSet(mode);
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
+        source.oscillator.frequency.setValueAtTime(pitch, startTime);
+        
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+        source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
+        source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
+        source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+        
+        source.oscillator.start(startTime);
+        source.oscillator.stop(endTime);
+        
+        var mode = _this.mode;
+        
+        $(source.oscillator).on('ended', function() {
+            displayChampionSet(mode);
+        });
+        
+        return source.oscillator;
     });
-    
-    return source.oscillator;
 };
 
 
@@ -249,7 +290,7 @@ Trumpet.prototype.createSource = function() {
     filter.frequency.value = 2000;
     
     gain.connect(filter);
-    filter.connect(analyzer);
+    filter.connect(this.analyzer);
     
     return {
         oscillator1: oscillator1,
@@ -269,25 +310,28 @@ Trumpet.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, startTime + duration);
     var endTime = fallOffTime + 0.01;
     
-    var source = this.createSource();
-    source.oscillator1.frequency.setValueAtTime(pitch, startTime);
-    source.oscillator1.detune.value = 10;
-    source.oscillator2.frequency.setValueAtTime(pitch, startTime);
-    source.oscillator2.detune.value = -10;
-    
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
-    source.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
-    source.gain.gain.exponentialRampToValueAtTime(0.4, fallOffTime);
-    source.gain.gain.linearRampToValueAtTime(0, endTime);
-    
-    source.oscillator1.start(startTime);
-    source.oscillator1.stop(endTime);
-    source.oscillator2.start(startTime);
-    source.oscillator2.stop(endTime);
-    
-    return source.oscillator1;
+    var _this = this;
+    return runBefore(_this.context, startTime).then(function() {
+        var source = _this.createSource();
+        source.oscillator1.frequency.setValueAtTime(pitch, startTime);
+        source.oscillator1.detune.value = 10;
+        source.oscillator2.frequency.setValueAtTime(pitch, startTime);
+        source.oscillator2.detune.value = -10;
+        
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.gain.gain.linearRampToValueAtTime(0.4, attackEndTime);
+        source.gain.gain.linearRampToValueAtTime(0.2, reduceEndTime);
+        source.gain.gain.exponentialRampToValueAtTime(0.4, fallOffTime);
+        source.gain.gain.linearRampToValueAtTime(0, endTime);
+        
+        source.oscillator1.start(startTime);
+        source.oscillator1.stop(endTime);
+        source.oscillator2.start(startTime);
+        source.oscillator2.stop(endTime);
+        
+        return source.oscillator1;
+    });
 };
 
 
@@ -348,35 +392,38 @@ Piano.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
     var endTime = fallOffTime + 0.03;
     
-    var source = this.createSource();
-    
-    source.oscillator.frequency.setValueAtTime(pitch, startTime);
-    
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
-    source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
-    
-    source.noiseFilter.frequency.setValueAtTime(pitch, startTime);
-    source.noiseFilter.Q.setValueAtTime(9, startTime);
-    
-    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
-    source.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
-    
-    // The piano can't be "held," it will fall off over time no matter what
-    source.gain.gain.exponentialRampToValueAtTime(
-        reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
-        fallOffTime);
-    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    
-    source.oscillator.start(startTime);
-    source.oscillator.stop(endTime);
-    source.noise.start(startTime);
-    source.noise.stop(endTime);
-    
-    return source.oscillator;
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
+        
+        source.oscillator.frequency.setValueAtTime(pitch, startTime);
+        
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+        source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
+        
+        source.noiseFilter.frequency.setValueAtTime(pitch, startTime);
+        source.noiseFilter.Q.setValueAtTime(9, startTime);
+        
+        source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
+        source.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
+        
+        // The piano can't be "held," it will fall off over time no matter what
+        source.gain.gain.exponentialRampToValueAtTime(
+            reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
+            fallOffTime);
+        source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+        
+        source.oscillator.start(startTime);
+        source.oscillator.stop(endTime);
+        source.noise.start(startTime);
+        source.noise.stop(endTime);
+        
+        return source.oscillator;
+    });
 };
 
 function Guitar(context, analyzer) {
@@ -435,34 +482,37 @@ Guitar.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
     var endTime = fallOffTime + 0.03;
     
-    var source = this.createSource();
-    source.oscillator.frequency.setValueAtTime(pitch, startTime);
-    
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
-    source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
-    
-    source.noiseFilter.frequency.setValueAtTime(pitch, startTime);
-    source.noiseFilter.Q.setValueAtTime(9, startTime);
-    
-    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
-    source.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
-    
-    // The guitar can't be "held," it will fall off over time no matter what
-    source.gain.gain.exponentialRampToValueAtTime(
-        reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
-        fallOffTime);
-    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    
-    source.oscillator.start(startTime);
-    source.oscillator.stop(endTime);
-    source.noise.start(startTime);
-    source.noise.stop(endTime);
-    
-    return source.oscillator;
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
+        source.oscillator.frequency.setValueAtTime(pitch, startTime);
+        
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+        source.gain.gain.exponentialRampToValueAtTime(reduceGain, reduceEndTime);
+        
+        source.noiseFilter.frequency.setValueAtTime(pitch, startTime);
+        source.noiseFilter.Q.setValueAtTime(9, startTime);
+        
+        source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.noiseGain.gain.exponentialRampToValueAtTime(0.5, attackEndTime);
+        source.noiseGain.gain.exponentialRampToValueAtTime(0.01, reduceEndTime);
+        
+        // The guitar can't be "held," it will fall off over time no matter what
+        source.gain.gain.exponentialRampToValueAtTime(
+            reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
+            fallOffTime);
+        source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+        
+        source.oscillator.start(startTime);
+        source.oscillator.stop(endTime);
+        source.noise.start(startTime);
+        source.noise.stop(endTime);
+        
+        return source.oscillator;
+    });
 };
 
 function Violin(context, analyzer) {
@@ -491,7 +541,7 @@ Violin.prototype.createSource = function() {
     filter.frequency.value = 2000;
     
     gain.connect(filter);
-    filter.connect(analyzer);
+    filter.connect(this.analyzer);
     
     return {
         oscillator: oscillator,
@@ -513,25 +563,28 @@ Violin.prototype.play = function(options) {
     var fallOffTime = Math.max(attackEndTime, startTime + duration);
     var endTime = fallOffTime + 0.05;
     
-    var source = this.createSource();
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
 
-    source.oscillator1.frequency.setValueAtTime(pitch, startTime);
-    source.oscillator1.detune.value = 5;
-    source.oscillator2.frequency.setValueAtTime(pitch, startTime);
-    source.oscillator2.detune.value = -5;
-    
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.gain.gain.exponentialRampToValueAtTime(volume, attackEndTime);
-    source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
-    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    
-    source.oscillator1.start(startTime);
-    source.oscillator1.stop(endTime);
-    source.oscillator2.start(startTime);
-    source.oscillator2.stop(endTime);
-    
-    return source.oscillator1;
+        source.oscillator1.frequency.setValueAtTime(pitch, startTime);
+        source.oscillator1.detune.value = 5;
+        source.oscillator2.frequency.setValueAtTime(pitch, startTime);
+        source.oscillator2.detune.value = -5;
+        
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.gain.gain.exponentialRampToValueAtTime(volume, attackEndTime);
+        source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
+        source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+        
+        source.oscillator1.start(startTime);
+        source.oscillator1.stop(endTime);
+        source.oscillator2.start(startTime);
+        source.oscillator2.stop(endTime);
+        
+        return source.oscillator1;
+    });
 };
 
 // Bass
@@ -573,26 +626,29 @@ Bass.prototype.play = function(options) {
     var fallOffTime = Math.max(reduceEndTime, Math.min(reduceEndTime + maxDurationSeconds, startTime + duration));
     var endTime = fallOffTime + 0.01;
     
-    var source = this.createSource();
-    source.oscillator.frequency.setValueAtTime(pitch, startTime);
-    
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
-    if (!finalVolume) {
-        // The bass can't be "held," it will fall off over time no matter what
-        source.gain.gain.exponentialRampToValueAtTime(
-            reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
-            fallOffTime);
-    } else {
-        source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
-    }
-    source.gain.gain.linearRampToValueAtTime(0, endTime);
-    
-    source.oscillator.start(startTime);
-    source.oscillator.stop(endTime);
-    
-    return source.oscillator;
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
+        source.oscillator.frequency.setValueAtTime(pitch, startTime);
+        
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.gain.gain.exponentialRampToValueAtTime(attackGain, attackEndTime);
+        if (!finalVolume) {
+            // The bass can't be "held," it will fall off over time no matter what
+            source.gain.gain.exponentialRampToValueAtTime(
+                reduceGain * (1 + BASICALLY_ZERO - ((fallOffTime - reduceEndTime) / maxDurationSeconds)),
+                fallOffTime);
+        } else {
+            source.gain.gain.exponentialRampToValueAtTime(finalVolume, fallOffTime);
+        }
+        source.gain.gain.linearRampToValueAtTime(0, endTime);
+        
+        source.oscillator.start(startTime);
+        source.oscillator.stop(endTime);
+        
+        return source.oscillator;
+    });
 };
 
 // Slider
@@ -625,33 +681,36 @@ Slider.prototype.play = function(options) {
     var toGain = options.toGain || options.fromGain;
     var duration = options.duration || 1;
 
-    var source = this.createSource();
-    // Ramp up/down at the beginning/end of being played to avoid clicks.
-    var rampUpTime = 0.02;
-    var rampDownTime = 0.02;
-    var rampUpEndTime = startTime + rampUpTime;
-    var holdTime = duration;
-    holdTime = Math.max(holdTime, rampUpTime);
-    var rampDownStartTime = startTime + holdTime;
-    var endTime = rampDownStartTime + rampDownTime;
-    
-    source.oscillator.frequency.setValueAtTime(fromPitch, tstartTimeime);
-    source.oscillator.frequency.linearRampToValueAtTime(toPitch, endTime);
-    
-    // Avoid errors if fromGain or toGain is 0
-    fromGain = Math.max(fromGain, BASICALLY_ZERO);
-    toGain = Math.max(toGain, BASICALLY_ZERO);
-    
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-    source.gain.gain.exponentialRampToValueAtTime(fromGain, rampUpEndTime);
-    source.gain.gain.linearRampToValueAtTime(toGain, rampDownStartTime);
-    source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    
-    source.oscillator.start(startTime);
-    source.oscillator.stop(endTime);
-    
-    return source.oscillator;
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
+        // Ramp up/down at the beginning/end of being played to avoid clicks.
+        var rampUpTime = 0.02;
+        var rampDownTime = 0.02;
+        var rampUpEndTime = startTime + rampUpTime;
+        var holdTime = duration;
+        holdTime = Math.max(holdTime, rampUpTime);
+        var rampDownStartTime = startTime + holdTime;
+        var endTime = rampDownStartTime + rampDownTime;
+        
+        source.oscillator.frequency.setValueAtTime(fromPitch, tstartTimeime);
+        source.oscillator.frequency.linearRampToValueAtTime(toPitch, endTime);
+        
+        // Avoid errors if fromGain or toGain is 0
+        fromGain = Math.max(fromGain, BASICALLY_ZERO);
+        toGain = Math.max(toGain, BASICALLY_ZERO);
+        
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
+        source.gain.gain.exponentialRampToValueAtTime(fromGain, rampUpEndTime);
+        source.gain.gain.linearRampToValueAtTime(toGain, rampDownStartTime);
+        source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+        
+        source.oscillator.start(startTime);
+        source.oscillator.stop(endTime);
+        
+        return source.oscillator;
+    });
 };
 
 function createNoiseBuffer(context) {
@@ -708,27 +767,30 @@ WhiteNoiseWithFilter.prototype.play = function(options) {
     var finalQ = options.finalQ || initialQ;
     var volume = options.volume || 1;
     
-    var source = this.createSource();
-    
-    var rampUpStartTime = Math.max(startTime - 0.02, 0);
-    var rampDownStartTime = startTime + duration - 0.02;
-    var endTime = startTime + duration;
-    
-    source.noiseFilter.frequency.setValueAtTime(initialFrequency, startTime);
-    source.noiseFilter.Q.setValueAtTime(initialQ, startTime);
-    source.noiseFilter.frequency.exponentialRampToValueAtTime(finalFrequency, endTime);
-    source.noiseFilter.Q.exponentialRampToValueAtTime(finalQ, endTime);
-    
-    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
-    source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, rampUpStartTime);
-    source.noiseGain.gain.exponentialRampToValueAtTime(volume, startTime);
-    source.noiseGain.gain.setValueAtTime(volume, rampDownStartTime);
-    source.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
-    
-    source.noise.start(rampUpStartTime);
-    source.noise.stop(endTime);
-    
-    return source.noise;
+    var _this = this;
+    return runBefore(this.context, startTime).then(function() {
+        var source = _this.createSource();
+        
+        var rampUpStartTime = Math.max(startTime - 0.02, 0);
+        var rampDownStartTime = startTime + duration - 0.02;
+        var endTime = startTime + duration;
+        
+        source.noiseFilter.frequency.setValueAtTime(initialFrequency, startTime);
+        source.noiseFilter.Q.setValueAtTime(initialQ, startTime);
+        source.noiseFilter.frequency.exponentialRampToValueAtTime(finalFrequency, endTime);
+        source.noiseFilter.Q.exponentialRampToValueAtTime(finalQ, endTime);
+        
+        source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+        source.noiseGain.gain.setValueAtTime(BASICALLY_ZERO, rampUpStartTime);
+        source.noiseGain.gain.exponentialRampToValueAtTime(volume, startTime);
+        source.noiseGain.gain.setValueAtTime(volume, rampDownStartTime);
+        source.noiseGain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
+        
+        source.noise.start(rampUpStartTime);
+        source.noise.stop(endTime);
+        
+        return source.noise;
+    });
 };
 
 function WhiteNoiseWithBandPass(context, analyzer) {
@@ -767,41 +829,71 @@ WhiteNoiseWithHighPass.prototype.init = function() {
     source.noiseFilter.type = 'highpass';
 };
 
-const A4 = 440;
+// TimerInstrument: a silent instrument used purely for firing events at specific times
+function TimerInstrument(context) {
+    this.context = context;
+}
 
-const Gs4 = A4 * Math.pow(2, -1/12);
-const G4 = A4 * Math.pow(2, -2/12);
-const Fs4 = A4 * Math.pow(2, -3/12);
-const F4 = A4 * Math.pow(2, -4/12);
-const E4 = A4 * Math.pow(2, -5/12);
-const Ds4 = A4 * Math.pow(2, -6/12);
-const D4 = A4 * Math.pow(2, -7/12);
-const Cs4 = A4 * Math.pow(2, -8/12);
-const C4 = A4 * Math.pow(2, -9/12);
-const B3 = A4 * Math.pow(2, -10/12);
-const As3 = A4 * Math.pow(2, -11/12);
+TimerInstrument.prototype.createSource = function() {
+    var oscillator = this.context.createOscillator();
+    oscillator.type = 'triangle';
+ 
+    var gain = this.context.createGain();
+    gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
+    oscillator.connect(gain);
+    gain.connect(this.context.destination);
+    
+    return {
+        oscillator: oscillator,
+        gain: gain,
+    };
+};
 
-const D5 = A4 * Math.pow(2, 5/12);
-const Cs5 = A4 * Math.pow(2, 4/12);
-const C5 = A4 * Math.pow(2, 3/12);
-const B4 = A4 * Math.pow(2, 2/12);
-const As4 = A4 * Math.pow(2, 1/12);
+TimerInstrument.prototype.play = function(options) {
+    options = options || {};
+    var endTime = options.endTime || 0;
 
-const A3 = 220;
-const A2 = 110;
+    var source = this.createSource();
+    source.oscillator.start(Math.max(endTime - 1, 0));
+    source.oscillator.stop(endTime);
+    return source.oscillator;
+};
 
-const As2 = A2 * Math.pow(2, 1/12);
-const B2 = A2 * Math.pow(2, 2/12);
-const C3 = A2 * Math.pow(2, 3/12);
-const Cs3 = A2 * Math.pow(2, 4/12);
-const D3 = A2 * Math.pow(2, 5/12);
+var A4 = 440;
+
+var Gs4 = A4 * Math.pow(2, -1/12);
+var G4 = A4 * Math.pow(2, -2/12);
+var Fs4 = A4 * Math.pow(2, -3/12);
+var F4 = A4 * Math.pow(2, -4/12);
+var E4 = A4 * Math.pow(2, -5/12);
+var Ds4 = A4 * Math.pow(2, -6/12);
+var D4 = A4 * Math.pow(2, -7/12);
+var Cs4 = A4 * Math.pow(2, -8/12);
+var C4 = A4 * Math.pow(2, -9/12);
+var B3 = A4 * Math.pow(2, -10/12);
+var As3 = A4 * Math.pow(2, -11/12);
+
+var D5 = A4 * Math.pow(2, 5/12);
+var Cs5 = A4 * Math.pow(2, 4/12);
+var C5 = A4 * Math.pow(2, 3/12);
+var B4 = A4 * Math.pow(2, 2/12);
+var As4 = A4 * Math.pow(2, 1/12);
+
+var A3 = 220;
+var A2 = 110;
+
+var As2 = A2 * Math.pow(2, 1/12);
+var B2 = A2 * Math.pow(2, 2/12);
+var C3 = A2 * Math.pow(2, 3/12);
+var Cs3 = A2 * Math.pow(2, 4/12);
+var D3 = A2 * Math.pow(2, 5/12);
 
 var isVisualizationStopped = true;
 
 function doVisualization(analyzer) {
     isVisualizationStopped = false;
-    const canvas = document.getElementById('visualizationArea');
-    const canvasContext = canvas.getContext('2d');
+    var canvas = document.getElementById('visualizationArea');
+    var canvasContext = canvas.getContext('2d');
     canvas.width = 0;
     canvas.width = Math.max(512, $(document).width());
     
@@ -811,7 +903,7 @@ function doVisualization(analyzer) {
     var bufferLength = analyzer.frequencyBinCount;
     var dataArray = new Uint8Array(bufferLength);
 
-    const draw = function() {
+    var draw = function() {
     
         analyzer.getByteFrequencyData(dataArray);
         
@@ -842,13 +934,13 @@ function stopVisualization() {
 }
 
 function playSong() {
-    const BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
-    const BEATS_PER_MINUTE = 80 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
-    const SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
-    const SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
+    var BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
+    var BEATS_PER_MINUTE = 80 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
+    var SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
+    var SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
 
-    const context = new AudioContext();
-    const analyzer = context.createAnalyser();
+    var context = new AudioContext();
+    var analyzer = context.createAnalyser();
     analyzer.connect(context.destination);
     
     doVisualization(analyzer);

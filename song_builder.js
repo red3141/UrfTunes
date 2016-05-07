@@ -534,70 +534,65 @@ var songBuilder = (function (seedrandom) {
         var bodyStartTime = currentTime;
 
         for (var i = 0; i < song.form.length; ++i) {
-            (function (segmentNumber) {
-                var segmentStartTime = bodyStartTime + segmentNumber * measuresPerSegment * beatsPerBar * secondsPerBeat;
-                setTimeout(function () {
-                    currentBeat = 0;
-                    currentTime = segmentStartTime;
-                    // Add drums
-                    var segment = song.segments[song.form[segmentNumber]];
-                    for (var j = 0; j < measuresPerSegment; ++j) {
-                        // Play bass drum on 1 and 3
-                        bassDrum.play({ startTime: currentTime });
-                        bassDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
-                        // Snare on 3
-                        snareDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
-                        currentBeat += beatsPerBar;
-                        currentTime = currentBeat * secondsPerBeat + segmentStartTime;
-                    }
-                    console.log(currentBeat);
+            var segmentStartTime = bodyStartTime + i * measuresPerSegment * beatsPerBar * secondsPerBeat;
+            currentBeat = 0;
+            currentTime = segmentStartTime;
+            // Add drums
+            var segment = song.segments[song.form[i]];
+            for (var j = 0; j < measuresPerSegment; ++j) {
+                // Play bass drum on 1 and 3
+                bassDrum.play({ startTime: currentTime });
+                bassDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
+                // Snare on 3
+                snareDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
+                currentBeat += beatsPerBar;
+                currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+            }
+            console.log(currentBeat);
 
-                    // Add bass line
-                    currentBeat = 0;
-                    currentTime = segmentStartTime;
-                    var segment = song.segments[song.form[segmentNumber]];
-                    var measure = 0;
-                    var beatInMeasure = 0;
-                    var j = 0;
-                    while (measure < measuresPerSegment) {
-                        var rhythm = segment.bassLineRhythm[j % segment.bassLineRhythm.length];
-                        if (!rhythm.isRest) {
-                            // Play the root note of the chord
-                            var chord = segment.chordProgression[measure % segment.chordProgression.length];
-                            var frequency = frequencies[chord] / 4;
-                            bassInstrument.play({ startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
-                        }
-                        currentBeat += rhythm.duration;
-                        beatInMeasure += rhythm.duration;
-                        currentTime = currentBeat * secondsPerBeat + segmentStartTime;
-                        while (beatInMeasure >= beatsPerBar) {
-                            ++measure;
-                            beatInMeasure -= beatsPerBar;
-                        }
-                        ++j;
-                    }
-                    console.log(currentBeat);
+            // Add bass line
+            currentBeat = 0;
+            currentTime = segmentStartTime;
+            var segment = song.segments[song.form[i]];
+            var measure = 0;
+            var beatInMeasure = 0;
+            var j = 0;
+            while (measure < measuresPerSegment) {
+                var rhythm = segment.bassLineRhythm[j % segment.bassLineRhythm.length];
+                if (!rhythm.isRest) {
+                    // Play the root note of the chord
+                    var chord = segment.chordProgression[measure % segment.chordProgression.length];
+                    var frequency = frequencies[chord] / 4;
+                    bassInstrument.play({ startTime: currentTime, pitch: frequency, duration: rhythm.duration * secondsPerBeat });
+                }
+                currentBeat += rhythm.duration;
+                beatInMeasure += rhythm.duration;
+                currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+                while (beatInMeasure >= beatsPerBar) {
+                    ++measure;
+                    beatInMeasure -= beatsPerBar;
+                }
+                ++j;
+            }
+            console.log(currentBeat);
 
-                    // Add melody
-                    currentBeat = 0;
-                    currentTime = segmentStartTime;
-                    var segment = song.segments[song.form[segmentNumber]];
-                    var melodyInstrument = melodyInstruments[segmentNumber];
-                    for (var j = 0; j < segment.melody.length; ++j) {
-                        var note = segment.melody[j];
-                        if (!note.isRest) {
-                            melodyInstrument.play({ startTime: currentTime, pitch: frequencies[note.note], duration: note.duration * secondsPerBeat });
-                        }
-                        currentBeat += note.duration;
-                        currentTime = currentBeat * secondsPerBeat + segmentStartTime;
-                    }
-                    console.log(currentBeat);
-
-                }, (segmentStartTime - 2) * 1000);
-            })(i);
+            // Add melody
+            currentBeat = 0;
+            currentTime = segmentStartTime;
+            var segment = song.segments[song.form[i]];
+            var melodyInstrument = melodyInstruments[i];
+            for (var j = 0; j < segment.melody.length; ++j) {
+                var note = segment.melody[j];
+                if (!note.isRest) {
+                    melodyInstrument.play({ startTime: currentTime, pitch: frequencies[note.note], duration: note.duration * secondsPerBeat });
+                }
+                currentBeat += note.duration;
+                currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+            }
+            console.log(currentBeat);
         }
 
-        var endingStartTime = currentTime;
+        var endingStartTime = bodyStartTime + song.form.length * measuresPerSegment * beatsPerBar * secondsPerBeat;;
         /*
         // Add backgrounds
         /*currentBeat = 0;
@@ -634,10 +629,10 @@ var songBuilder = (function (seedrandom) {
         }*/
 
         // Add ending
-        /*currentBeat = 0;
+        currentBeat = 0;
         currentTime = endingStartTime;
         var melodyInstrument = melodyInstruments[melodyInstruments.length - 1];
-        var lastSource;
+        var lastSourcePromise;
         for (var j = 0; j < song.ending.melody.length; ++j) {
             var note = song.ending.melody[j];
             if (!note.isRest) {
@@ -654,6 +649,7 @@ var songBuilder = (function (seedrandom) {
         }
         var endingLength = currentBeat;
         currentBeat = 0;
+        var beatInMeasure = 0;
         currentTime = endingStartTime;
         measure = 0;
         var j = 0;
@@ -663,7 +659,7 @@ var songBuilder = (function (seedrandom) {
                 // Play the root note of the chord
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
                 var frequency = frequencies[chord] / 4;
-                lastSource = bassInstrument.play({
+                lastSourcePromise = bassInstrument.play({
                     startTime: currentTime,
                     pitch: frequency,
                     duration: rhythm.duration * secondsPerBeat,
@@ -679,14 +675,13 @@ var songBuilder = (function (seedrandom) {
             }
             ++j;
         }
-        
-        $(lastSource).on('ended', function() {
-            audioRecorder.finishRecording();
-            // Kill the context to clean up resources
-            context.close();
-            context = null;
-            stopVisualization();
-        });*/
+        lastSourcePromise.then(function(lastSource) {
+            $(lastSource).on('ended', function() {
+                audioRecorder.finishRecording();
+                // Kill the context to clean up resources
+                stop();
+            });
+        })
     }
 
     function pause() {

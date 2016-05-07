@@ -6,6 +6,8 @@ var songBuilder = (function(seedrandom) {
     var measuresPerSegment = 16;
     var recordedSongBlob;
     function build()  {
+        var beatsPerMinute = 180 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
+        
         var formSeedInputs = ['aatrox', 'ahri', 'akali', 'alistar', 'amumu', 'anivia', 'annie', 'ashe', 'aurelionsol', 'azir', 'bard', 'blitzcrank', 'brand', 'braum', 'caitlyn', 'cassiopeia', 'chogath', 'corki', 'darius', 'diana', 'drmundo', 'draven', 'ekko', 'elise', 'evelynn', 'ezreal', 'fiddlesticks', 'fiora', 'fizz', 'galio', 'gangplank', 'garen', 'gnar', 'gragas', 'graves', 'hecarim', 'heimerdinger', 'illaoi', 'irelia', 'janna', 'jarvaniv'];
         var prng = seedrandom(getSeed(formSeedInputs), { global: false });
         // Start by building the form of the song (e.g. AABA)
@@ -340,6 +342,7 @@ var songBuilder = (function(seedrandom) {
         }
         
         currentSong = {
+            beatsPerMinute: beatsPerMinute,
             form: form,
             intro: intro,
             segments: segments,
@@ -360,14 +363,18 @@ var songBuilder = (function(seedrandom) {
     }
     
     function play(song)  {
+        $('#play').text('Pause');
+        if (context) {
+            // Audio context already exists. Resume instead of creating a new one.
+            context.resume();
+            return;
+        }
         song = song || currentSong;
         if (!song)
             return;
         currentInstruments = [];
         // C4-B5
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
-        if (context)
-            context.close();
         context = new AudioContext();
         analyzer = context.createAnalyser();
         analyzer.connect(context.destination);
@@ -400,7 +407,7 @@ var songBuilder = (function(seedrandom) {
         audioRecorder.startRecording();
         
         var beatsPerBar = 4 // Use 4/4 time
-        var beatsPerMinute = 180 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
+        var beatsPerMinute = song.beatsPerMinute;
         var secondsPerBeat = 60.0 / beatsPerMinute;
         var currentBeat = 0;
         var currentTime = 0;
@@ -519,6 +526,7 @@ var songBuilder = (function(seedrandom) {
             }
             var bassNote = chords[chords.length - 1];
             bassInstrument.play({ startTime: currentTime - beatsPerBar * secondsPerBeat, pitch: frequencies[bassNote] / 4, duration: beatsPerBar * secondsPerBeat, volume: 0.1, finalVolume: 2.5 });
+            
         }
         
         // Body
@@ -625,6 +633,7 @@ var songBuilder = (function(seedrandom) {
         currentBeat = 0;
         currentTime = endingStartTime;
         var melodyInstrument = melodyInstruments[melodyInstruments.length - 1];
+        var lastSource;
         for (var j = 0; j < song.ending.melody.length; ++j) {
             var note = song.ending.melody[j];
             if (!note.isRest) {
@@ -650,7 +659,7 @@ var songBuilder = (function(seedrandom) {
                 // Play the root note of the chord
                 var chord = song.ending.chordProgression[measure % song.ending.chordProgression.length];
                 var frequency = frequencies[chord] / 4;
-                bassInstrument.play({
+                lastSource = bassInstrument.play({
                     startTime: currentTime,
                     pitch: frequency,
                     duration: rhythm.duration * secondsPerBeat,
@@ -667,8 +676,23 @@ var songBuilder = (function(seedrandom) {
             ++j;
         }
         
-        setTimeout(function() {audioRecorder.finishRecording();}, (currentTime - context.currentTime + 4 * secondsPerBeat) * 1000);
-        
+        $(lastSource).on('ended', function() {
+            audioRecorder.finishRecording();
+        });
+    }
+    
+    function pause() {
+        if (context)
+            context.suspend();
+        $('#play').text('Play');
+    }
+    
+    function playOrPause() {
+        var playButton = $('#play');
+        if (playButton.text() === 'Play')
+            play();
+        else
+            pause();
     }
     
     function buildAndPlay()  {
@@ -676,7 +700,9 @@ var songBuilder = (function(seedrandom) {
         currentSong = song;
         play(song);
     }
+    
     function stop()  {
+        $('#play').text('Play');
         if (!context)
             return;
         context.close();
@@ -702,11 +728,11 @@ var songBuilder = (function(seedrandom) {
         
     }
     
-    //currentSong = build();
-    
     return {
         build: build,
         play: play,
+        pause: pause,
+        playOrPause: playOrPause,
         buildAndPlay: buildAndPlay,
         stop: stop,
         test: test

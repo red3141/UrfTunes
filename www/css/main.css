@@ -66,6 +66,16 @@ div.champRow {
     margin-left: 0.2rem;
 }
 
+#playbackButtons {
+    text-align: center;
+    margin-top: 1.5rem;
+    visibility: hidden;
+}
+#play, #stop {
+    /* Impose a min width on the button, mainly so when the play button changes its text to 'Pause' things don't shift around */
+    min-width: 7rem;
+}
+
 #visualizationArea {
     margin-top: 1rem;
 }

@@ -55,8 +55,8 @@
                     </div>
                 </form>
             </div>
-            <div style="text-align:center;margin-top:1.5rem;">
-                <button type="button" id="play" class="btn btn-success" onclick="songBuilder.play();" disabled>Play</button>
+            <div id="playbackButtons">
+                <button type="button" id="play" class="btn btn-success" onclick="songBuilder.playOrPause();" disabled>Play</button>
                 <button type="button" id="stop" class="btn btn-danger" style="margin-left: 2rem;" onclick="songBuilder.stop();" disabled>Stop</button>
                 <a id="downloadSongButton" class="btn btn-default" style="margin-left: 2rem;" disabled>Download Song</a>
             </div>

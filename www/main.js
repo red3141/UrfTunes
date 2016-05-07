@@ -81,6 +81,7 @@
                 songBuilder.build();
                 if (playOnLoad)
                     songBuilder.play();
+                $('#playbackButtons').css('visibility', 'visible');
                 $('#play').prop('disabled', false);
                 $('#stop').prop('disabled', false);
                 

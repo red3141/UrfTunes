@@ -82,6 +82,7 @@
                 if (playOnLoad)
                     songBuilder.play();
                 $('#playbackButtons').css('visibility', 'visible');
+                $('#notFoundMessage').hide();
                 $('#play').prop('disabled', false);
                 $('#stop').prop('disabled', false);
                 
@@ -92,6 +93,8 @@
             } else {
                 $('#play').prop('disabled', true);
                 $('#stop').prop('disabled', true);
+                $('#playbackButtons').css('visibility', 'hidden');
+                $('#notFoundMessage').show();
             }
         }
         xmlHttp.onerror = function() {

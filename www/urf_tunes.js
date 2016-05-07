@@ -1,7 +1,7 @@
 const MAX_GAIN = 3;
 const BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
-var currentSineTooth = -1;
+var currentChampionSet = -1;
 
 window.addEventListener('load', init, false);
 function init() {
@@ -11,6 +11,14 @@ function init() {
         alert('Your browser does not support Urf Tunes; we recommend using Google Chrome.');
     }
 };
+
+function displayChampionSet(n) {
+    if (n === currentChampionSet)
+        return;
+    currentChampionSet = n;
+    for (var i = 0; i < 5; ++i)
+        $('#champions' + i).toggle(i === n);
+}
 
 // Bass Drum
 function BassDrum(context, analyzer) {
@@ -182,7 +190,7 @@ SineTooth.prototype.play = function(options) {
     var mode = this.mode;
     
     $(this.oscillator).on('ended', function() {
-        window.currentSineTooth = mode;
+        displayChampionSet(mode);
     });
     
     return this.oscillator;
@@ -733,21 +741,20 @@ function doVisualization(analyzer) {
     isVisualizationStopped = false;
     const canvas = document.getElementById('visualizationArea');
     const canvasContext = canvas.getContext('2d');
+    canvas.width = 0;
+    canvas.width = Math.max(512, $(document).width());
     
+    var width = canvas.width;
+    var height = canvas.height;
+    analyzer.fftSize = 1024;
+    var bufferLength = analyzer.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+
     const draw = function() {
-        canvasContext.canvas.width = 0;
-        canvasContext.canvas.width = Math.max(512, $(document).width());
     
-        width = canvas.width;
-        height = canvas.height;
-    
-        analyzer.fftSize = 1024;
-        var bufferLength = analyzer.frequencyBinCount;
-        var dataArray = new Uint8Array(bufferLength);
         analyzer.getByteFrequencyData(dataArray);
         
-        canvasContext.fillStyle = 'rgb(9, 9, 9)';
-        canvasContext.fillRect(0, 0, width, height);
+        canvasContext.clearRect(0, 0, width, height);
         
         var barWidth = (width / bufferLength);
         var barHeight;
@@ -760,15 +767,6 @@ function doVisualization(analyzer) {
             canvasContext.fillRect(x, height-barHeight, barWidth, barHeight);
             
             x += barWidth + 1;
-        }
-        
-        // Show the right set of champions
-        if (window.currentSineTooth >= 0) {
-            for (var i = 0; i < 5; ++i) {
-                $('#champions' + i).toggle(i == window.currentSineTooth);
-            }
-            // No need to do this again until the currentSineTooth changes again
-            window.currentSineTooth = -1;
         }
         
         if (!isVisualizationStopped)

@@ -69,7 +69,7 @@
                 $('#summonerName').focus();
             }
         }
-        if (navigator.userAgent.indexOf('Chrome') === -1) {
+        if (navigator.userAgent.indexOf('Chrome') === -1 || navigator.userAgent.indexOf('Edge') !== -1) {
             $('#browserErrorMessage').show();
         }
         

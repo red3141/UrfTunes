@@ -515,6 +515,7 @@ Guitar.prototype.play = function(options) {
     });
 };
 
+// It's called a Violin. It sounds more like an accordion. Meh.
 function Violin(context, analyzer) {
     this.context = context;
     this.analyzer = analyzer;
@@ -544,10 +545,9 @@ Violin.prototype.createSource = function() {
     filter.connect(this.analyzer);
     
     return {
-        oscillator: oscillator,
+        oscillator1: oscillator1,
+        oscillator2: oscillator2,
         gain: gain,
-        noise: noise,
-        noiseGain: noiseGain,
     };
 };
 

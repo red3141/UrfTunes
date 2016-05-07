@@ -799,7 +799,7 @@ const D3 = A2 * Math.pow(2, 5/12);
 var isVisualizationStopped = true;
 
 function doVisualization(analyzer) {
-    /*isVisualizationStopped = false;
+    isVisualizationStopped = false;
     const canvas = document.getElementById('visualizationArea');
     const canvasContext = canvas.getContext('2d');
     canvas.width = 0;
@@ -834,7 +834,7 @@ function doVisualization(analyzer) {
             window.requestAnimationFrame(draw);
     };
     
-    draw();*/
+    draw();
 }
 
 function stopVisualization() {

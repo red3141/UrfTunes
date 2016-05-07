@@ -98,6 +98,7 @@ div.champRow {
 .social-media-buttons {
     margin-top: 1.5rem;
     text-align: center;
+    display: none;
 }
 .fb-share-button {
     position: relative;
@@ -115,4 +116,11 @@ div.champRow {
     text-align: center;
     font-size: 1.1rem;
     margin-top: 3rem;
+}
+
+
+#browserErrorMessage {
+    display: none;
+    color: #FF6666;
+    text-align: center;
 }

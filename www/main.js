@@ -18,6 +18,16 @@
         return args;
     }
     
+    function updateShareButton() {
+        var host = 'red3141.github.io/UrfTunes';
+        var href = 'http://red3141.github.io/UrfTunes/' + location.search;
+        $('.fb-share-button').attr('data-href', href);
+        $('.fb-share-button iframe').attr('src',
+            location.protocol + "//www.facebook.com/v2.3/plugins/share_button.php?app_id=&channel=http%3A%2F%2Fstatic.ak.facebook.com%2Fconnect%2Fxd_arbiter%2FKvoNGODIqPG.js%3Fversion%3D41%23cb%3Df29bfbb228%26domain%3D"
+            + location.host + "%26origin%3D" + encodeURIComponent(encodeURIComponent(location.protocol)) + "%252F%252F" + host + "%252Ff2b736fc34%26relation%3Dparent.parent&container_width=191&href="
+            + encodeURIComponent(href) + "&layout=button&locale=en_US&sdk=joey");
+    }
+    
     $(window).on('popstate', function(e) {
         // Try to parse parameters in the query string.
         // Sometimes a '/' gets added to the end of the query string - if so, remove it.
@@ -35,9 +45,12 @@
         } else {
             $('#summonerName').focus();
         }
+        updateShareButton();
     });
     
     $(document).ready(function() {
+        $('#summonerName').focus();
+        
         var args = parseSearch(location.search);
         if (args.summoner) {
             args.region = args.region || 'na';
@@ -56,12 +69,16 @@
                 $('#summonerName').focus();
             }
         }
+        if (navigator.userAgent.indexOf('Chrome') === -1 || navigator.userAgent.indexOf('Edge') !== -1) {
+            $('#browserErrorMessage').show();
+        }
         
-        $("#summonerForm").submit(function(e) {
+        $('#summonerForm').submit(function(e) {
             loadSummoner($('#summonerName').val(), $('#region').val(), true, true);
             e.preventDefault();
             return false;
         });
+        updateShareButton();
     });
     
     function setChampionIconOpacities() {
@@ -75,19 +92,20 @@
             $('#summonerName').focus();
             return;
         }
-            
+        songBuilder.stop();
+
         // Get the standardized summoner name, which has spaces removed and is lowercase.
-        summonerName = summonerName.replace(/\s+/g, '').toLowerCase();
+        normalizedSummonerName = summonerName.replace(/\s+/g, '').toLowerCase();
         
         var connectionSucceeded = false;
         $.ajax({
-            url: 'http://172.81.178.14:8080/' + region + '/' + summonerName,
+            url: 'http://172.81.178.14:8080/' + region + '/' + normalizedSummonerName,
             dataType: 'json'
         }).then(null, function(response) {
             // If the request failed, maybe the server is down. Try to get pre-cached data.
             connectionSucceeded = response && response.readyState === 4;
             return $.ajax({
-                url: 'json/' + summonerName + '-' + region + ".json",
+                url: 'json/' + normalizedSummonerName + '-' + region + ".json",
                 dataType: 'json'
             });
         }).then(function(championMasteryLevels) {
@@ -103,18 +121,22 @@
             if (playOnLoad)
                 songBuilder.play();
             $('#playbackButtons').css('visibility', 'visible');
+            $('.social-media-buttons').show();
             $('#errorMessage').hide();
             $('#play').prop('disabled', false);
             $('#stop').prop('disabled', false);
 
             localStorage.setItem("summoner", summonerName);
             localStorage.setItem("region", region);
-            if (pushState)
+            if (pushState) {
                 history.pushState(null, summonerName, '?summoner=' + encodeURIComponent(summonerName) + '&region=' + encodeURIComponent(region));
+                updateShareButton();
+            }
         }, function(response) {
             $('#play').prop('disabled', true);
             $('#stop').prop('disabled', true);
             $('#playbackButtons').css('visibility', 'hidden');
+            $('.social-media-buttons').hide();
             $('#errorMessage').show();
             if (connectionSucceeded)
                 $('#errorMessage').text('That summoner name was not found in the selected region. Check that the name is spelled correctly and that you are in the right region.');

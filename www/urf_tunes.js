@@ -44,6 +44,8 @@ BassDrum.prototype.play = function(options) {
     
     this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
+    
+    return this.oscillator;
 };
 
 // Snare Drum
@@ -109,6 +111,8 @@ SnareDrum.prototype.play = function(options) {
     
     this.noise.stop(endTime);
     this.oscillator.stop(endTime);
+    
+    return this.oscillator;
 }
 
 // SineTooth
@@ -188,7 +192,11 @@ SineTooth.prototype.play = function(options) {
     
     var mode = this.mode;
     
-    this.oscillator.onended = function() {window.currentSineTooth = mode;};
+    $(this.oscillator).on('ended', function() {
+        window.currentSineTooth = mode;
+    });
+    
+    return this.oscillator;
 };
 
 
@@ -257,6 +265,8 @@ Trumpet.prototype.play = function(options) {
     this.oscillator1.stop(endTime);
     this.oscillator2.start(startTime);
     this.oscillator2.stop(endTime);
+    
+    return this.oscillator1;
 };
 
 
@@ -335,6 +345,8 @@ Piano.prototype.play = function(options) {
     this.oscillator.stop(endTime);
     this.noise.start(startTime);
     this.noise.stop(endTime);
+    
+    return this.oscillator;
 };
 
 function Guitar(context, analyzer) {
@@ -412,6 +424,8 @@ Guitar.prototype.play = function(options) {
     this.oscillator.stop(endTime);
     this.noise.start(startTime);
     this.noise.stop(endTime);
+    
+    return this.oscillator;
 };
 
 function Violin(context, analyzer) {
@@ -471,6 +485,8 @@ Violin.prototype.play = function(options) {
     this.oscillator1.stop(endTime);
     this.oscillator2.start(startTime);
     this.oscillator2.stop(endTime);
+    
+    return this.oscillator1;
 };
 
 // Bass
@@ -526,6 +542,8 @@ Bass.prototype.play = function(options) {
     
     this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
+    
+    return this.oscillator;
 };
 
 // Slider
@@ -579,6 +597,8 @@ Slider.prototype.play = function(startTime, fromPitch, toPitch, fromGain, toGain
     
     this.oscillator.start(startTime);
     this.oscillator.stop(endTime);
+    
+    return this.oscillator;
 };
 
 function createNoiseBuffer(context) {
@@ -649,6 +669,8 @@ WhiteNoiseWithFilter.prototype.play = function(options) {
     
     this.noise.start(rampUpStartTime);
     this.noise.stop(endTime);
+    
+    return this.noise;
 };
 
 function WhiteNoiseWithBandPass(context, analyzer) {
@@ -716,7 +738,10 @@ const C3 = A2 * Math.pow(2, 3/12);
 const Cs3 = A2 * Math.pow(2, 4/12);
 const D3 = A2 * Math.pow(2, 5/12);
 
+var isVisualizationStopped = true;
+
 function doVisualization(analyzer) {
+    isVisualizationStopped = false;
     const canvas = document.getElementById('visualizationArea');
     const canvasContext = canvas.getContext('2d');
     
@@ -756,11 +781,16 @@ function doVisualization(analyzer) {
             // No need to do this again until the currentSineTooth changes again
             window.currentSineTooth = -1;
         }
-
-        window.requestAnimationFrame(draw);
+        
+        if (!isVisualizationStopped)
+            window.requestAnimationFrame(draw);
     };
     
     draw();
+}
+
+function stopVisualization() {
+    isVisualizationStopped = true;
 }
 
 function playSong() {

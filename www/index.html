@@ -31,7 +31,7 @@
         </div>
         <div class="urf-container">
             <div class="description">
-                Procedural music generator based on Champion Mastery
+                Procedural music generator based on Champion Mastery Levels
             </div>
                 <form id="summonerForm">
                     <div class="input-group">
@@ -55,10 +55,13 @@
                     </div>
                 </form>
             </div>
-            <div style="text-align:center;margin-top:1.5rem;">
-                <button type="button" id="play" class="btn btn-success" onclick="songBuilder.play();" disabled>Play</button>
-                <button type="button" id="stop" class="btn btn-danger" style="margin-left: 2rem;" onclick="songBuilder.stop();" disabled>Stop</button>
-                <a id="downloadSongButton" class="btn btn-default" style="margin-left: 2rem;" disabled>Download Song</a>
+            <div id="playbackButtonContainer">
+                <div id="playbackButtons">
+                    <button type="button" id="play" class="btn btn-success" onclick="songBuilder.playOrPause();" disabled>Play</button>
+                    <button type="button" id="stop" class="btn btn-danger" style="margin-left: 2rem;" onclick="songBuilder.stop();" disabled>Stop</button>
+                    <a id="downloadSongButton" class="btn btn-default" style="margin-left: 2rem;" disabled>Download Song</a>
+                </div>
+                <div id="errorMessage"></div>
             </div>
         </div>
         <canvas id="visualizationArea" height="256"></canvas>

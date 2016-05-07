@@ -74,38 +74,51 @@
         // Get the standardized summoner name, which has spaces removed and is lowercase.
         summonerName = summonerName.replace(/\s+/g, '').toLowerCase();
         
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onload = function() {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                championMasteryLevels = JSON.parse(xmlHttp.responseText);
-                for (var i = 0; i < championNames.length; ++i) {
-                    if (!championMasteryLevels[championNames[i]]) {
-                        championMasteryLevels[championNames[i]] = 0;
-                    }
+        function playSong(championMasteryLevels) {
+            for (var i = 0; i < championNames.length; ++i) {
+                if (!championMasteryLevels[championNames[i]]) {
+                    championMasteryLevels[championNames[i]] = 0;
                 }
-                window.masteries = championMasteryLevels;
-                
-                setChampionIconOpacities();
-                
-                songBuilder.build();
-                if (playOnLoad)
-                    songBuilder.play();
-                $('#play').prop('disabled', false);
-                $('#stop').prop('disabled', false);
-                
-                localStorage.setItem("summoner", summonerName);
-                localStorage.setItem("region", region);
-                if (pushState)
-                    history.pushState(null, summonerName, '?summoner=' + encodeURIComponent(summonerName) + '&region=' + encodeURIComponent(region));
-            } else {
-                $('#play').prop('disabled', true);
-                $('#stop').prop('disabled', true);
             }
+            window.masteries = championMasteryLevels;
+            setChampionIconOpacities();
+            songBuilder.build();
+            if (playOnLoad)
+                songBuilder.play();
+            $('#playbackButtons').css('visibility', 'visible');
+            $('#errorMessage').hide();
+            $('#play').prop('disabled', false);
+            $('#stop').prop('disabled', false);
+
+            localStorage.setItem("summoner", summonerName);
+            localStorage.setItem("region", region);
+            if (pushState)
+                history.pushState(null, summonerName, '?summoner=' + encodeURIComponent(summonerName) + '&region=' + encodeURIComponent(region));
         }
-        xmlHttp.onerror = function() {
-            alert('Something disasterous has occured, terribly sorry about that.');
-        }
-        xmlHttp.open('GET', 'http://172.81.178.14:8080/' + region + '/' + summonerName, true);
-        xmlHttp.send(null);
+        
+        var connectionSucceeded = false;
+        $.ajax({
+            url: 'http://172.81.178.14:8080/' + region + '/' + summonerName,
+            dataType: 'json'
+        }).then(null, function(response) {
+            // If the request failed, maybe the server is down. Try to get pre-cached data.
+            connectionSucceeded = response && response.readyState === 4;
+            return $.ajax({
+                url: 'json/' + summonerName.toLowerCase() + '-' + region + ".json",
+                dataType: 'json'
+            });
+        }).then(function(championMasteryLevels) {
+            connectionSucceeded = true;
+            playSong(championMasteryLevels);
+        }, function(response) {
+            $('#play').prop('disabled', true);
+            $('#stop').prop('disabled', true);
+            $('#playbackButtons').css('visibility', 'hidden');
+            $('#errorMessage').show();
+            if (connectionSucceeded)
+                $('#errorMessage').text('That summoner name was not found in the selected region. Check that the name is spelled correctly and that you are in the right region.');
+            else
+                $('#errorMessage').text('Oops! It looks like our server is down, so we can\'t get your data. Try checking out some of our suggested summoner songs.');
+        });
     }
 })();

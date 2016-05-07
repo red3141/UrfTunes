@@ -452,7 +452,7 @@ var songBuilder = (function(seedrandom) {
         var minVolume = 0.05;
         var peakVolume = 0.1;
         // Intro
-        if (song.intro.mode === 0) {
+        if (/*song.intro.mode === 0*/true) {
             // Basic intro - start with bass & bass drum, add snare
             var introLength = 32;
             for (var i = 0; i < introLength; ++i) {
@@ -529,7 +529,7 @@ var songBuilder = (function(seedrandom) {
             bassInstrument.play({ startTime: currentTime - beatsPerBar * secondsPerBeat, pitch: frequencies[bassNote] / 4, duration: beatsPerBar * secondsPerBeat, volume: 0.1, finalVolume: 2.5 });
             
         }
-        
+        /*
         // Body
         var bodyStartTime = currentTime;
         currentBeat = 0;
@@ -592,7 +592,7 @@ var songBuilder = (function(seedrandom) {
                 currentTime = currentBeat * secondsPerBeat + bodyStartTime;
             }
         }
-        console.log(currentBeat);
+        console.log(currentBeat);*/
         
         var endingStartTime = currentTime;
         /*
@@ -631,7 +631,7 @@ var songBuilder = (function(seedrandom) {
         }*/
         
         // Add ending
-        currentBeat = 0;
+        /*currentBeat = 0;
         currentTime = endingStartTime;
         var melodyInstrument = melodyInstruments[melodyInstruments.length - 1];
         var lastSource;
@@ -683,7 +683,7 @@ var songBuilder = (function(seedrandom) {
             context.close();
             context = null;
             stopVisualization();
-        });
+        });*/
     }
     
     function pause() {

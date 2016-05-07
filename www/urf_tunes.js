@@ -27,23 +27,33 @@ var runBefore = (function() {
     var deferredObjects = [];
     var timerInstrument;
     var currentContext;
+    function resolvePromise(context, index) {
+        console.log('Resolving deferred object at index ' + index);
+        if (index >= deferredObjects.length)
+            return;
+        deferredObjects[index].resolve();
+        createTimerInstrument(context, index + 1);
+    }
     function createTimerInstrument(context, index) {
         console.log('Creating silent timer at index ' + index);
         if (index === 0) {
-            if (index >= deferredObjects.length)
-                return;
-            deferredObjects[index].resolve();
-            createTimerInstrument(context, index + 1);
+            resolvePromise(context, index);
         } else {
-            timerInstrument = new TimerInstrument(context);
-            var oscillator = timerInstrument.play({ endTime: timeDelta * index });
-            $(oscillator).on('ended', function() {
-                console.log('Resolving deferred object at index ' + index);
-                if (index >= deferredObjects.length)
-                    return;
-                deferredObjects[index].resolve();
-                createTimerInstrument(context, index + 1);
-            });
+            var endTime = timeDelta * index;
+            if (context.suspend) {
+                // If the pause function works, we need to use a silent "instrument" to know when to resolve the promise
+                timerInstrument = new TimerInstrument(context);
+                var timerOscillator = timerInstrument.play({ endTime: endTime });
+                $(timerOscillator).on('ended', function() {
+                    resolvePromise(context, index);
+                });
+            } else {
+                // User can't pause, so we are safe to use setTimeout(). The onended event doesn't work on all browsers, especially the ones that don't implement pause.
+                var delaySeconds = context.currentTime ? endTime - context.currentTime : timeDelta;
+                setTimeout(function() {
+                    resolvePromise(context, index);
+                }, delaySeconds * 1000);
+            }
         }
     }
     return function runBefore(context, time) {
@@ -1134,6 +1144,7 @@ function playSong() {
     }*/
     
     setTimeout(function() { 
-        context.close();
+        if (context.close)
+            context.close();
     }, 12000);
 };

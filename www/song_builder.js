@@ -376,7 +376,7 @@ var songBuilder = (function (seedrandom) {
         currentInstruments = [];
         // C4-B5
         var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
-        context = new AudioContext();
+        context = new (window.AudioContext || window.webkitAudioContext)();
         analyzer = context.createAnalyser();
         analyzer.connect(context.destination);
         doVisualization(analyzer);
@@ -707,14 +707,14 @@ var songBuilder = (function (seedrandom) {
         $('#play').text('Play');
         if (!context)
             return;
-        context.close();
+        if (context.close)
+            context.close();
         context = null;
         stopVisualization();
     }
 
-
     function test() {
-        if (context)
+        if (context && context.close)
             context.close();
         context = new AudioContext();
         analyzer = context.createAnalyser();
@@ -743,4 +743,4 @@ var songBuilder = (function (seedrandom) {
 })(
     Math.seedrandom
     //function mockSeedRandom() { return Math.random; }
-    );
+);

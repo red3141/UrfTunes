@@ -367,6 +367,7 @@ var songBuilder = (function(seedrandom) {
         if (context) {
             // Audio context already exists. Resume instead of creating a new one.
             context.resume();
+            doVisualization(analyzer);
             return;
         }
         song = song || currentSong;
@@ -678,6 +679,10 @@ var songBuilder = (function(seedrandom) {
         
         $(lastSource).on('ended', function() {
             audioRecorder.finishRecording();
+            // Kill the context to clean up resources
+            context.close();
+            context = null;
+            stopVisualization();
         });
     }
     
@@ -685,6 +690,7 @@ var songBuilder = (function(seedrandom) {
         if (context)
             context.suspend();
         $('#play').text('Play');
+        stopVisualization();
     }
     
     function playOrPause() {
@@ -707,6 +713,7 @@ var songBuilder = (function(seedrandom) {
             return;
         context.close();
         context = null;
+        stopVisualization();
     }
 
     

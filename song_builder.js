@@ -452,7 +452,7 @@ var songBuilder = (function(seedrandom) {
         var minVolume = 0.05;
         var peakVolume = 0.1;
         // Intro
-        if (/*song.intro.mode === 0*/true) {
+        if (song.intro.mode === 0) {
             // Basic intro - start with bass & bass drum, add snare
             var introLength = 32;
             for (var i = 0; i < introLength; ++i) {

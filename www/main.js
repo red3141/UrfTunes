@@ -79,7 +79,19 @@
         // Get the standardized summoner name, which has spaces removed and is lowercase.
         summonerName = summonerName.replace(/\s+/g, '').toLowerCase();
         
-        function playSong(championMasteryLevels) {
+        var connectionSucceeded = false;
+        $.ajax({
+            url: 'http://172.81.178.14:8080/' + region + '/' + summonerName,
+            dataType: 'json'
+        }).then(null, function(response) {
+            // If the request failed, maybe the server is down. Try to get pre-cached data.
+            connectionSucceeded = response && response.readyState === 4;
+            return $.ajax({
+                url: 'json/' + summonerName + '-' + region + ".json",
+                dataType: 'json'
+            });
+        }).then(function(championMasteryLevels) {
+            connectionSucceeded = true;
             for (var i = 0; i < championNames.length; ++i) {
                 if (!championMasteryLevels[championNames[i]]) {
                     championMasteryLevels[championNames[i]] = 0;
@@ -99,22 +111,6 @@
             localStorage.setItem("region", region);
             if (pushState)
                 history.pushState(null, summonerName, '?summoner=' + encodeURIComponent(summonerName) + '&region=' + encodeURIComponent(region));
-        }
-        
-        var connectionSucceeded = false;
-        $.ajax({
-            url: 'http://172.81.178.14:8080/' + region + '/' + summonerName,
-            dataType: 'json'
-        }).then(null, function(response) {
-            // If the request failed, maybe the server is down. Try to get pre-cached data.
-            connectionSucceeded = response && response.readyState === 4;
-            return $.ajax({
-                url: 'json/' + summonerName.toLowerCase() + '-' + region + ".json",
-                dataType: 'json'
-            });
-        }).then(function(championMasteryLevels) {
-            connectionSucceeded = true;
-            playSong(championMasteryLevels);
         }, function(response) {
             $('#play').prop('disabled', true);
             $('#stop').prop('disabled', true);

@@ -18,13 +18,24 @@
         
         <title>Urf Tunes - Ultra Random Frequencies</title>
         
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="application-name" content="Urf Tunes">
-        <meta name="author" content="KirkBerkley and RndmInternetMan">
-        <meta name="description" content="Listen to your personalized Urf tune. There's a different song for each summoner!">
-        <meta name="keywords" content="urf tunes league of legends lol">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="application-name" content="Urf Tunes" />
+        <meta name="author" content="KirkBerkley and RndmInternetMan" />
+        <meta name="description" content="Procedural music generator based on Champion Mastery" />
+        <meta name="keywords" content="urf tunes league of legends lol" />
+        <meta property="og:description" content="Listen to your personalized Urf Tune. There's a different song for each summoner!" />
+        <meta property="og:image" content="http://red3141.github.io/UrfTunes/img/urf_tunes.png" />
     </head>
     <body>
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
+        
         <div class="header">
             <img src="img/urf_tunes.png" title="Ultra Random Frequency Tunes" />
             <img src="img/urf_tunes_text.png" title="Ultra Random Frequency Tunes" />
@@ -33,35 +44,39 @@
             <div class="description">
                 Procedural music generator based on Champion Mastery
             </div>
-                <form id="summonerForm">
-                    <div class="input-group">
-                        <input type="text" id="summonerName" class="form-control" style="width:calc(100% - 9rem);" placeholder="Enter your summoner name" />
-                        <select id="region" class="form-control" style="width:9rem;margin-left:-1px;">
-                            <option value="br">BR</option>
-                            <option value="eune">EUNE</option>
-                            <option value="euw">EUW</option>
-                            <option value="jp">JP</option>
-                            <option value="kr">KR</option>
-                            <option value="lan">LAN</option>
-                            <option value="las">LAS</option>
-                            <option value="na" selected>NA</option>
-                            <option value="oce">OCE</option>
-                            <option value="ru">RU</option>
-                            <option value="tr">TR</option>
-                        </select>
-                    </div>
-                    <div class="go-button">
-                        <button type="submit" id="go" class="btn btn-primary">Get Music!</button>
-                    </div>
-                </form>
-            </div>
+            <form id="summonerForm">
+                <div class="input-group">
+                    <input type="text" id="summonerName" class="form-control" style="width:calc(100% - 9rem);" placeholder="Enter your summoner name" />
+                    <select id="region" class="form-control" style="width:9rem;margin-left:-1px;">
+                        <option value="br">BR</option>
+                        <option value="eune">EUNE</option>
+                        <option value="euw">EUW</option>
+                        <option value="jp">JP</option>
+                        <option value="kr">KR</option>
+                        <option value="lan">LAN</option>
+                        <option value="las">LAS</option>
+                        <option value="na" selected>NA</option>
+                        <option value="oce">OCE</option>
+                        <option value="ru">RU</option>
+                        <option value="tr">TR</option>
+                    </select>
+                </div>
+                <div class="go-button">
+                    <button type="submit" id="go" class="btn btn-primary">Get Music!</button>
+                </div>
+            </form>
             <div id="playbackButtonContainer">
                 <div id="playbackButtons">
                     <button type="button" id="play" class="btn btn-success" onclick="songBuilder.playOrPause();" disabled>Play</button>
-                    <button type="button" id="stop" class="btn btn-danger" style="margin-left: 2rem;" onclick="songBuilder.stop();" disabled>Stop</button>
-                    <a id="downloadSongButton" class="btn btn-default" style="margin-left: 2rem;" disabled>Download Song</a>
+                    <button type="button" id="stop" class="btn btn-danger" onclick="songBuilder.stop();" disabled>Stop</button>
+                    <a id="downloadSongButton" class="btn btn-default" disabled>Download Song</a>
                 </div>
                 <div id="errorMessage"></div>
+            </div>
+            <div class="social-media-buttons">
+                <div class="fb-share-button" data-href="http://red3141.github.io/UrfTunes/" data-layout="button" data-mobile-iframe="true" style="margin-right: 10px;"></div>
+                <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://red3141.github.io/UrfTunes/">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
             </div>
         </div>
         <canvas id="visualizationArea" height="256"></canvas>

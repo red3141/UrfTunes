@@ -74,6 +74,10 @@ div.champRow {
     margin-top: 1.5rem;
     visibility: hidden;
 }
+#playbackButtons > .btn {
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
 #play, #stop {
     /* Impose a min width on the button, mainly so when the play button changes its text to 'Pause' things don't shift around */
     min-width: 7rem;
@@ -86,6 +90,14 @@ div.champRow {
     bottom: 0;
     right: 0;
     display: none;
+}
+.social-media-buttons {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+.fb-share-button {
+    position: relative;
+    top: -5px;
 }
 
 #visualizationArea {

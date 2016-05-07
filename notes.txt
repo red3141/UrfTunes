@@ -82,7 +82,6 @@ Ways to make songs more interesting / varying
 TODO before cutoff date:
 Must have:
 - Share on social media buttons
-- Pre-saved json data in case the server goes down
 - Fix background sounds
 - Write-up of what it does & development process
 Nice to have:

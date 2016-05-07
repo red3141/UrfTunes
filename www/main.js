@@ -18,9 +18,14 @@
         return args;
     }
     
-    window.onpopstate = function(event)
-    {
-        var args = parseSearch(location.search);
+    $(window).on('popstate', function(e) {
+        // Try to parse parameters in the query string.
+        // Sometimes a '/' gets added to the end of the query string - if so, remove it.
+        var search = location.search.trim();
+        if (search && search.lastIndexOf('/') === search.length - 1)
+            search = search.substring(0, search.length - 1);
+            
+        var args = parseSearch(search);
         if (args.summoner) {
             songBuilder.stop();
             args.region = args.region || 'na';
@@ -30,7 +35,7 @@
         } else {
             $('#summonerName').focus();
         }
-    };
+    });
     
     $(document).ready(function() {
         var args = parseSearch(location.search);

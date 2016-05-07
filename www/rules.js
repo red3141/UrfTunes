@@ -187,6 +187,131 @@ var bassLineRhythmRule = function (beat, measure, prevRhythm) {
             ];
     }
 }
+
+// Bass Drum rhythm rule
+// Bass drum must sound on beat 0 of every bar.
+// Bass drum must not sound on beat 2 of every bar.
+// Bass drum patterns will be 2 bars long.
+// 
+var bassDrumRhythmRule = function (beat, measure, prevRhythm) {
+    switch (beat) {
+        case 0:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 1.5 }, probability: 0.3 },
+                    { value: { duration: 2.5 }, probability: 0.3 },
+                    { value: { duration: 4 }, probability: 0.4 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 1 }, probability: 0.1 },
+                    { value: { duration: 1.5 }, probability: 0.3 },
+                    { value: { duration: 2.5 }, probability: 0.1 },
+                    { value: { duration: 4 }, probability: 0.2 },
+                ]
+            }
+        case 0.5:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 3.5 }, probability: 1 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 2 }, probability: 0.7 },
+                    { value: { duration: 3.5 }, probability: 0.3 },
+                ];
+            }
+        case 1:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 3 }, probability: 1 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 2 }, probability: 0.3 },
+                    { value: { duration: 3 }, probability: 0.7 },
+                ];
+            }
+        case 1.5:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 1 }, probability: 0.6 },
+                    { value: { duration: 2.5 }, probability: 0.4 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 1 }, probability: 0.8 },
+                    { value: { duration: 2.5 }, probability: 0.2 },
+                ];
+            }
+        case 2:
+            // Shouldn't happen, this is where the snare drum plays every time
+            return [
+                { value: { duration: 2 }, probability: 1 },
+            ];
+        case 2.5:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 1 }, probability: 0.5 },
+                    { value: { duration: 1.5 }, probability: 0.5 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 1.5 }, probability: 1 },
+                ];
+            }
+        case 3:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 1 }, probability: 1 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 1 }, probability: 1 },
+                ];
+            }
+        case 3.5:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            } else {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            }
+        default:
+            // Shouldn't happen
+            return [
+                { value: { duration: 1 }, probability: 1 },
+            ];
+    }
+}
+
+var snareDrumRhythmRule = function (beat, measure, prevRhythm) {
+    switch (beat) {
+        case 0:
+            return [
+                { value: { duration: 2, isRest: true }, probability: 1 },
+            ];
+        case 2:
+            // Shouldn't happen, this is where the snare drum plays every time
+            return [
+                { value: { duration: 2 }, probability: 1 },
+            ];
+        default:
+            // Shouldn't happen
+            return [
+                { value: { duration: 1 }, probability: 1 },
+            ];
+    }
+}
+
 var introRhythmRule = function (beat, measure, prevRhythm) {
     if ((measure % 4) < 3) {
         switch (beat) {

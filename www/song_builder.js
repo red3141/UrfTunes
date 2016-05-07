@@ -147,6 +147,22 @@ var songBuilder = (function(seedrandom) {
             markovChain.buildNotes(melodyPitchRule, segment.melody, segment.chordProgression, prng);
         }
         
+        var bassDrumSeedInputs = ['alistar', 'amumu', 'blitzcrank', 'chogath', 'galio', 'jarvaniv', 'leona', 'malphite', 'maokai', 'nautilus', 'poppy', 'rammus', 'sejuani', 'shen', 'singed', 'sion', 'zac'];
+        prng = seedrandom(getSeed(bassDrumSeedInputs), { global: false });
+        // Generate a bass drum rhythm for each section
+        for (var i = 0; i < segments.length; ++i) {
+            var bassDrumRhythm = markovChain.buildRhythm(bassDrumRhythmRule, 2, prng);
+            segments[i].bassDrumRhythm = bassDrumRhythm;
+        }
+        
+        var snareDrumSeedInputs = ['akali', 'ekko', 'evelynn', 'fizz', 'kassadin', 'katarina', 'khazix', 'leblanc', 'masteryi', 'nidalee', 'nocturne', 'rengar', 'shaco', 'talon', 'zed'];
+        prng = seedrandom(getSeed(snareDrumSeedInputs), { global: false });
+        // Generate a snare drum rhythm for each section
+        for (var i = 0; i < segments.length; ++i) {
+            var snareDrumRhythm = markovChain.buildRhythm(snareDrumRhythmRule, 2, prng);
+            segments[i].snareDrumRhythm = snareDrumRhythm;
+        }
+        
         // Generate backgrounds
         var segment = segments[0];
         segment.backgrounds = [];
@@ -534,17 +550,49 @@ var songBuilder = (function(seedrandom) {
         var bodyStartTime = currentTime;
         currentBeat = 0;
         currentTime = bodyStartTime;
-        // Add drums
+
+        // Add bass drum
         for (var i = 0; i < song.form.length; ++i) {
             var segment = song.segments[song.form[i]];
-            for (var j = 0; j < measuresPerSegment; ++j) {
-                // Play bass drum on 1 and 3
+            var measure = 0;
+            var beatInMeasure = 0;
+            var j = 0;
+            while (measure < measuresPerSegment) {
+                var rhythm = segment.bassDrumRhythm[j % segment.bassDrumRhythm.length];
                 bassDrum.play({ startTime: currentTime });
-                bassDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
-                // Snare on 3
-                snareDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
-                currentBeat += beatsPerBar;
+                currentBeat += rhythm.duration;
+                beatInMeasure += rhythm.duration;
                 currentTime = currentBeat * secondsPerBeat + bodyStartTime;
+                while (beatInMeasure >= beatsPerBar) {
+                    ++measure;
+                    beatInMeasure -= beatsPerBar;
+                }
+                ++j;
+            }
+        }
+        console.log(currentBeat);
+        
+        // Add snare drum
+        currentBeat = 0;
+        currentTime = bodyStartTime;
+        for (var i = 0; i < song.form.length; ++i) {
+            var segment = song.segments[song.form[i]];
+            var measure = 0;
+            var beatInMeasure = 0;
+            var j = 0;
+            while (measure < measuresPerSegment) {
+                var rhythm = segment.snareDrumRhythm[j % segment.snareDrumRhythm.length];
+                if (!rhythm.isRest) {
+                    snareDrum.play({ startTime: currentTime });
+                }
+                currentBeat += rhythm.duration;
+                beatInMeasure += rhythm.duration;
+                currentTime = currentBeat * secondsPerBeat + bodyStartTime;
+                while (beatInMeasure >= beatsPerBar) {
+                    ++measure;
+                    beatInMeasure -= beatsPerBar;
+                }
+                ++j;
             }
         }
         console.log(currentBeat);

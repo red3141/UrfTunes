@@ -386,7 +386,8 @@ var songBuilder = (function (seedrandom) {
         });
         audioRecorder.setEncoding('wav');
         audioRecorder.setOptions({
-            timeLimit: 600 // Allow recording for up to 10 minutes; we probably won't need this much time.
+            timeLimit: 600, // Allow recording for up to 10 minutes; we probably won't need this much time.
+            bufferSize: 2048,
         });
         audioRecorder.onComplete = function (recorder, blob) {
             recordedSongBlob = blob;

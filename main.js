@@ -18,6 +18,16 @@
         return args;
     }
     
+    function updateShareButton() {
+        var host = 'red3141.github.io/UrfTunes';
+        var href = 'http://red3141.github.io/UrfTunes/' + location.search;
+        $('.fb-share-button').attr('data-href', href);
+        $('.fb-share-button iframe').attr('src',
+            location.protocol + "//www.facebook.com/v2.3/plugins/share_button.php?app_id=&channel=http%3A%2F%2Fstatic.ak.facebook.com%2Fconnect%2Fxd_arbiter%2FKvoNGODIqPG.js%3Fversion%3D41%23cb%3Df29bfbb228%26domain%3D"
+            + location.host + "%26origin%3D" + encodeURIComponent(encodeURIComponent(location.protocol)) + "%252F%252F" + host + "%252Ff2b736fc34%26relation%3Dparent.parent&container_width=191&href="
+            + encodeURIComponent(href) + "&layout=button&locale=en_US&sdk=joey");
+    }
+    
     $(window).on('popstate', function(e) {
         // Try to parse parameters in the query string.
         // Sometimes a '/' gets added to the end of the query string - if so, remove it.
@@ -35,6 +45,7 @@
         } else {
             $('#summonerName').focus();
         }
+        updateShareButton();
     });
     
     $(document).ready(function() {
@@ -58,12 +69,16 @@
                 $('#summonerName').focus();
             }
         }
+        if (navigator.userAgent.indexOf('Chrome') === -1) {
+            $('#browserErrorMessage').show();
+        }
         
-        $("#summonerForm").submit(function(e) {
+        $('#summonerForm').submit(function(e) {
             loadSummoner($('#summonerName').val(), $('#region').val(), true, true);
             e.preventDefault();
             return false;
         });
+        updateShareButton();
     });
     
     function setChampionIconOpacities() {
@@ -113,8 +128,10 @@
 
             localStorage.setItem("summoner", summonerName);
             localStorage.setItem("region", region);
-            if (pushState)
+            if (pushState) {
                 history.pushState(null, summonerName, '?summoner=' + encodeURIComponent(summonerName) + '&region=' + encodeURIComponent(region));
+                updateShareButton();
+            }
         }, function(response) {
             $('#play').prop('disabled', true);
             $('#stop').prop('disabled', true);

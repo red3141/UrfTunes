@@ -37,13 +37,13 @@ var runBefore = (function() {
         } else {
             timerInstrument = new TimerInstrument(context);
             var oscillator = timerInstrument.play({ endTime: timeDelta * index });
-            oscillator.onended = function() {
+            $(oscillator).on('ended', function() {
                 console.log('Resolving deferred object at index ' + index);
                 if (index >= deferredObjects.length)
                     return;
                 deferredObjects[index].resolve();
                 createTimerInstrument(context, index + 1);
-            };
+            });
         }
     }
     return function runBefore(context, time) {

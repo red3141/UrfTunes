@@ -117,3 +117,10 @@ div.champRow {
     font-size: 1.1rem;
     margin-top: 3rem;
 }
+
+
+#browserErrorMessage {
+    display: none;
+    color: #FF6666;
+    text-align: center;
+}

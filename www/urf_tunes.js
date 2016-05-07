@@ -52,23 +52,12 @@ BassDrum.prototype.play = function(options) {
 function SnareDrum(context, analyzer) {
     this.context = context;
     this.analyzer = analyzer;
-    this.noiseBuffer = this.createNoiseBuffer();
+    this.noiseBuffer = createNoiseBuffer();
     this.pitch = 100;
     this.oscillatorDuration = 0.1;
     this.noiseDuration = 0.2;
     this.filterMinPitch = 1500;
 }
-
-SnareDrum.prototype.createNoiseBuffer = function() {
-    var bufferSize = this.context.sampleRate;
-    var buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
-    var output = buffer.getChannelData(0);
-    for (var i = 0; i < bufferSize; ++i) {
-        output[i] = Math.random() * 2 - 1;
-    }
-    
-    return buffer;
-};
 
 SnareDrum.prototype.init = function() {
     this.noise = this.context.createBufferSource();

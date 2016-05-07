@@ -38,6 +38,8 @@
     });
     
     $(document).ready(function() {
+        $('#summonerName').focus();
+        
         var args = parseSearch(location.search);
         if (args.summoner) {
             args.region = args.region || 'na';

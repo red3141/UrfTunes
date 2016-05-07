@@ -63,6 +63,12 @@
             return false;
         });
     });
+    
+    function setChampionIconOpacities() {
+        for (var i = 0; i < championNames.length; ++i) {
+            $('#' + championNames[i]).css('opacity', 0.05 + 0.19 * window.masteries[championNames[i]]);
+        }
+    }
 
     function loadSummoner(summonerName, region, playOnLoad, pushState) {
         if (!summonerName) {
@@ -80,6 +86,7 @@
                 }
             }
             window.masteries = championMasteryLevels;
+            setChampionIconOpacities();
             songBuilder.build();
             if (playOnLoad)
                 songBuilder.play();

@@ -20,6 +20,10 @@ img.champImage {
     height: auto;
 }
 
+img.champImage:hover {
+    opacity: 1.0 !important;
+}
+
 div.champRow {
     display: none;
     text-align: center;

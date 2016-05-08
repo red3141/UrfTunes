@@ -100,6 +100,8 @@ var songBuilder = (function (seedrandom) {
         var intro = { mode: maxIntroIndex };
         var introRhythm = markovChain.buildRhythm(intro.mode !== 2 ? introRhythmRule : electricIntroRhythmRule, 4, prng);
         intro.melody = introRhythm.concat(introRhythm);
+        intro.bassDrumRhythm = markovChain.buildRhythm(introBassDrumRhythmRule, 8, prng, false);
+        intro.snareDrumRhythm = markovChain.buildRhythm(introSnareDrumRhythmRule, 8, prng, false);
         markovChain.buildNotes(introPitchRule, intro.melody, segments[0].chordProgression, prng);
         intro.transition = Math.floor(prng() * 3);
         if (intro.mode === 2)
@@ -312,18 +314,24 @@ var songBuilder = (function (seedrandom) {
         currentTime = startTime;
 
         var minVolume = 0.4;
-        var peakVolume = 0.9;
+        var peakVolume = 0.8;
         // Intro
         if (song.intro.mode === 0) {
             // Basic intro - start with bass & bass drum, add snare
             var introLength = 32;
-            for (var i = 0; i < introLength; ++i) {
-                // Play bass drum on 1 and 3
-                if (i % 2 === 0)
+            for (var i = 0; i < song.intro.bassDrumRhythm.length; ++i) {
+                if (!song.intro.bassDrumRhythm[i].isRest)
                     bassDrum.play({ startTime: currentTime });
-                if (currentBeat >= 16 && i % 4 === 2)
+                currentBeat += song.intro.bassDrumRhythm[i].duration;
+                currentTime = currentBeat * secondsPerBeat + startTime;
+            }
+            currentBeat = 0;
+            currentTime = startTime;
+            // Snare drum
+            for (var i = 0; i < song.intro.snareDrumRhythm.length; ++i) {
+                if (!song.intro.snareDrumRhythm[i].isRest)
                     snareDrum.play({ startTime: currentTime });
-                ++currentBeat;
+                currentBeat += song.intro.snareDrumRhythm[i].duration;
                 currentTime = currentBeat * secondsPerBeat + startTime;
             }
             currentBeat = 0;
@@ -425,8 +433,8 @@ var songBuilder = (function (seedrandom) {
                     introInstrument.play({
                         startTime: currentTime,
                         pitch: frequency,
-                        duration: secondsPerBeat * beatsPerBar,
-                        volume: volume * 0.3,
+                        duration: secondsPerBeat * (beatsPerBar - 0.5),
+                        volume: volume * 0.4,
                     });
                 }
                 currentBeat += note.duration;
@@ -459,9 +467,9 @@ var songBuilder = (function (seedrandom) {
                         startFrequency: 100,
                         endFrequency: 1000,
                         startQ: 5,
-                        endQ: 0.7,
+                        endQ: 0.6,
                         startVolume: 0.1,
-                        endVolume: 4,
+                        endVolume: 5,
                     });
                     break;
             }

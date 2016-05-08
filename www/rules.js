@@ -188,6 +188,24 @@ var bassLineRhythmRule = function (beat, measure, prevRhythm) {
     }
 }
 
+// During the tank intro, have bass drum on 1+3, until bar 5 when the snare somes in
+var introBassDrumRhythmRule = function (beat, measure, prevRhythm) {
+    switch (beat) {
+        case 0:
+            return [
+                { value: { duration: 2 }, probability: 1 },
+            ];
+        case 2:
+            return [
+                { value: { duration: 2, isRest: measure >= 4 }, probability: 0.7 },
+            ];
+        default:
+            // Shouldn't happen
+            return [
+                { value: { duration: 2 }, probability: 1 },
+            ];
+    }
+}
 // Bass Drum rhythm rule
 // Bass drum must sound on beat 0 of every bar.
 // Bass drum must not sound on beat 2 of every bar.
@@ -297,6 +315,48 @@ var bassDrumRhythmRule = function (beat, measure, prevRhythm) {
 // The snare drum will never play before beat 2 in a bar
 // Snare drum patterns are 4 bars long
 // Bar 0 in the pattern will always only play on beat 2
+var introSnareDrumRhythmRule = function (beat, measure, prevRhythm) {
+    if (measure < 4) {
+        return [
+            { value: { duration: 4, isRest: true }, probability: 1 },
+        ];
+    }
+    switch (beat) {
+        case 0:
+            return [
+                { value: { duration: 2, isRest: true }, probability: 1 },
+            ];
+        case 2:
+            if (measure !== 7) {
+                return [
+                    { value: { duration: 2 }, probability: 1 },
+                ];
+            } else  {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 1 }, probability: 0.7 },
+                ];
+            }
+        case 2.5:
+            return [
+                { value: { duration: 0.5 }, probability: 0.7 },
+                { value: { duration: 1 }, probability: 0.3 },
+            ];
+        case 3:
+            return [
+                { value: { duration: 0.5 }, probability: 1 },
+            ];
+        default:
+            return [
+                { value: { duration: 0.5 }, probability: 1 },
+            ];
+    }
+}
+
+// The snare drum will always play on beat 2 (0-indexed)
+// The snare drum will never play before beat 2 in a bar
+// Snare drum patterns are 4 bars long
+// Bar 0 in the pattern will always only play on beat 2
 var snareDrumRhythmRule = function (beat, measure, prevRhythm) {
     switch (beat) {
         case 0:
@@ -397,6 +457,10 @@ var introRhythmRule = function (beat, measure, prevRhythm) {
                     { value: { duration: 0.5 }, probability: 0.3 },
                     { value: { duration: 0.5, isRest: true }, probability: 0.7 },
                 ];
+            case 3.5:
+                return [
+                    { value: { duration: 0.5, isRest: true }, probability: 1 },
+                ];
             case 0:
                 return [
                     { value: { duration: 0.5 }, probability: 1 },
@@ -454,6 +518,10 @@ var electricIntroRhythmRule = function (beat, measure, prevRhythm) {
                     { value: { duration: 0.25 }, probability: 0.5 },
                     { value: { duration: 0.5 }, probability: 0.2 },
                     { value: { duration: 0.5, isRest: !wasSixteenth }, probability: 0.3 },
+                ];
+            case 3.5:
+                return [
+                    { value: { duration: 0.5, isRest: true }, probability: 1 },
                 ];
             case 0:
                 return [

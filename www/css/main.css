@@ -1,0 +1,126 @@
+body {
+    background-color: #090909;
+    color: #DDE;
+    margin: 0;
+}
+h1 {
+    margin: 0;
+}
+button, button:focus {
+    outline: 0 !important;
+}
+
+a[disabled] {
+    pointer-events: none;
+}
+
+img.champImage {
+    max-width: 3.4%;
+    min-width: 30px;
+    height: auto;
+}
+
+img.champImage:hover {
+    opacity: 1.0 !important;
+}
+
+div.champRow {
+    display: none;
+    text-align: center;
+}
+
+.btn-default[disabled] {
+    color: #999;
+}
+
+.header {
+    background-color: #191919;
+    padding: 2rem;
+    border-bottom: #EEF 4px solid;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.urf-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.description {
+    text-align: center;
+    font-style: italic;
+    font-size: 1.7rem;
+    margin-bottom: 1.8rem;
+}
+
+#summonerForm {
+    max-width: 50rem;
+    min-width: 25rem;
+    margin: auto;
+    display: flex;
+}
+#summonerForm > .input-group {
+    flex: 1 1 auto;
+    display: block;
+}
+#summonerForm > .go-button {
+    flex: 0 0 auto;
+    margin-left: 0.2rem;
+}
+
+#playbackButtonContainer {
+    position: relative;
+}
+#playbackButtons {
+    text-align: center;
+    margin-top: 1.5rem;
+    visibility: hidden;
+}
+#playbackButtons > .btn {
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+#play, #stop {
+    /* Impose a min width on the button, mainly so when the play button changes its text to 'Pause' things don't shift around */
+    min-width: 7rem;
+}
+#errorMessage {
+    text-align: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: none;
+}
+.social-media-buttons {
+    margin-top: 1.5rem;
+    text-align: center;
+    display: none;
+}
+.fb-share-button {
+    position: relative;
+    top: -5px;
+}
+
+#visualizationArea {
+    margin-top: 1rem;
+}
+
+.footer {
+    max-width: 80rem;
+    margin: auto;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 3rem;
+}
+
+
+#browserErrorMessage {
+    display: none;
+    color: #FF6666;
+    text-align: center;
+}

@@ -7,3 +7,4 @@ procedural music generation, and other topics pertaining to our project.
 4) http://www.sitepoint.com/using-fourier-transforms-web-audio-api/ - Explains how to create sounds using Fourier coefficients
 5) http://www.hooktheory.com/trends# - Frequencies of which chords follow other chords, super helpful for making chord progressions that don't sound terrible
 6) https://en.wikipedia.org/wiki/Markov_chain - Markov chains - can generate notes as well as the structure of the song
+7) https://github.com/higuma/web-audio-recorder-js - We GitHub user "higuma"'s Web Audio Recorder library to record the song 

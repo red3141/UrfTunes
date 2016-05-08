@@ -1,19 +1,12 @@
 Planning for how each champion will affect the form of the song.
 Note: "+1" is in arbirary units (not seconds or beats per minute or anything)
 
-General instrument scaling - instruments should behave differently based on mastery level. All levels should increase volume.
-  1) eighth notes and quarter notes
-  2) Fewer rests
-  3) Sixteenth notes
-  4) ?
-  5) Triplets
-
 * = not yet implemented
 
 aatrox
   *1-5) +1 modulate pitch upward transition
 ahri
-  *1-5) +1 white noise backgrouns (high pass)
+  1-5) +1 white noise backgrounds (high pass)
 akali
   *1-5) +1 quiet section
 alistar
@@ -23,10 +16,12 @@ amumu
 anivia
   *1-5) +1 Piano intro duration
 annie
+  1-5) +1 white noise backgrounds (high pass)
 ashe
   *1-5) +1 Piano intro duration
 aurelionsol
 azir
+  1-5) +1 white noise backgrounds (high pass)
 bard
   *1-5) +1 loud funky instrument section
 blitzcrank
@@ -35,12 +30,12 @@ brand
 braum
   *1-5) +1 Piano intro duration
 caitlyn
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 cassiopeia
 chogath
   *1-5) +1 loud funky instrument section
 corki
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 darius
   *1-5) +1 bass+percussion only section
 diana
@@ -57,6 +52,7 @@ fiddlesticks
   *1-5) +1 guitar backgrounds
 fiora
 fizz
+  *1-5) +1 melody only intro duration
 galio
 gangplank
 garen
@@ -66,7 +62,7 @@ gragas
 graves
   *1-5) +1 speeding up drum fill
 hecarim
-  *1-5) +1 tempo
+  1-5) +1 tempo
 heimerdinger
 illaoi
   *1-5) +1 bass+percussion only section
@@ -77,14 +73,16 @@ jarvaniv
 jax
 jayce
 jhin
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 jinx
   *1-5) +1 electric intro duration
 kalista
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 karma
+  1-5) +1 white noise backgrounds (high pass)
 karthus
 kassadin
+  1-5) +1 white noise backgrounds (high pass)
 katarina
 kayle
 kennen
@@ -109,7 +107,7 @@ malzahar
 maokai
   *1-5) +1 speeding up drum fill
 masteryi
-  *1-5) +1 tempo
+  1-5) +1 tempo
 missfortune
   *1-5) +1 electric intro duration
 mordekaiser
@@ -126,18 +124,20 @@ nocturne
 nunu
 olaf
 orianna
+  *1-5) +1 melody only intro duration
 pantheon
 poppy
 quinn
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 rammus
-  *1-5) +1 tempo
+  1-5) +1 tempo
 reksai
 renekton
 rengar
 riven
 rumble
 ryze
+  1-5) +1 white noise backgrounds (high pass)
 sejuani
   *1-5) +1 Piano intro duration
 shaco
@@ -148,7 +148,7 @@ singed
 sion
   *) Controls drum beat
 sivir
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 skarner
 sona
   *1-5) +1 string intro duration
@@ -156,33 +156,39 @@ soraka
   *1-5) +1 string intro duration
 swain
 syndra
+  1-5) +1 white noise backgrounds (band pass)
 tahmkench
 talon
 taric
 teemo
 thresh
 tristana
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 trundle
 tryndamere
 twistedfate
 twitch
 udyr
-  *1-5) +1 tempo
+  1-5) +1 tempo
 urgot
 varus
 vayne
-  *1-5) +1 white noise backgrouns (low pass)
+  1-5) +1 white noise backgrounds (low pass)
 veigar
+  1-5) +1 white noise backgrounds (band pass)
 velkoz
+  *1-5) +1 melody only intro duration
 vi
 viktor
+  *1-5) +1 melody only intro duration
 vladimir
 volibear
 warwick
 wukong
 xerath
+  *1-5) +1 melody only intro duration
 xinzhao
+  *1-5) +1 electric intro duration
 yasuo
   *1-5) +1 white noise backgrounds
 yorick
@@ -192,7 +198,8 @@ zac
 zed
   *1-5) +1 quiet section
 ziggs
+  1-5) +1 white noise backgrounds (band pass)
 zilean
-  *1-5) +1 tempo
+  1-5) +1 tempo
 zyra
   *1-5) +1 string intro duration

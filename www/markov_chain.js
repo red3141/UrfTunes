@@ -4,11 +4,13 @@ var markovChain = (function() {
         if (!stateMap || !stateMap.length)
             return 0;
         var i = 0;
-        var cum = stateMap[0];
-        while (i < stateMap.length - 1 && cum <= n) {
+        var totalProbability = stateMap[0];
+        while (i < stateMap.length - 1 && totalProbability <= n) {
             ++i;
-            cum += stateMap[i];
+            totalProbability += stateMap[i];
         }
+        if (i === stateMap.length - 1 && Math.abs(totalProbability - 1) > 0.00001)
+            console.warn('Bad rule (does not add to 1): [' + stateMap.join(',') + ']');
         return i;
     }
     
@@ -17,12 +19,14 @@ var markovChain = (function() {
             return 0;
         var i = 0;
         var currentState;
-        var cum = 0;
+        var totalProbability = 0;
         do {
             currentState = stateMap[i];
-            cum += currentState.probability;
+            totalProbability += currentState.probability;
             ++i;
-        } while (i < stateMap.length && cum <= n);
+        } while (i < stateMap.length && totalProbability <= n);
+        if (i === stateMap.length && Math.abs(totalProbability - 1) > 0.00001)
+            console.warn('Bad rule (does not add to 1): [' + stateMap.join(',') + ']');
         return currentState.value;
     }
     
@@ -40,22 +44,37 @@ var markovChain = (function() {
     }
     
     function buildRhythm(rule, measures, prng) {
+        rule = rule || function() { return [{ value: { duration: 1 }, probability: 1 }] };
         prng = prng || Math.random;
         var beatsPerMeasure = 4; // Always use 4/4 time
         var state = 0;
         var beatInMeasure = 0;
         var currentMeasure = 0;
         var rhythms = [];
+        var firstTimeRhythms = [];
         var prevRhythm = { duration: 0 };
+        var i2 = 0;
         while (currentMeasure < measures) {
-            var stateMap = rule(beatInMeasure, prevRhythm);
-            rhythm = getNextStateComplex(stateMap, prng());
+            var currentGroup = Math.floor(currentMeasure / 4);
+            var rhythm;
+            if (currentGroup === 0 || currentGroup === 2 || (currentMeasure % 4) >= 2) {
+                var stateMap = rule(beatInMeasure, currentMeasure, prevRhythm);
+                rhythm = getNextStateComplex(stateMap, prng());
+            } else {
+                // Use repetition
+                rhythm = firstTimeRhythms[i2];
+            }
             rhythms.push(rhythm);
             beatInMeasure += rhythm.duration;
-            if (beatInMeasure >= 4 - 1e-2) {
-                beatInMeasure = 0;
+            ++i2;
+            while (beatInMeasure >= 4 - 1e-2) {
+                beatInMeasure -= 4;
                 ++currentMeasure;
+                if (currentMeasure % 4 === 0)
+                    i2 = 0;
             }
+            if (currentMeasure < 4)
+                firstTimeRhythms.push(rhythm);
             prevRhythm = rhythm;
         }
         return rhythms;
@@ -67,38 +86,42 @@ var markovChain = (function() {
         var prevNote = 0;
         var beatInMeasure = 0;
         var currentMeasure = 0;
-        var notes = [];
+        //var notes = [];
         var firstTimeNotes = [];
         var i2 = 0;
         for (var i = 0; i < rhythm.length; ++i) {
+            var currentGroup = Math.floor(currentMeasure / 4);
+            var note;
             if (rhythm[i].isRest) {
-                notes[i] = -1;
+                note = -1;
             } else {
-                var currentGroup = Math.floor(currentMeasure / 4);
-                if (currentGroup == 0 || currentGroup == 2 || (currentMeasure % 4) >= 2) {
+                if (currentGroup === 0 || currentGroup === 2 || (currentMeasure % 4) >= 2) {
                     // Generate note
                     // For now assume that each chord is one measure long
                     var chord = chordProgression[currentMeasure % chordProgression.length];
-                    var stateMap = rule(prevNote, beatInMeasure, chord);
-                    notes[i] = getNextState(stateMap, prng());
+                    var stateMap = rule(prevNote, beatInMeasure, currentMeasure, chord);
+                    note = getNextState(stateMap, prng());
                 } else {
                     // Use repetition
-                    notes[i] = firstTimeNotes[i2];
+                    note = firstTimeNotes[i2];
+                    if (note < 0)
+                        console.warn('Bad repeated note!');
                 }
-                prevNote = notes[i];
+                prevNote = note;
             }
+            rhythm[i].note = note;
             if (currentMeasure < 4)
-                firstTimeNotes[i] = notes[i];
+                firstTimeNotes[i] = note;
             beatInMeasure += rhythm[i].duration;
-            if (beatInMeasure >= 4 - 1e-2) {
-                beatInMeasure = 0;
-                ++currentMeasure;
-            }
             ++i2;
-            if (currentMeasure >= 4 && i2 >= firstTimeNotes.length)
-                i2 = 0;
+            while (beatInMeasure >= 4 - 1e-2) {
+                beatInMeasure -= 4;
+                ++currentMeasure;
+                if (currentMeasure % 4 === 0)
+                    i2 = 0;
+            }
         }
-        return notes;
+        //return notes;
     }
     
     return {

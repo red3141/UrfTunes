@@ -69,15 +69,17 @@ var songBuilder = (function (seedrandom) {
         // Generate intro
         var introChampions = [
             // 0 = bass
-            ['aatrox', 'alistar', 'drmundo', 'nautilus', 'zac'],
+            ['alistar', 'malphite', 'maokai', 'nautilus', 'rammus', 'zac'],
             // 1 = piano
-            ['draven', 'ezreal', 'jinx', 'missfortune', 'xinzhao'],
+            ['jinx', 'kalista', 'kogmaw', 'tristana', 'twitch', 'vayne'],
             // 2 = electric
-            ['fizz', 'orianna', 'velkoz', 'viktor', 'xerath'],
+            ['akali', 'fizz', 'kassadin', 'katarina', 'leblanc', 'zed'],
             // 3 = strings (violins)
-            ['morgana', 'nami', 'sona', 'soraka', 'zyra'],
-            // 4 = melody only
-            ['anivia', 'ashe', 'braum', 'lissandra', 'sejuani'],
+            ['janna', 'morgana', 'nami', 'sona', 'soraka', 'zyra'],
+            // 4 = sine tooth
+            ['lux', 'syndra', 'viktor', 'velkoz', 'xerath', 'ziggs'],
+            // 5 = trumpet
+            ['darius', 'drmundo', 'nasus', 'garen', 'illaoi', 'mordekaiser'],
         ];
 
         var maxIntroScore = -1;
@@ -96,9 +98,12 @@ var songBuilder = (function (seedrandom) {
         prng = seedrandom(seed, { global: false });
 
         var intro = { mode: maxIntroIndex };
-        var introRhythm = markovChain.buildRhythm(introRhythmRule, 4, prng);
+        var introRhythm = markovChain.buildRhythm(intro.mode !== 2 ? introRhythmRule : electricIntroRhythmRule, 4, prng);
         intro.melody = introRhythm.concat(introRhythm);
         markovChain.buildNotes(introPitchRule, intro.melody, segments[0].chordProgression, prng);
+        intro.transition = Math.floor(prng() * 3);
+        if (intro.mode === 2)
+            intro.transition = 2;
 
         var melodySeedInputs = ['olaf',
             'orianna',
@@ -134,7 +139,6 @@ var songBuilder = (function (seedrandom) {
             'tryndamere'];
         prng = seedrandom(getSeed(melodySeedInputs), { global: false });
 
-
         // Generate rhythms for each section
         for (var i = 0; i < segments.length; ++i) {
             var rhythm = markovChain.buildRhythm(melodyRhythmRule, 16, prng);
@@ -146,167 +150,21 @@ var songBuilder = (function (seedrandom) {
             var segment = segments[i];
             markovChain.buildNotes(melodyPitchRule, segment.melody, segment.chordProgression, prng);
         }
-
-        // Generate backgrounds
-        var segment = segments[0];
-        segment.backgrounds = [];
-        if (masteries['ahri']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 1000, initialQ: 100, finalFrequency: 500, finalQ: 1, volume: 0.5, duration: 0.4 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['ahri']], 4, prng)
-            };
-            segment.backgrounds.push(background);
+        
+        var bassDrumSeedInputs = ['alistar', 'amumu', 'blitzcrank', 'chogath', 'galio', 'jarvaniv', 'leona', 'malphite', 'maokai', 'nautilus', 'poppy', 'rammus', 'sejuani', 'shen', 'singed', 'sion', 'zac'];
+        prng = seedrandom(getSeed(bassDrumSeedInputs), { global: false });
+        // Generate a bass drum rhythm for each section
+        for (var i = 0; i < segments.length; ++i) {
+            var bassDrumRhythm = markovChain.buildRhythm(bassDrumRhythmRule, 2, prng);
+            segments[i].bassDrumRhythm = bassDrumRhythm;
         }
-        if (masteries['annie']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 440, initialQ: 0.8, finalFrequency: 440, finalQ: 0.8, volume: 0.2, duration: 1.5 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['annie']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['azir']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 1000, initialQ: 100, finalFrequency: 500, finalQ: 2, volume: 0.5, duration: 2 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['azir']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['caitlyn']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 700, initialQ: 0.2, finalFrequency: 80, finalQ: 200, volume: 0.5, duration: 0.7 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['caitlyn']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['corki']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 200, initialQ: 0.5, finalFrequency: 8, finalQ: 100, volume: 0.6, duration: 0.3, multishots: [0.25, 0.5] },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['corki']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-
-        segment = segments[1];
-        segment.backgrounds = [];
-        if (masteries['janna']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 400, initialQ: 0.8, finalFrequency: 600, finalQ: 0.8, volume: 0.1, duration: 4 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['janna']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['jhin']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 440, initialQ: 0.2, finalFrequency: 8, finalQ: 100, volume: 0.3, duration: 2 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['jhin']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['kalista']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 100, initialQ: 0.7, finalFrequency: 800, finalQ: 100, volume: 2, duration: 1.5 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['kalista']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['karma']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 100, initialQ: 50, finalFrequency: 1000, finalQ: 9, volume: 0.4, duration: 1 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['karma']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['kassadin']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 4000, initialQ: 50, finalFrequency: 100, finalQ: 3, volume: 0.8, duration: 1 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['kassadin']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['quinn']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 100, initialQ: 1, finalFrequency: 50, finalQ: 0.1, volume: 0.5, duration: 2 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['quinn']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-
-        segment = segments[2];
-        segment.backgrounds = [];
-        if (masteries['ryze']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 150, initialQ: 20, finalFrequency: 150, finalQ: 1, volume: 1, duration: 0.9 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['ryze']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['sivir']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 400, initialQ: 0.2, finalFrequency: 100, finalQ: 20, volume: 0.2, duration: 2 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['sivir']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['syndra']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 800, initialQ: 20, finalFrequency: 400, finalQ: 5, volume: 1.2, duration: 2.5 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['syndra']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['teemo']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 500, initialQ: 100, finalFrequency: 1000, finalQ: 1, volume: 1.2, duration: 0.4 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['teemo']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['tristana']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 200, initialQ: 0.2, finalFrequency: 50, finalQ: 1, volume: 0.2, duration: 3 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['tristana']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['vayne']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 1000, initialQ: 0.7, finalFrequency: 500, finalQ: 1, volume: 0.5, duration: 0.4 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['vayne']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['veigar']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 4000, initialQ: 3000, finalFrequency: 4000, finalQ: 50, volume: 1.2, duration: 0.7 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['veigar']], 4, prng)
-            };
-            segment.backgrounds.push(background);
-        }
-        if (masteries['ziggs']) {
-            var background = {
-                instrument: WhiteNoiseWithBandPass,
-                options: { initialFrequency: 200, initialQ: 50, finalFrequency: 200, finalQ: 50, volume: 1.2, duration: 2 },
-                rhythm: markovChain.buildRhythm(backgroundRhythmRules[masteries['ziggs']], 4, prng)
-            };
-            segment.backgrounds.push(background);
+        
+        var snareDrumSeedInputs = ['akali', 'ekko', 'evelynn', 'fizz', 'kassadin', 'katarina', 'khazix', 'leblanc', 'masteryi', 'nidalee', 'nocturne', 'rengar', 'shaco', 'talon', 'zed'];
+        prng = seedrandom(getSeed(snareDrumSeedInputs), { global: false });
+        // Generate a snare drum rhythm for each section
+        for (var i = 0; i < segments.length; ++i) {
+            var snareDrumRhythm = markovChain.buildRhythm(snareDrumRhythmRule, 4, prng);
+            segments[i].snareDrumRhythm = snareDrumRhythm;
         }
 
         // Make an ending
@@ -418,6 +276,7 @@ var songBuilder = (function (seedrandom) {
         var snareDrum = new SnareDrum(context, analyzer);
         var bassInstrument = new Bass(context, analyzer);
         var introInstrument;
+        song.intro.mode = 5;
         switch (song.intro.mode) {
             case 0: // 0 = bass
                 introInstrument = new Bass(context, analyzer);
@@ -426,13 +285,16 @@ var songBuilder = (function (seedrandom) {
                 introInstrument = new Piano(context, analyzer);
                 break;
             case 2: // 2 =TODO: electric
-                introInstrument = new Bass(context, analyzer);
+                introInstrument = new ElectricGuitar(context, analyzer);
                 break;
             case 3: // 3 = strings (violins)
                 introInstrument = new Violin(context, analyzer); // it's called violin. It sounds more like an accordion. Meh.
                 break;
-            case 4: // 4 = melody only
+            case 4: // 4 = sine tooth
                 introInstrument = new SineTooth(context, analyzer, 0);
+                break;
+            case 5: // 5 = trumpet
+                introInstrument = new Trumpet(context, analyzer);
                 break;
         }
         var melodyInstruments = [
@@ -450,15 +312,15 @@ var songBuilder = (function (seedrandom) {
         var startTime = 0.3;
         currentTime = startTime;
 
-        var minVolume = 0.05;
-        var peakVolume = 0.1;
+        var minVolume = 0.4;
+        var peakVolume = 0.9;
         // Intro
         if (song.intro.mode === 0) {
             // Basic intro - start with bass & bass drum, add snare
             var introLength = 32;
             for (var i = 0; i < introLength; ++i) {
                 // Play bass drum on 1 and 3
-                if (i % 2 === 0)
+                if (i % 4 === 0)
                     bassDrum.play({ startTime: currentTime });
                 if (currentBeat >= 16 && i % 4 === 2)
                     snareDrum.play({ startTime: currentTime });
@@ -487,6 +349,51 @@ var songBuilder = (function (seedrandom) {
                     beatInMeasure -= beatsPerBar;
                 }
                 ++j;
+            }
+        } else if (song.intro.mode === 200) {
+            var chords = song.segments[0].chordProgression;
+            currentBeat = 0;
+            currentTime = startTime;
+            function getVolume(position) {
+                switch (position) {
+                    case 0:
+                    case 4:
+                        return minVolume;
+                    case 1:
+                    case 3:
+                        return (minVolume + peakVolume) / 2;
+                    case 2:
+                        return peakVolume;
+                }
+            }
+            for (var j = 0; j < chords.length * 2; ++j) {
+                var note = chords[j % chords.length];
+                var startVolume = getVolume(j % chords.length);
+                var endVolume = getVolume((j % chords.length) + 1);
+                introInstrument.play({
+                    startTime: currentTime,
+                    duration: secondsPerBeat * beatsPerBar,
+                    pitch: frequencies[note],
+                    volume: startVolume,
+                    finalVolume: endVolume,
+                });
+                introInstrument.play({
+                    startTime: currentTime,
+                    duration: secondsPerBeat * beatsPerBar,
+                    pitch: frequencies[(note + 2) % 7],
+                    volume: startVolume,
+                    finalVolume: endVolume,
+                });
+                introInstrument.play({
+                    startTime: currentTime,
+                    duration: secondsPerBeat * beatsPerBar,
+                    pitch: frequencies[(note + 4) % 7],
+                    volume: startVolume,
+                    finalVolume: endVolume,
+                });
+                
+                currentBeat += beatsPerBar;
+                currentTime = currentBeat * secondsPerBeat + startTime;
             }
         } else {
             // Add intro melody
@@ -519,44 +426,100 @@ var songBuilder = (function (seedrandom) {
                     introInstrument.play({
                         startTime: currentTime,
                         pitch: frequency,
-                        duration: secondsPerBeat,
-                        volume: volume,
+                        duration: secondsPerBeat * beatsPerBar,
+                        volume: volume * 0.3,
                     });
                 }
                 currentBeat += note.duration;
                 currentTime = currentBeat * secondsPerBeat + startTime;
             }
-            var bassNote = chords[chords.length - 1];
-            bassInstrument.play({ startTime: currentTime - beatsPerBar * secondsPerBeat, pitch: frequencies[bassNote] / 4, duration: beatsPerBar * secondsPerBeat, volume: 0.1, finalVolume: 2.5 });
-
+            switch (song.intro.transition) {
+                case 0: 
+                    var bassNote = chords[chords.length - 1];
+                    bassInstrument.play({
+                        startTime: currentTime - beatsPerBar * secondsPerBeat,
+                        pitch: frequencies[bassNote] / 4,
+                        duration: beatsPerBar * secondsPerBeat,
+                        volume: 0.2,
+                        finalVolume: 4,
+                    });
+                    break;
+                case 1:
+                    for (var j = 0; j < 8; ++j) {
+                        snareDrum.play({
+                            startTime: currentTime - ((8 - j) / 2) * secondsPerBeat,
+                            volume: Math.pow((j + 1) / 8, 2),
+                        });
+                    }
+                    break;
+                case 2:
+                    var whiteNoise = new WhiteNoiseWithBandPass(context, analyzer);
+                    whiteNoise.play({
+                        startTime: currentTime - beatsPerBar * secondsPerBeat,
+                        duration: (beatsPerBar - 0.5) * secondsPerBeat,
+                        startFrequency: 100,
+                        endFrequency: 1000,
+                        startQ: 5,
+                        endQ: 0.7,
+                        startVolume: 0.1,
+                        endVolume: 4,
+                    });
+                    break;
+            }
         }
 
         // Body
         var bodyStartTime = currentTime;
-
         for (var i = 0; i < song.form.length; ++i) {
             var segmentStartTime = bodyStartTime + i * measuresPerSegment * beatsPerBar * secondsPerBeat;
-            currentBeat = 0;
-            currentTime = segmentStartTime;
-            // Add drums
-            var segment = song.segments[song.form[i]];
-            for (var j = 0; j < measuresPerSegment; ++j) {
-                // Play bass drum on 1 and 3
-                bassDrum.play({ startTime: currentTime });
-                bassDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
-                // Snare on 3
-                snareDrum.play({ startTime: currentTime + 2 * secondsPerBeat });
-                currentBeat += beatsPerBar;
-                currentTime = currentBeat * secondsPerBeat + segmentStartTime;
-            }
-
-            // Add bass line
+            
+            // Add bass drum 
             currentBeat = 0;
             currentTime = segmentStartTime;
             var segment = song.segments[song.form[i]];
             var measure = 0;
             var beatInMeasure = 0;
             var j = 0;
+            while (measure < measuresPerSegment) {
+                var rhythm = segment.bassDrumRhythm[j % segment.bassDrumRhythm.length];
+                bassDrum.play({ startTime: currentTime });
+                currentBeat += rhythm.duration;
+                beatInMeasure += rhythm.duration;
+                currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+                while (beatInMeasure >= beatsPerBar) {
+                    ++measure;
+                    beatInMeasure -= beatsPerBar;
+                }
+                ++j;
+            }
+        
+            // Add snare drum
+            currentBeat = 0;
+            currentTime = segmentStartTime;
+            measure = 0;
+            beatInMeasure = 0;
+            j = 0;
+            while (measure < measuresPerSegment) {
+                var rhythm = segment.snareDrumRhythm[j % segment.snareDrumRhythm.length];
+                if (!rhythm.isRest) {
+                    snareDrum.play({ startTime: currentTime });
+                }
+                currentBeat += rhythm.duration;
+                beatInMeasure += rhythm.duration;
+                currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+                while (beatInMeasure >= beatsPerBar) {
+                    ++measure;
+                    beatInMeasure -= beatsPerBar;
+                }
+                ++j;
+            }
+
+            // Add bass line
+            currentBeat = 0;
+            currentTime = segmentStartTime;
+            measure = 0;
+            beatInMeasure = 0;
+            j = 0;
             while (measure < measuresPerSegment) {
                 var rhythm = segment.bassLineRhythm[j % segment.bassLineRhythm.length];
                 if (!rhythm.isRest) {
@@ -591,40 +554,6 @@ var songBuilder = (function (seedrandom) {
         }
 
         var endingStartTime = bodyStartTime + song.form.length * measuresPerSegment * beatsPerBar * secondsPerBeat;;
-        /*
-        // Add backgrounds
-        /*currentBeat = 0;
-        currentTime = bodyStartTime;
-        for (var i = 0; i < song.form.length; ++i) {
-            var segment = song.segments[song.form[i]];
-            for (var j = 0; j < segment.backgrounds.length; ++j) {
-                var background = segment.backgrounds[j];
-                var backgroundInstrument = getInstrument(background.instrument);
-                var segmentStartBeat = i * measuresPerSegment * beatsPerBar;
-                currentBeat = 0;
-                currentTime = (currentBeat + segmentStartBeat) * secondsPerBeat + bodyStartTime;
-                while (currentBeat < measuresPerSegment * beatsPerBar) {
-                    for (var k = 0; k < background.rhythm.length; ++k) {
-                        var rhythm = background.rhythm[k];
-                        if (!rhythm.isRest) {
-                            var options = copy(background.options);
-                            options.startTime = currentTime;
-                            options.duration *= secondsPerBeat;
-                            backgroundInstrument.play(options);
-                            if (options.multishots) {
-                                for (var m = 0; m < options.multishots.length; ++m) {
-                                    options = copy(background.options);
-                                    options.startTime = currentTime + options.multishots[m] * secondsPerBeat;
-                                    backgroundInstrument.play(options);
-                                }
-                            }
-                        }
-                        currentBeat += rhythm.duration;
-                        currentTime = (currentBeat + segmentStartBeat) * secondsPerBeat + bodyStartTime;
-                    }
-                }
-            }
-        }*/
 
         // Add ending
         currentBeat = 0;
@@ -639,7 +568,7 @@ var songBuilder = (function (seedrandom) {
                     startTime: currentTime,
                     pitch: frequencies[note.note],
                     duration: note.duration * secondsPerBeat,
-                    finalVolume: 0.05,
+                    finalVolume: 0.1,
                 });
             }
             currentBeat += note.duration;
@@ -661,7 +590,7 @@ var songBuilder = (function (seedrandom) {
                     startTime: currentTime,
                     pitch: frequency,
                     duration: rhythm.duration * secondsPerBeat,
-                    finalVolume: 0.05,
+                    finalVolume: 0.1,
                 });
             }
             currentBeat += rhythm.duration;
@@ -711,6 +640,14 @@ var songBuilder = (function (seedrandom) {
             context.close();
         context = null;
         stopVisualization();
+
+        // Clear the visualization canvas and the displayed champion set
+        window.requestAnimationFrame(function () {
+            var canvas = document.getElementById('visualizationArea');
+            var canvasContext = canvas.getContext('2d');
+            canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        clearChampionSet();
     }
 
     function test() {

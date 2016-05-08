@@ -187,6 +187,186 @@ var bassLineRhythmRule = function (beat, measure, prevRhythm) {
             ];
     }
 }
+
+// Bass Drum rhythm rule
+// Bass drum must sound on beat 0 of every bar.
+// Bass drum must not sound on beat 2 of every bar.
+// Bass drum patterns will be 2 bars long.
+// 
+var bassDrumRhythmRule = function (beat, measure, prevRhythm) {
+    switch (beat) {
+        case 0:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 1.5 }, probability: 0.3 },
+                    { value: { duration: 2.5 }, probability: 0.3 },
+                    { value: { duration: 4 }, probability: 0.4 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 1 }, probability: 0.1 },
+                    { value: { duration: 1.5 }, probability: 0.3 },
+                    { value: { duration: 2.5 }, probability: 0.1 },
+                    { value: { duration: 4 }, probability: 0.2 },
+                ]
+            }
+        case 0.5:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 3.5 }, probability: 1 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 2 }, probability: 0.7 },
+                    { value: { duration: 3.5 }, probability: 0.3 },
+                ];
+            }
+        case 1:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 3 }, probability: 1 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 2 }, probability: 0.3 },
+                    { value: { duration: 3 }, probability: 0.7 },
+                ];
+            }
+        case 1.5:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 1 }, probability: 0.6 },
+                    { value: { duration: 2.5 }, probability: 0.4 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 1 }, probability: 0.8 },
+                    { value: { duration: 2.5 }, probability: 0.2 },
+                ];
+            }
+        case 2:
+            // Shouldn't happen, this is where the snare drum plays every time
+            return [
+                { value: { duration: 2 }, probability: 1 },
+            ];
+        case 2.5:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 1 }, probability: 0.5 },
+                    { value: { duration: 1.5 }, probability: 0.5 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 1.5 }, probability: 1 },
+                ];
+            }
+        case 3:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 1 }, probability: 1 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 1 }, probability: 1 },
+                ];
+            }
+        case 3.5:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            } else {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            }
+        default:
+            // Shouldn't happen
+            return [
+                { value: { duration: 1 }, probability: 1 },
+            ];
+    }
+}
+
+// The snare drum will always play on beat 2 (0-indexed)
+// The snare drum will never play before beat 2 in a bar
+// Snare drum patterns are 4 bars long
+// Bar 0 in the pattern will always only play on beat 2
+var snareDrumRhythmRule = function (beat, measure, prevRhythm) {
+    switch (beat) {
+        case 0:
+            return [
+                { value: { duration: 2, isRest: true }, probability: 1 },
+            ];
+        case 2:
+            if (measure == 0) {
+                return [
+                    { value: { duration: 2 }, probability: 1 },
+                ];
+            } else if (measure == 3) {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 1 }, probability: 0.7 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 1 }, probability: 0.3 },
+                    { value: { duration: 2 }, probability: 0.7 },
+                ];
+            }
+        case 2.5:
+            if (measure == 3) {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.7 },
+                    { value: { duration: 1 }, probability: 0.3 },
+                ];
+            } else {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 1.5, isRest: true }, probability: 1 },
+                ];
+            }
+        case 3:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 1, isRest: true }, probability: 1 },
+                ];
+            } else if (measure == 3) {
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.6 },
+                    { value: { duration: 1 }, probability: 0.4 },
+                ];
+            }
+        case 3.5:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 0.5, isRest: true }, probability: 1 },
+                ];
+            } else {
+                // Do the same thing for bars 1, 2, and 3
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            }
+        default:
+            // Shouldn't happen
+            return [
+                { value: { duration: 1 }, probability: 1 },
+            ];
+    }
+}
+
 var introRhythmRule = function (beat, measure, prevRhythm) {
     if ((measure % 4) < 3) {
         switch (beat) {
@@ -197,6 +377,10 @@ var introRhythmRule = function (beat, measure, prevRhythm) {
                 return [
                     { value: { duration: 0.5 }, probability: 0.5 },
                     { value: { duration: 0.5, isRest: true }, probability: 0.5 },
+                ];
+            case 0:
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
                 ];
             default:
                 return [
@@ -214,10 +398,72 @@ var introRhythmRule = function (beat, measure, prevRhythm) {
                     { value: { duration: 0.5, isRest: true }, probability: 0.7 },
                 ];
             case 0:
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
             case 1:
             case 2:
                 return [
                     { value: { duration: 0.5 }, probability: 0.8 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.2 },
+                ];
+            default:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.2 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.8 },
+                ];
+        }
+    }
+}
+var electricIntroRhythmRule = function (beat, measure, prevRhythm) {
+    if ((beat % 1) === 0.25 || beat % 1 === 0.75) {
+        return [
+            { value: { duration: 0.25 }, probability: 1 },
+        ];
+    }
+    var wasSixteenth = prevRhythm.duration && prevRhythm.duration < 0.4;
+    if ((measure % 4) < 3) {
+        switch (beat) {
+            case 0.5:
+            case 1.5:
+            case 2.5:
+            case 3.5:
+                return [
+                    { value: { duration: 0.25 }, probability: 0.4 },
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 0.5, isRest: !wasSixteenth }, probability: 0.3 },
+                ];
+            case 0:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.5 },
+                    { value: { duration: 1 }, probability: 0.5 },
+                ];
+            default:
+                return [
+                    { value: { duration: 0.25 }, probability: 0.4 },
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 1 }, probability: 0.2 },
+                    { value: { duration: 0.5, isRest: !wasSixteenth }, probability: 0.1 },
+                ];
+        }
+    } else {
+        switch (beat) {
+            case 0.5:
+            case 1.5:
+                return [
+                    { value: { duration: 0.25 }, probability: 0.5 },
+                    { value: { duration: 0.5 }, probability: 0.2 },
+                    { value: { duration: 0.5, isRest: !wasSixteenth }, probability: 0.3 },
+                ];
+            case 0:
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            case 1:
+            case 2:
+                return [
+                    { value: { duration: 0.25 }, probability: 0.4 },
+                    { value: { duration: 0.5 }, probability: 0.4 },
                     { value: { duration: 0.5, isRest: true }, probability: 0.2 },
                 ];
             default:

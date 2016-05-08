@@ -199,7 +199,7 @@ var songBuilder = (function (seedrandom) {
             chordProgression: [0],
             bassLineRhythm: [{ duration: 8 }],
             melody: [{ duration: 8, note: endingNote }],
-        }
+        };
 
         currentSong = {
             beatsPerMinute: beatsPerMinute,
@@ -357,51 +357,6 @@ var songBuilder = (function (seedrandom) {
                 }
                 ++j;
             }
-        } else if (song.intro.mode === 200) {
-            var chords = song.segments[0].chordProgression;
-            currentBeat = 0;
-            currentTime = startTime;
-            function getVolume(position) {
-                switch (position) {
-                    case 0:
-                    case 4:
-                        return minVolume;
-                    case 1:
-                    case 3:
-                        return (minVolume + peakVolume) / 2;
-                    case 2:
-                        return peakVolume;
-                }
-            }
-            for (var j = 0; j < chords.length * 2; ++j) {
-                var note = chords[j % chords.length];
-                var startVolume = getVolume(j % chords.length);
-                var endVolume = getVolume((j % chords.length) + 1);
-                introInstrument.play({
-                    startTime: currentTime,
-                    duration: secondsPerBeat * beatsPerBar,
-                    pitch: frequencies[note],
-                    volume: startVolume,
-                    finalVolume: endVolume,
-                });
-                introInstrument.play({
-                    startTime: currentTime,
-                    duration: secondsPerBeat * beatsPerBar,
-                    pitch: frequencies[(note + 2) % 7],
-                    volume: startVolume,
-                    finalVolume: endVolume,
-                });
-                introInstrument.play({
-                    startTime: currentTime,
-                    duration: secondsPerBeat * beatsPerBar,
-                    pitch: frequencies[(note + 4) % 7],
-                    volume: startVolume,
-                    finalVolume: endVolume,
-                });
-                
-                currentBeat += beatsPerBar;
-                currentTime = currentBeat * secondsPerBeat + startTime;
-            }
         } else {
             // Add intro melody
             currentBeat = 0;
@@ -455,7 +410,7 @@ var songBuilder = (function (seedrandom) {
                     for (var j = 0; j < 8; ++j) {
                         snareDrum.play({
                             startTime: currentTime - ((8 - j) / 2) * secondsPerBeat,
-                            volume: Math.pow((j + 1) / 8, 2),
+                            volume: 2 * Math.pow((j + 1) / 8, 2),
                         });
                     }
                     break;
@@ -657,24 +612,6 @@ var songBuilder = (function (seedrandom) {
         clearChampionSet();
     }
 
-    function test() {
-        if (context && context.close)
-            context.close();
-        context = new AudioContext();
-        analyzer = context.createAnalyser();
-        analyzer.connect(context.destination);
-
-        var frequencies = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77];
-
-        var introInstrument = new Violin(context, analyzer);
-
-        introInstrument.play({ startTime: 0.5, duration: 0.5, pitch: C4 });
-        introInstrument.play({ startTime: 1, duration: 0.5, pitch: D4 });
-        introInstrument.play({ startTime: 1.5, duration: 0.5, pitch: E4 });
-        introInstrument.play({ startTime: 2, duration: 0.5, pitch: F4 });
-
-    }
-
     return {
         build: build,
         play: play,
@@ -682,7 +619,6 @@ var songBuilder = (function (seedrandom) {
         playOrPause: playOrPause,
         buildAndPlay: buildAndPlay,
         stop: stop,
-        test: test
     }
 })(
     Math.seedrandom

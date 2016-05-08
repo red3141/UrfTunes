@@ -84,6 +84,7 @@ Must have:
 - Write-up of what it does & development process
 - Update server
 - Fix seeding so each champion is only part of one seed?
+- Highlight some songs
 Nice to have:
 - Different endings
 - Special section types

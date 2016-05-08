@@ -162,7 +162,7 @@ SnareDrum.prototype.play = function(options) {
     var startTime = options.startTime || 0;
     var volume = options.volume || 1;
     
-    var attackGain = volume * 0.3;
+    var attackGain = volume * 0.2;
 
     var oscillatorEndTime = startTime + this.oscillatorDuration;
     var noiseEndTime = startTime + this.noiseDuration;

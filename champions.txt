@@ -3,6 +3,8 @@ Note: "+1" is in arbirary units (not seconds or beats per minute or anything)
 
 * = not yet implemented
 
+In hindsight, we didn't end up following most of these - we wnt in a different direction instead.
+
 aatrox
   *1-5) +1 modulate pitch upward transition
 ahri

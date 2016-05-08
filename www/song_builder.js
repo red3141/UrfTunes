@@ -13,7 +13,11 @@ var songBuilder = (function (seedrandom) {
         // Start by building the form of the song (e.g. AABA)
         // A "rule" is a function that determines the probability of getting to each state from the current state.
         // It returns a stateMap, which is an array of probabilities for each state.
-        var form = markovChain.build(formRule, 8, prng);
+        var segmentOrder = markovChain.build(formRule, 10, prng);
+        var form = [];
+        for (var i = 0; i < segmentOrder.length; ++i) {
+            form.push({ segmentType: segmentOrder[i] });
+        }
 
         var segments = [];
         for (var i = 0; i < 3; ++i) {
@@ -168,11 +172,43 @@ var songBuilder = (function (seedrandom) {
             var snareDrumRhythm = markovChain.buildRhythm(snareDrumRhythmRule, 4, prng);
             segments[i].snareDrumRhythm = snareDrumRhythm;
         }
+        
+        // Transitions
+        var transitionSeedInputs = [
+            'twistedfate',
+            'twitch',
+            'udyr',
+            'urgot',
+            'varus',
+            'vayne',
+            'veigar',
+            'velkoz',
+            'vi',
+            'viktor',
+            'vladimir',
+            'volibear',
+            'warwick',
+            'wukong',
+            'xerath',
+            'xinzhao',
+            'yasuo',
+            'yorick',
+            'zac',
+            'zed',
+            'ziggs',
+            'zilean',
+            'zyra'
+        ];
+        prng = seedrandom(getSeed(transitionSeedInputs), { global: false });
+        var transitions = markovChain.build(transitionRule, segments.length, prng);
+        for (var i = 0; i < form.length; ++i) {
+            form[i].transition = transitions[i];
+        }
 
         // Make an ending
         // For now just play a double whole note
         var lastForm = form[form.length - 1];
-        var lastSegment = segments[lastForm];
+        var lastSegment = segments[lastForm.segmentType];
         var lastNote = lastSegment.melody[lastSegment.melody.length - 1];
         var octaveShift = 0;
         while (lastNote > 7) {
@@ -277,6 +313,7 @@ var songBuilder = (function (seedrandom) {
         var bassDrum = new BassDrum(context, analyzer);
         var snareDrum = new SnareDrum(context, analyzer);
         var bassInstrument = new Bass(context, analyzer);
+        var whiteNoise = new WhiteNoiseWithBandPass(context, analyzer);
         var introInstrument;
         switch (song.intro.mode) {
             case 0: // 0 = bass
@@ -285,7 +322,7 @@ var songBuilder = (function (seedrandom) {
             case 1: // 1 = piano
                 introInstrument = new Piano(context, analyzer);
                 break;
-            case 2: // 2 =TODO: electric
+            case 2: // 2 = electric
                 introInstrument = new ElectricGuitar(context, analyzer);
                 break;
             case 3: // 3 = strings (violins)
@@ -304,6 +341,8 @@ var songBuilder = (function (seedrandom) {
             new SineTooth(context, analyzer, 2),
             new SineTooth(context, analyzer, 3),
             new SineTooth(context, analyzer, 4),
+            new SineTooth(context, analyzer, 0),
+            new SineTooth(context, analyzer, 1),
             new SineTooth(context, analyzer, 2),
             new SineTooth(context, analyzer, 3),
             new SineTooth(context, analyzer, 4),
@@ -388,7 +427,7 @@ var songBuilder = (function (seedrandom) {
                     introInstrument.play({
                         startTime: currentTime,
                         pitch: frequency,
-                        duration: secondsPerBeat * (beatsPerBar - 0.5),
+                        duration: secondsPerBeat * (beatsPerBar - (currentBeat >= 12 ? 0.5 : 0)),
                         volume: volume * 0.4,
                     });
                 }
@@ -415,7 +454,6 @@ var songBuilder = (function (seedrandom) {
                     }
                     break;
                 case 2:
-                    var whiteNoise = new WhiteNoiseWithBandPass(context, analyzer);
                     whiteNoise.play({
                         startTime: currentTime - beatsPerBar * secondsPerBeat,
                         duration: (beatsPerBar - 0.5) * secondsPerBeat,
@@ -432,13 +470,16 @@ var songBuilder = (function (seedrandom) {
 
         // Body
         var bodyStartTime = currentTime;
+        var volumes = [0.6, 0.9, 1.5];
         for (var i = 0; i < song.form.length; ++i) {
             var segmentStartTime = bodyStartTime + i * measuresPerSegment * beatsPerBar * secondsPerBeat;
             
             // Add bass drum 
             currentBeat = 0;
             currentTime = segmentStartTime;
-            var segment = song.segments[song.form[i]];
+            var segmentType = song.form[i].segmentType;
+            var segment = song.segments[segmentType];
+            var volume = volumes[segmentType] || 1;
             var measure = 0;
             var beatInMeasure = 0;
             var j = 0;
@@ -454,7 +495,7 @@ var songBuilder = (function (seedrandom) {
                 }
                 ++j;
             }
-        
+
             // Add snare drum
             currentBeat = 0;
             currentTime = segmentStartTime;
@@ -503,15 +544,64 @@ var songBuilder = (function (seedrandom) {
             // Add melody
             currentBeat = 0;
             currentTime = segmentStartTime;
-            var segment = song.segments[song.form[i]];
             var melodyInstrument = melodyInstruments[i];
+            var lastNotePitch = 7;
             for (var j = 0; j < segment.melody.length; ++j) {
                 var note = segment.melody[j];
                 if (!note.isRest) {
-                    melodyInstrument.play({ startTime: currentTime, pitch: frequencies[note.note], duration: note.duration * secondsPerBeat });
+                    if (song.form[i].transition !== 3 || currentBeat < beatsPerBar * 15.5)
+                        melodyInstrument.play({
+                            startTime: currentTime,
+                            pitch: frequencies[note.note],
+                            duration: note.duration * secondsPerBeat,
+                            volume: volume,
+                        });
+                    lastNote = note.note;
                 }
                 currentBeat += note.duration;
                 currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+            }
+            // Transitions (note that 0 = no transition)
+            switch (song.form[i].transition) {
+                case 1: // Speeding up drum beat
+                    currentBeat -= 2 * beatsPerBar;
+                    currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+                    for (var j = 0; j < 4; ++j) {
+                        snareDrum.play({ startTime: currentTime, volume: 0.5 });
+                        currentBeat += 1;
+                        currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+                    }
+                    for (var j = 0; j < 4; ++j) {
+                        snareDrum.play({ startTime: currentTime, volume: 1 });
+                        currentBeat += 0.5;
+                        currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+                    }
+                    for (var j = 0; j < 7; ++j) {
+                        snareDrum.play({ startTime: currentTime, volume: 1.8 });
+                        currentBeat += 0.25;
+                        currentTime = currentBeat * secondsPerBeat + segmentStartTime;
+                    }
+                    break;
+                case 2: // Whoosh
+                    whiteNoise.play({
+                        startTime: currentTime - 2 * beatsPerBar * secondsPerBeat,
+                        duration: 2 * beatsPerBar * secondsPerBeat,
+                        startFrequency: 100,
+                        endFrequency: 5000,
+                        startQ: 10,
+                        endQ: 5,
+                        startVolume: 0.1,
+                        endVolume: 4,
+                    });
+                    break;
+                case 3: // Pitch bend
+                    melodyInstrument.play({
+                        startTime: currentTime - 2 * secondsPerBeat,
+                        duration: 2 * secondsPerBeat,
+                        pitch: frequencies[lastNote],
+                        finalPitch: frequencies[lastNote] * 0.5,
+                    });
+                    break;
             }
         }
 

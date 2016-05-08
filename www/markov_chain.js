@@ -10,7 +10,7 @@ var markovChain = (function() {
             totalProbability += stateMap[i];
         }
         if (i === stateMap.length - 1 && Math.abs(totalProbability - 1) > 0.00001)
-            console.warn('Bad rule (does not add to 1): [' + stateMap.join(',') + ']');
+            console.warn('Bad rule (does not add to 1): [' + stateMap.join(',') + ']; value: ' + totalProbability);
         return i;
     }
     
@@ -26,7 +26,7 @@ var markovChain = (function() {
             ++i;
         } while (i < stateMap.length && totalProbability <= n);
         if (i === stateMap.length && Math.abs(totalProbability - 1) > 0.00001)
-            console.warn('Bad rule (does not add to 1): [' + stateMap.join(',') + ']');
+            console.warn('Bad rule (does not add to 1): [' + stateMap.join(',') + ']; value: ' + totalProbability);
         return currentState.value;
     }
     

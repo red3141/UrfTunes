@@ -1,6 +1,17 @@
 // The rules to use for building various types of Markov chains
+/* Section types:
+  0 = standard A section
+  1 = standard B section
+  2 = bridge
+  3 = Repeat last bar of prev section; repeated part gets shorter with time, must have a transition
+  4 = Repeated note (1/3/5) that modulates up in pitch, must have a transition
+  5 = Quiet/percussionless section
+  6 = Percussion+bass section
+  */
 var formRule = function (prevStates) {
     // state is a 0-based number
+    // The index of each element is its state numer. The value is the probability of that state being selected.
+    // Probabilities must add up to 1.
     if (equals(prevStates, []))
         return [1];
     if (equals(prevStates, [0]))
@@ -15,8 +26,8 @@ var formRule = function (prevStates) {
         return [0, 0.9, 0.1];
     if (equals(prevStates, [0, 1, 2]))
         return [0.8, 0.2, 0];
-    if (prevStates.length === 6 && prevStates.indexOf(2) === -1)
-        return [0, 0, 1]; // Ensure that the C section happens at least once
+    if (prevStates.length === 6 && prevStates.indexOf(2) === -1 && prevStates.indexOf(3) === -1 && prevStates.indexOf(4) === -1 && prevStates.indexOf(5) === -1)
+        return [0, 0, 1/*0.25, 0.25, 0.25, 0.25*/]; // Ensure that a non-standard section happens at least once
     if (prevStates.length < 2)
         return [1];
     var recentStates = prevStates.slice(prevStates.length - 2, prevStates.length);
@@ -33,6 +44,22 @@ var formRule = function (prevStates) {
     if (equals(recentStates, [2, 0]))
         return [0.1, 0.8, 0.1];
     return [1];
+}
+/* Transition types:
+  0 = no transition
+  1 = speeding up drum beat
+  2 = whoosh (increasing pitch over 2 bars)
+  3 = note on the last 2 beats that bends pitch down over time
+  */
+var transitionRule = function (prevStates) {
+    if (prevStates.length === 0 || prevStates.length === 9)
+        return [1];
+    if (prevStates.length === 1)
+        return [0.7, 0.1, 0.1, 0.1];
+    var recentStates = prevStates.slice(prevStates.length - 2, prevStates.length);
+    if (equals(recentStates, [0, 0]))
+        return [0, 0.33, 0.33, 0.34];
+    return [0.7, 0.1, 0.1, 0.1];
 }
 var chordRule = function (prevStates) {
     // Data from http://www.hooktheory.com/trends#node=1&key=C
@@ -79,50 +106,6 @@ var chordRule = function (prevStates) {
         return [0.5, 0, 0, 0, 0.5, 0, 0];
     if (equals(prevStates, [0, 5, 4]))
         return [0.2, 0.1, 0, 0.7, 0, 0, 0];
-    /*if (prevStates.length === 0)
-        return [1];
-    if (prevStates.length === 3)
-        return [0, 0, 0, 0, 1];
-    if (equals(prevStates, [0]))
-        return [0, 0.09, 0, 0.28, 0.48, 0.15, 0];
-    if (equals(prevStates, [0, 1]))
-        return [0.3, 0, 0.3, 0.4, 0.0, 0.0, 0];
-    if (equals(prevStates, [0, 1, 0]))
-        return [0, 0.54, 0, 0.18, 0.22, 0.06, 0];
-    if (equals(prevStates, [0, 1, 2]))
-        return [0, 0, 0, 0.8, 0, 0.0, 0];
-    if (equals(prevStates, [0, 1, 3]))
-        return [0, 0, 0, 0, 0.67, 0.33, 0];
-    if (equals(prevStates, [0, 1, 4]))
-        return [0.35, 0, 0, 0, 0.45, 0.2, 0];
-    if (equals(prevStates, [0, 1, 5]))
-        return [0.5, 0, 0, 0.2, 0, 0.3, 0];
-    if (equals(prevStates, [0, 3]))
-        return [1, 0, 0, 0, 0.0, 0.0, 0];
-    if (equals(prevStates, [0, 3, 0]))
-        return [0, 0, 0, 0.6, 0.4, 0, 0];
-    if (equals(prevStates, [0, 3, 4]))
-        return [0.4, 0, 0, 0.2, 0, 0.4, 0];
-    if (equals(prevStates, [0, 3, 5]))
-        return [0.1, 0, 0, 0.2, 0.7, 0, 0];
-    if (equals(prevStates, [0, 4]))
-        return [0.6, 0.4, 0, 0.0, 0, 0.0, 0];
-    if (equals(prevStates, [0, 4, 0]))
-        return [0, 0, 0, 0.5, 0.5, 0, 0];
-    if (equals(prevStates, [0, 4, 1]))
-        return [0, 0, 0, 0.7, 0, 0.3, 0];
-    if (equals(prevStates, [0, 4, 3]))
-        return [0.5, 0, 0, 0, 0.25, 0.25, 0];
-    if (equals(prevStates, [0, 4, 5]))
-        return [0, 0, 0, 0.8, 0.2, 0, 0];
-    if (equals(prevStates, [0, 5]))
-        return [1, 0, 0, 0.0, 0.0, 0, 0];
-    if (equals(prevStates, [0, 5, 0]))
-        return [0, 0, 0, 0.3, 0.1, 0.6, 0];
-    if (equals(prevStates, [0, 5, 3]))
-        return [0.5, 0, 0, 0, 0.5, 0, 0];
-    if (equals(prevStates, [0, 5, 4]))
-        return [0.2, 0.1, 0, 0.7, 0, 0, 0];*/
 }
 
 // Rhythm rules
@@ -197,7 +180,7 @@ var introBassDrumRhythmRule = function (beat, measure, prevRhythm) {
             ];
         case 2:
             return [
-                { value: { duration: 2, isRest: measure >= 4 }, probability: 0.7 },
+                { value: { duration: 2, isRest: measure >= 4 }, probability: 1 },
             ];
         default:
             // Shouldn't happen

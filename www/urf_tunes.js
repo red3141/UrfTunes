@@ -162,7 +162,7 @@ SnareDrum.prototype.play = function(options) {
     var startTime = options.startTime || 0;
     var volume = options.volume || 1;
     
-    var attackGain = volume * 0.2;
+    var attackGain = volume * 0.15;
 
     var oscillatorEndTime = startTime + this.oscillatorDuration;
     var noiseEndTime = startTime + this.noiseDuration;
@@ -242,6 +242,7 @@ SineTooth.prototype.play = function(options) {
     options = options || {};
     var startTime = options.startTime || 0;
     var pitch = options.pitch || 440;
+    var finalPitch = options.finalPitch || pitch;
     var duration = options.duration || 1;
     var volume = options.volume || 1;
     var finalVolume = options.finalVolume || volume;
@@ -259,6 +260,7 @@ SineTooth.prototype.play = function(options) {
     return runBefore(this.context, startTime).then(function() {
         var source = _this.createSource();
         source.oscillator.frequency.setValueAtTime(pitch, startTime);
+        source.oscillator.frequency.exponentialRampToValueAtTime(finalPitch, endTime);
         
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);

@@ -276,7 +276,6 @@ var songBuilder = (function (seedrandom) {
         var snareDrum = new SnareDrum(context, analyzer);
         var bassInstrument = new Bass(context, analyzer);
         var introInstrument;
-        song.intro.mode = 5;
         switch (song.intro.mode) {
             case 0: // 0 = bass
                 introInstrument = new Bass(context, analyzer);
@@ -320,7 +319,7 @@ var songBuilder = (function (seedrandom) {
             var introLength = 32;
             for (var i = 0; i < introLength; ++i) {
                 // Play bass drum on 1 and 3
-                if (i % 4 === 0)
+                if (i % 2 === 0)
                     bassDrum.play({ startTime: currentTime });
                 if (currentBeat >= 16 && i % 4 === 2)
                     snareDrum.play({ startTime: currentTime });

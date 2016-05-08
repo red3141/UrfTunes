@@ -752,6 +752,14 @@ var songBuilder = (function (seedrandom) {
             context.close();
         context = null;
         stopVisualization();
+
+        // Clear the visualization canvas and the displayed champion set
+        window.requestAnimationFrame(function () {
+            var canvas = document.getElementById('visualizationArea');
+            var canvasContext = canvas.getContext('2d');
+            canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        clearChampionSet();
     }
 
     function test() {

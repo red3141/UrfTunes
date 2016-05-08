@@ -1,4 +1,3 @@
-var MAX_GAIN = 3;
 var BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
 var currentChampionSet = -1;
@@ -18,6 +17,10 @@ function displayChampionSet(n) {
     currentChampionSet = n;
     for (var i = 0; i < 5; ++i)
         $('#champions' + i).toggle(i === n);
+}
+
+function clearChampionSet() {
+    displayChampionSet(-1);
 }
 
 // Runs a function before the specified time is reached in the AudioContext
@@ -877,35 +880,6 @@ TimerInstrument.prototype.play = function(options) {
     return source.oscillator;
 };
 
-var A4 = 440;
-
-var Gs4 = A4 * Math.pow(2, -1/12);
-var G4 = A4 * Math.pow(2, -2/12);
-var Fs4 = A4 * Math.pow(2, -3/12);
-var F4 = A4 * Math.pow(2, -4/12);
-var E4 = A4 * Math.pow(2, -5/12);
-var Ds4 = A4 * Math.pow(2, -6/12);
-var D4 = A4 * Math.pow(2, -7/12);
-var Cs4 = A4 * Math.pow(2, -8/12);
-var C4 = A4 * Math.pow(2, -9/12);
-var B3 = A4 * Math.pow(2, -10/12);
-var As3 = A4 * Math.pow(2, -11/12);
-
-var D5 = A4 * Math.pow(2, 5/12);
-var Cs5 = A4 * Math.pow(2, 4/12);
-var C5 = A4 * Math.pow(2, 3/12);
-var B4 = A4 * Math.pow(2, 2/12);
-var As4 = A4 * Math.pow(2, 1/12);
-
-var A3 = 220;
-var A2 = 110;
-
-var As2 = A2 * Math.pow(2, 1/12);
-var B2 = A2 * Math.pow(2, 2/12);
-var C3 = A2 * Math.pow(2, 3/12);
-var Cs3 = A2 * Math.pow(2, 4/12);
-var D3 = A2 * Math.pow(2, 5/12);
-
 var isVisualizationStopped = true;
 
 function doVisualization(analyzer) {
@@ -950,201 +924,3 @@ function doVisualization(analyzer) {
 function stopVisualization() {
     isVisualizationStopped = true;
 }
-
-function playSong() {
-    var BEATS_PER_BAR = 4; // We're sticking with 4/4 time to start with.
-    var BEATS_PER_MINUTE = 80 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
-    var SECONDS_PER_BEAT = 60.0 / BEATS_PER_MINUTE;
-    var SECONDS_PER_BAR = BEATS_PER_BAR * SECONDS_PER_BEAT;
-
-    var context = new AudioContext();
-    var analyzer = context.createAnalyser();
-    analyzer.connect(context.destination);
-    
-    doVisualization(analyzer);
-    
-    // Create the instruments for the song.
-    var bassDrum = new BassDrum(context, analyzer);
-    var snareDrum = new SnareDrum(context, analyzer);
-    var sineTooth0 = new SineTooth(context, analyzer, 0);
-    var sineTooth1 = new SineTooth(context, analyzer, 1);
-    var sineTooth2 = new SineTooth(context, analyzer, 2);
-    var sineTooth3 = new SineTooth(context, analyzer, 3);
-    var sineTooth4 = new SineTooth(context, analyzer, 4);
-    var trumpet = new Trumpet(context, analyzer);
-    var bass = new Bass(context, analyzer);
-    var slider = new Slider(context, analyzer);
-    var whiteNoise = new WhiteNoiseWithBandPass(context, analyzer);
-    
-    function play(instrument, bar, note, durationBars) {
-        instrument.play({ startTime: bar * SECONDS_PER_BAR, pitch: note, duration: durationBars * SECONDS_PER_BAR });
-    }
-    
-    //play(sineTooth, 0, 261.63, 2);
-    
-    /*whiteNoise.play({
-        startTime: 0,
-        duration: 0.3,
-        initialFrequency: 10000,
-        initialQ: 100, 
-        finalFrequency: 440,
-        finalQ: 10,
-    });*/
-    
-    // Megalovania
-    play(sineTooth0, 0, D4, 1/16);
-    play(sineTooth0, 0, A4, 1/16);
-    play(sineTooth0, 1/16, D4, 1/16);
-    play(sineTooth0, 1/16, A4, 1/16);
-    play(sineTooth0, 1/8, D5, 1/8);
-    play(sineTooth0, 1/4, A4, 3/16);
-    play(sineTooth0, 7/16, Gs4, 1/8);
-    play(sineTooth0, 9/16, G4, 1/8);
-    play(sineTooth0, 11/16, F4, 1/8);
-    play(sineTooth0, 13/16, D4, 1/16);
-    play(sineTooth0, 14/16, F4, 1/16);
-    play(sineTooth0, 15/16, G4, 1/16);
-    
-    play(bass, 0, D3, 1/8);
-    play(bass, 1/8, D3, 1/8);
-    play(bass, 1/4, D3, 1/16);
-    play(bass, 5/16, D3, 1/16);
-    play(bass, 7/16, D3, 1/8);
-    play(bass, 9/16, D3, 1/8);
-    play(bass, 11/16, D3, 1/16);
-    play(bass, 12/16, D3, 1/16);
-    play(bass, 13/16, D3, 1/16);
-    play(bass, 14/16, D3, 1/8);
-    
-    play(sineTooth1, 1+0, C4, 1/16);
-    play(sineTooth1, 1+0, G4, 1/16);
-    play(sineTooth1, 1+1/16, C4, 1/16);
-    play(sineTooth1, 1+1/16, G4, 1/16);
-    play(sineTooth1, 1+1/8, D5, 1/8);
-    play(sineTooth1, 1+1/4, A4, 3/16);
-    play(sineTooth1, 1+7/16, Gs4, 1/8);
-    play(sineTooth1, 1+9/16, G4, 1/8);
-    play(sineTooth1, 1+11/16, F4, 1/8);
-    play(sineTooth1, 1+13/16, D4, 1/16);
-    play(sineTooth1, 1+14/16, F4, 1/16);
-    play(sineTooth1, 1+15/16, G4, 1/16);
-    
-    play(bass, 1+0, C3, 1/8);
-    play(bass, 1+1/8, C3, 1/8);
-    play(bass, 1+1/4, C3, 1/16);
-    play(bass, 1+5/16, C3, 1/16);
-    play(bass, 1+7/16, C3, 1/8);
-    play(bass, 1+9/16, C3, 1/8);
-    play(bass, 1+11/16, C3, 1/16);
-    play(bass, 1+12/16, C3, 1/16);
-    play(bass, 1+13/16, C3, 1/16);
-    play(bass, 1+14/16, C3, 1/8);
-    
-    play(sineTooth2, 2+0, B3, 1/16);
-    play(sineTooth2, 2+0, Fs4, 1/16);
-    play(sineTooth2, 2+1/16, B3, 1/16);
-    play(sineTooth2, 2+1/16, Fs4, 1/16);
-    play(sineTooth2, 2+1/8, D5, 1/8);
-    play(sineTooth2, 2+1/4, A4, 3/16);
-    play(sineTooth2, 2+7/16, Gs4, 1/8);
-    play(sineTooth2, 2+9/16, G4, 1/8);
-    play(sineTooth2, 2+11/16, F4, 1/8);
-    play(sineTooth2, 2+13/16, D4, 1/16);
-    play(sineTooth2, 2+14/16, F4, 1/16);
-    play(sineTooth2, 2+15/16, G4, 1/16);
-    
-    play(bass, 2+0, B2, 1/8);
-    play(bass, 2+1/8, B2, 1/8);
-    play(bass, 2+1/4, B2, 1/16);
-    play(bass, 2+5/16, B2, 1/16);
-    play(bass, 2+7/16, B2, 1/8);
-    play(bass, 2+9/16, B2, 1/8);
-    play(bass, 2+11/16, B2, 1/16);
-    play(bass, 2+12/16, B2, 1/16);
-    play(bass, 2+13/16, B2, 1/16);
-    play(bass, 2+14/16, B2, 1/8);
-    
-    play(sineTooth4, 3+0, As3, 1/16);
-    play(sineTooth4, 3+0, F4, 1/16);
-    play(sineTooth4, 3+1/16, As3, 1/16);
-    play(sineTooth4, 3+1/16, F4, 1/16);
-    play(sineTooth4, 3+1/8, D5, 1/8);
-    play(sineTooth4, 3+1/4, A4, 3/16);
-    play(sineTooth4, 3+7/16, Gs4, 1/8);
-    play(sineTooth4, 3+9/16, G4, 1/8);
-    play(sineTooth4, 3+11/16, F4, 1/8);
-    play(sineTooth4, 3+13/16, D4, 1/16);
-    play(sineTooth4, 3+14/16, F4, 1/16);
-    play(sineTooth4, 3+15/16, G4, 1/16);
-    
-    play(bass, 3+0, As2, 1/8);
-    play(bass, 3+1/8, As2, 1/8);
-    play(bass, 3+1/4, As2, 1/16);
-    play(bass, 3+5/16, As2, 1/16);
-    play(bass, 3+7/16, C3, 1/8);
-    play(bass, 3+9/16, C3, 1/8);
-    play(bass, 3+11/16, C3, 1/16);
-    play(bass, 3+12/16, C3, 1/16);
-    play(bass, 3+13/16, C3, 1/16);
-    play(bass, 3+14/16, C3, 5);
-    
-    //play(trumpet, 4, D4, 1);
-    
-    play(bassDrum, 0);
-    play(bassDrum, 1/16);
-    play(snareDrum, 2/16);
-    play(bassDrum, 3/16);
-    play(snareDrum, 4/16);
-    play(snareDrum, 6/16);
-    play(snareDrum, 8/16);
-    
-    play(bassDrum, 1+0);
-    play(bassDrum, 1+1/16);
-    play(snareDrum, 1+2/16);
-    play(bassDrum, 1+3/16);
-    play(snareDrum, 1+4/16);
-    play(snareDrum, 1+6/16);
-    play(snareDrum, 1+8/16);
-    
-    play(bassDrum, 2+0);
-    play(bassDrum, 2+1/16);
-    play(snareDrum, 2+2/16);
-    play(bassDrum, 2+3/16);
-    play(snareDrum, 2+4/16);
-    play(snareDrum, 2+6/16);
-    play(snareDrum, 2+8/16);
-    
-    play(bassDrum, 3+0);
-    play(bassDrum, 3+1/16);
-    play(snareDrum, 3+2/16);
-    play(bassDrum, 3+3/16);
-    play(snareDrum, 3+4/16);
-    play(snareDrum, 3+6/16);
-    play(snareDrum, 3+8/16);
-    
-    
-    
-    // Increasing speed drum pattern
-    //slider.play(0, A2, A4 * 2, 0, 0.2, 3.75);
-    /*var delta = 0.25;
-    var repeats = 4;
-    var bars = 0;
-    
-    for (var i = 0; i < 4; ++i) {
-        for (var j = 0; j < repeats; ++j) {
-            play(snareDrum, bars);
-            if (j % 2 == 0) {
-                play(bassDrum, bars, 1);
-            }
-            bars += delta;
-            if (j == 24) break;
-        }
-        delta /= 2;
-        repeats *= 2;
-    }*/
-    
-    setTimeout(function() { 
-        if (context.close)
-            context.close();
-    }, 12000);
-};

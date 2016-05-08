@@ -134,7 +134,6 @@ var songBuilder = (function (seedrandom) {
             'tryndamere'];
         prng = seedrandom(getSeed(melodySeedInputs), { global: false });
 
-
         // Generate rhythms for each section
         for (var i = 0; i < segments.length; ++i) {
             var rhythm = markovChain.buildRhythm(melodyRhythmRule, 16, prng);
@@ -159,7 +158,7 @@ var songBuilder = (function (seedrandom) {
         prng = seedrandom(getSeed(snareDrumSeedInputs), { global: false });
         // Generate a snare drum rhythm for each section
         for (var i = 0; i < segments.length; ++i) {
-            var snareDrumRhythm = markovChain.buildRhythm(snareDrumRhythmRule, 2, prng);
+            var snareDrumRhythm = markovChain.buildRhythm(snareDrumRhythmRule, 4, prng);
             segments[i].snareDrumRhythm = snareDrumRhythm;
         }
         

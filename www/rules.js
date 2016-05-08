@@ -323,6 +323,10 @@ var introRhythmRule = function (beat, measure, prevRhythm) {
                     { value: { duration: 0.5 }, probability: 0.5 },
                     { value: { duration: 0.5, isRest: true }, probability: 0.5 },
                 ];
+            case 0:
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
             default:
                 return [
                     { value: { duration: 0.5 }, probability: 0.4 },
@@ -339,10 +343,72 @@ var introRhythmRule = function (beat, measure, prevRhythm) {
                     { value: { duration: 0.5, isRest: true }, probability: 0.7 },
                 ];
             case 0:
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
             case 1:
             case 2:
                 return [
                     { value: { duration: 0.5 }, probability: 0.8 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.2 },
+                ];
+            default:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.2 },
+                    { value: { duration: 0.5, isRest: true }, probability: 0.8 },
+                ];
+        }
+    }
+}
+var electricIntroRhythmRule = function (beat, measure, prevRhythm) {
+    if ((beat % 1) === 0.25 || beat % 1 === 0.75) {
+        return [
+            { value: { duration: 0.25 }, probability: 1 },
+        ];
+    }
+    var wasSixteenth = prevRhythm.duration && prevRhythm.duration < 0.4;
+    if ((measure % 4) < 3) {
+        switch (beat) {
+            case 0.5:
+            case 1.5:
+            case 2.5:
+            case 3.5:
+                return [
+                    { value: { duration: 0.25 }, probability: 0.4 },
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 0.5, isRest: !wasSixteenth }, probability: 0.3 },
+                ];
+            case 0:
+                return [
+                    { value: { duration: 0.5 }, probability: 0.5 },
+                    { value: { duration: 1 }, probability: 0.5 },
+                ];
+            default:
+                return [
+                    { value: { duration: 0.25 }, probability: 0.4 },
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 1 }, probability: 0.2 },
+                    { value: { duration: 0.5, isRest: !wasSixteenth }, probability: 0.1 },
+                ];
+        }
+    } else {
+        switch (beat) {
+            case 0.5:
+            case 1.5:
+                return [
+                    { value: { duration: 0.25 }, probability: 0.5 },
+                    { value: { duration: 0.5 }, probability: 0.2 },
+                    { value: { duration: 0.5, isRest: !wasSixteenth }, probability: 0.3 },
+                ];
+            case 0:
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            case 1:
+            case 2:
+                return [
+                    { value: { duration: 0.25 }, probability: 0.4 },
+                    { value: { duration: 0.5 }, probability: 0.4 },
                     { value: { duration: 0.5, isRest: true }, probability: 0.2 },
                 ];
             default:

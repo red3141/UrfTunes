@@ -161,7 +161,7 @@ championIdToNameMap = {
 # From https://docs.python.org/2/library/collections.html#collections.OrderedDict
 class LastUpdatedOrderedDict(OrderedDict):
     'Store items in the order the keys were last added'
-    maxSize = 1000
+    maxSize = 10000
 
     def __setitem__(self, key, value):
         if key in self:
@@ -223,8 +223,8 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             json.dump(masteryLevels, self.wfile)
             return
-        except urllib2.URLError:
-            self.send_response(500)
+        except urllib2.HTTPError as e:
+            self.send_response(e.code)
             self.end_headers()
             return
         else:

@@ -293,6 +293,10 @@ var bassDrumRhythmRule = function (beat, measure, prevRhythm) {
     }
 }
 
+// The snare drum will always play on beat 2 (0-indexed)
+// The snare drum will never play before beat 2 in a bar
+// Snare drum patterns are 4 bars long
+// Bar 0 in the pattern will always only play on beat 2
 var snareDrumRhythmRule = function (beat, measure, prevRhythm) {
     switch (beat) {
         case 0:
@@ -300,10 +304,61 @@ var snareDrumRhythmRule = function (beat, measure, prevRhythm) {
                 { value: { duration: 2, isRest: true }, probability: 1 },
             ];
         case 2:
-            // Shouldn't happen, this is where the snare drum plays every time
-            return [
-                { value: { duration: 2 }, probability: 1 },
-            ];
+            if (measure == 0) {
+                return [
+                    { value: { duration: 2 }, probability: 1 },
+                ];
+            } else if (measure == 3) {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.3 },
+                    { value: { duration: 1 }, probability: 0.7 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 1 }, probability: 0.3 },
+                    { value: { duration: 2 }, probability: 0.7 },
+                ];
+            }
+        case 2.5:
+            if (measure == 3) {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.7 },
+                    { value: { duration: 1 }, probability: 0.3 },
+                ];
+            } else {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 1.5, isRest: true }, probability: 1 },
+                ];
+            }
+        case 3:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 1, isRest: true }, probability: 1 },
+                ];
+            } else if (measure == 3) {
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            } else {
+                return [
+                    { value: { duration: 0.5 }, probability: 0.6 },
+                    { value: { duration: 1 }, probability: 0.4 },
+                ];
+            }
+        case 3.5:
+            if (measure == 0) {
+                // Shouldn't happen
+                return [
+                    { value: { duration: 0.5, isRest: true }, probability: 1 },
+                ];
+            } else {
+                // Do the same thing for bars 1, 2, and 3
+                return [
+                    { value: { duration: 0.5 }, probability: 1 },
+                ];
+            }
         default:
             // Shouldn't happen
             return [

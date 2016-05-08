@@ -8,7 +8,49 @@ var songBuilder = (function (seedrandom) {
     function build() {
         var beatsPerMinute = 180 + 1.5 * (masteries['hecarim'] + masteries['masteryi'] + masteries['rammus'] + masteries['zilean']);
 
-        var formSeedInputs = ['aatrox', 'ahri', 'akali', 'alistar', 'amumu', 'anivia', 'annie', 'ashe', 'aurelionsol', 'azir', 'bard', 'blitzcrank', 'brand', 'braum', 'caitlyn', 'cassiopeia', 'chogath', 'corki', 'darius', 'diana', 'drmundo', 'draven', 'ekko', 'elise', 'evelynn', 'ezreal', 'fiddlesticks', 'fiora', 'fizz', 'galio', 'gangplank', 'garen', 'gnar', 'gragas', 'graves', 'hecarim', 'heimerdinger', 'illaoi', 'irelia', 'janna', 'jarvaniv'];
+        var formSeedInputs = [
+            'aatrox',
+            'ahri',
+            'akali',
+            'alistar',
+            'amumu',
+            'anivia',
+            'annie',
+            'ashe',
+            'aurelionsol',
+            'azir',
+            'bard',
+            'blitzcrank',
+            'brand',
+            'braum',
+            'caitlyn',
+            'cassiopeia',
+            'chogath',
+            'corki',
+            'darius',
+            'diana',
+            'drmundo',
+            'draven',
+            'ekko',
+            'elise',
+            'evelynn',
+            'ezreal',
+            'fiddlesticks',
+            'fiora',
+            'fizz',
+            'galio',
+            'gangplank',
+            'garen',
+            'gnar',
+            'gragas',
+            'graves',
+            'hecarim',
+            'heimerdinger',
+            'illaoi',
+            'irelia',
+            'janna',
+            'jarvaniv'
+        ];
         var prng = seedrandom(getSeed(formSeedInputs), { global: false });
         // Start by building the form of the song (e.g. AABA)
         // A "rule" is a function that determines the probability of getting to each state from the current state.
@@ -21,7 +63,8 @@ var songBuilder = (function (seedrandom) {
         }
 
 
-        var bassSeedInputs = ['jax',
+        var bassSeedInputs = [
+            'jax',
             'jayce',
             'jhin',
             'jinx',
@@ -54,7 +97,8 @@ var songBuilder = (function (seedrandom) {
             'nautilus',
             'nidalee',
             'nocturne',
-            'nunu'];
+            'nunu'
+        ];
         prng = seedrandom(getSeed(bassSeedInputs), { global: false });
         // Generate a chord progression (0=C, 1=Dm, 2=Em, 3=F, etc.)
         for (var i = 0; i < segments.length; ++i) {
@@ -107,7 +151,8 @@ var songBuilder = (function (seedrandom) {
         if (intro.mode === 2)
             intro.transition = 2;
 
-        var melodySeedInputs = ['olaf',
+        var melodySeedInputs = [
+            'olaf',
             'orianna',
             'pantheon',
             'poppy',
@@ -138,7 +183,8 @@ var songBuilder = (function (seedrandom) {
             'thresh',
             'tristana',
             'trundle',
-            'tryndamere'];
+            'tryndamere'
+        ];
         prng = seedrandom(getSeed(melodySeedInputs), { global: false });
 
         // Generate rhythms for each section
@@ -388,7 +434,7 @@ var songBuilder = (function (seedrandom) {
                     introInstrument.play({
                         startTime: currentTime,
                         pitch: frequency,
-                        duration: secondsPerBeat * (beatsPerBar - 0.5),
+                        duration: secondsPerBeat * (beatsPerBar - (currentBeat >= 12 ? 0.5 : 0)),
                         volume: volume * 0.4,
                     });
                 }

@@ -98,6 +98,9 @@
         normalizedSummonerName = summonerName.replace(/\s+/g, '').toLowerCase();
         
         var summonerNotFound = false;
+        $('#notFoundErrorMessage').hide();
+        //$('#serverDownErrorMessage').hide();
+            $('.social-media-buttons').hide();
         $.ajax({
             url: 'http://172.81.178.14:8080/' + region + '/' + normalizedSummonerName,
             dataType: 'json'
@@ -121,7 +124,9 @@
                 songBuilder.play();
             $('#playbackButtons').css('visibility', 'visible');
             $('.social-media-buttons').show();
-            $('#errorMessage').hide();
+            $('.social-media-buttons').hide();
+            $('#notFoundErrorMessage').hide();
+            //$('#serverDownErrorMessage').hide();
             $('#play').prop('disabled', false);
             $('#stop').prop('disabled', false);
 
@@ -138,9 +143,9 @@
             $('.social-media-buttons').hide();
             $('#errorMessage').show();
             if (summonerNotFound)
-                $('#errorMessage').text('That summoner name was not found in the selected region. Check that the name is spelled correctly and that you are in the right region.');
+                $('#notFoundErrorMessage').show();
             else
-                $('#errorMessage').text('Oops! It looks like our server is down, so we can\'t get your data. Try checking out the songs for some of our suggested summoners.');
+                $('#serverDownErrorMessage').show();
         });
     }
 })();

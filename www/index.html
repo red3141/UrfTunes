@@ -57,12 +57,22 @@
                 </div>
             </form>
             <div id="playbackButtonContainer">
+                <div id="notFoundErrorMessage" class="error-message">That summoner name was not found in the selected region. Check that the name is spelled correctly and that you are in the right region.</div>
+                <div id="serverDownErrorMessage" class="error-message">
+                    Oops! It looks like our server is down, so we can't get your data. Fortunately, we can still get data for these summoners:
+                    <ul>
+                        <li><a href="?summoner=RndmInternetMan&region=na">RndmInternetMan</a></li>
+                        <li><a href="?summoner=KirkBerkley&region=na">KirkBerkley</a></li>
+                        <li><a href="?summoner=Riot%20Sargonas&region=na">Riot Sargonas</a></li>
+                        <li><a href="?summoner=Tuxedo&region=na">Tuxedo</a></li>
+                        <li><a href="?summoner=Krepo&region=euw">Krepo</a></li>
+                    </ul>
+                </div>
                 <div id="playbackButtons">
                     <button type="button" id="play" class="btn btn-success" onclick="songBuilder.playOrPause();" disabled>Play</button>
                     <button type="button" id="stop" class="btn btn-danger" onclick="songBuilder.stop();" disabled>Stop</button>
                     <a id="downloadSongButton" class="btn btn-default" disabled>Download Song</a>
                 </div>
-                <div id="errorMessage"></div>
             </div>
             <div class="social-media-buttons">
                 <div class="fb-share-button" data-href="http://red3141.github.io/UrfTunes/" data-layout="button" data-mobile-iframe="true" style="margin-right: 10px;"></div>

@@ -63,10 +63,15 @@ div.panel-collapse {
     color: #DDDDE0 !important;
 }
 
+div.urf-bottom-container {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
 div.panel-group {
-    width: 850px;
     margin-left: auto;
     margin-right: auto;
+    max-width: 850px;
 }
 
 .btn-default[disabled] {
@@ -86,6 +91,7 @@ div.panel-group {
 .urf-container {
     padding-left: 1rem;
     padding-right: 1rem;
+    min-height: 165px;
 }
 
 .description {
@@ -117,7 +123,6 @@ div.panel-group {
     text-align: center;
     margin-top: 1.5rem;
     visibility: hidden;
-    display: none;
 }
 #playbackButtons > .btn {
     margin-left: 1rem;
@@ -143,7 +148,7 @@ div.panel-group {
     left: 0;
     bottom: 0;
     right: 0;
-    /*display: none;*/
+    display: none;
 }
 #serverDownErrorMessage li {
     list-style-type: none;
@@ -177,4 +182,17 @@ div.panel-group {
     display: none;
     color: #FF6666;
     text-align: center;
+}
+
+.panel-heading {
+    padding: 0;
+}
+.panel-heading a {
+    padding: 10px 15px;
+}
+.panel-default, .panel-default > .panel-heading {
+    border-color: #555 !important;
+}
+.panel-default>.panel-heading+.panel-collapse>.panel-body {
+    border-top-color: #555 !important;
 }

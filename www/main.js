@@ -99,8 +99,7 @@
         
         var summonerNotFound = false;
         $('#notFoundErrorMessage').hide();
-        //$('#serverDownErrorMessage').hide();
-            $('.social-media-buttons').hide();
+        $('#serverDownErrorMessage').hide();
         $.ajax({
             url: 'http://172.81.178.14:8080/' + region + '/' + normalizedSummonerName,
             dataType: 'json'
@@ -124,9 +123,8 @@
                 songBuilder.play();
             $('#playbackButtons').css('visibility', 'visible');
             $('.social-media-buttons').show();
-            $('.social-media-buttons').hide();
             $('#notFoundErrorMessage').hide();
-            //$('#serverDownErrorMessage').hide();
+            $('#serverDownErrorMessage').hide();
             $('#play').prop('disabled', false);
             $('#stop').prop('disabled', false);
 

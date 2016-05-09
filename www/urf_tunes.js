@@ -16,11 +16,18 @@ function displayChampionSet(n) {
         return;
     currentChampionSet = n;
     for (var i = 0; i < 5; ++i)
-        $('#champions' + i).toggle(i === n);
+        $('#champions' + i)
+            .toggle(i === n)
+            .css('visibility', 'visible');
 }
 
 function clearChampionSet() {
-    displayChampionSet(-1);
+    currentChampionSet = -1;
+    $('#champions0')
+        .css('visibility', 'hidden')
+        .show();
+    for (var i = 1; i < 5; ++i)
+        $('#champions' + i).toggle(i === n);
 }
 
 // Runs a function before the specified time is reached in the AudioContext

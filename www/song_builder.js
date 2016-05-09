@@ -354,7 +354,7 @@ var songBuilder = (function (seedrandom) {
             case 1: // 1 = piano
                 introInstrument = new Piano(context, analyzer);
                 break;
-            case 2: // 2 =TODO: electric
+            case 2: // 2 = electric
                 introInstrument = new ElectricGuitar(context, analyzer);
                 break;
             case 3: // 3 = strings (violins)

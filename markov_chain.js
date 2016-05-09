@@ -43,9 +43,11 @@ var markovChain = (function() {
         return states;
     }
     
-    function buildRhythm(rule, measures, prng) {
+    function buildRhythm(rule, measures, prng, useRepetition) {
         rule = rule || function() { return [{ value: { duration: 1 }, probability: 1 }] };
         prng = prng || Math.random;
+        if (useRepetition === undefined)
+            useRepetition = true;
         var beatsPerMeasure = 4; // Always use 4/4 time
         var state = 0;
         var beatInMeasure = 0;
@@ -57,7 +59,7 @@ var markovChain = (function() {
         while (currentMeasure < measures) {
             var currentGroup = Math.floor(currentMeasure / 4);
             var rhythm;
-            if (currentGroup === 0 || currentGroup === 2 || (currentMeasure % 4) >= 2) {
+            if (!useRepetition || currentGroup === 0 || currentGroup === 2 || (currentMeasure % 4) >= 2) {
                 var stateMap = rule(beatInMeasure, currentMeasure, prevRhythm);
                 rhythm = getNextStateComplex(stateMap, prng());
             } else {
@@ -83,7 +85,7 @@ var markovChain = (function() {
     function buildNotes(rule, rhythm, chordProgression, prng) {
         prng = prng || Math.random;
         var beatsPerMeasure = 4; // Always use 4/4 time
-        var prevNote = 0;
+        var prevNote = 4;
         var beatInMeasure = 0;
         var currentMeasure = 0;
         //var notes = [];

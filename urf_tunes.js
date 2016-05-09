@@ -16,11 +16,18 @@ function displayChampionSet(n) {
         return;
     currentChampionSet = n;
     for (var i = 0; i < 5; ++i)
-        $('#champions' + i).toggle(i === n);
+        $('#champions' + i)
+            .toggle(i === n)
+            .css('visibility', 'visible');
 }
 
 function clearChampionSet() {
-    displayChampionSet(-1);
+    currentChampionSet = -1;
+    $('#champions0')
+        .css('visibility', 'hidden')
+        .show();
+    for (var i = 1; i < 5; ++i)
+        $('#champions' + i).toggle(i === n);
 }
 
 // Runs a function before the specified time is reached in the AudioContext
@@ -107,7 +114,8 @@ BassDrum.prototype.play = function(options) {
         source.oscillator.frequency.setValueAtTime(_this.pitch, startTime + 0.01);
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-        source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.01);
+        source.gain.gain.exponentialRampToValueAtTime(2.5, startTime + 0.01);
+        source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.02);
         source.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
         source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
         
@@ -161,7 +169,7 @@ SnareDrum.prototype.play = function(options) {
     var startTime = options.startTime || 0;
     var volume = options.volume || 1;
     
-    var attackGain = volume * 0.3;
+    var attackGain = volume * 0.2;
 
     var oscillatorEndTime = startTime + this.oscillatorDuration;
     var noiseEndTime = startTime + this.noiseDuration;
@@ -413,8 +421,8 @@ Piano.prototype.play = function(options) {
     var duration = options.duration || 1;
     var volume = options.volume || 1;
 
-    var attackGain = volume * 0.7;
-    var reduceGain = volume * 0.1;
+    var attackGain = volume * 0.55;
+    var reduceGain = volume * 0.08;
     var maxDurationSeconds = 1;
 
     var attackEndTime = startTime + 0.01;
@@ -570,7 +578,7 @@ function ElectricGuitar(context, analyzer) {
     
     this.waveform = this.context.createPeriodicWave(real, imag);
     this.noiseBuffer = createNoiseBuffer(context);
-    this.distortionCurve = makeDistortionCurve(40);
+    this.distortionCurve = makeDistortionCurve(8000);
 }
 
 ElectricGuitar.prototype.createSource = function() {
@@ -601,9 +609,9 @@ ElectricGuitar.prototype.play = function(options) {
     var volume = options.volume || 1;
     var finalVolume = options.finalVolume || volume;
 
-    var attackGain = volume * 0.2;
-    var reduceGain = volume * 0.2;
-    var finalGain = finalVolume * 0.2;
+    var attackGain = volume * 0.15;
+    var reduceGain = volume * 0.15;
+    var finalGain = finalVolume * 0.15;
 
     var attackEndTime = startTime + 0.01;
     var reduceEndTime = attackEndTime + 0.06;
@@ -613,7 +621,7 @@ ElectricGuitar.prototype.play = function(options) {
     var _this = this;
     return runBefore(this.context, startTime).then(function() {
         var source = _this.createSource();
-        source.oscillator.frequency.setValueAtTime(pitch / 2, startTime);
+        source.oscillator.frequency.setValueAtTime(pitch, startTime);
         
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
@@ -673,8 +681,8 @@ Violin.prototype.play = function(options) {
     var volume = options.volume || 1;
     var finalVolume = options.finalVolume || volume;
     
-    var initialGain = volume * 0.2;
-    var finalGain = finalVolume * 0.2;
+    var initialGain = volume * 0.3;
+    var finalGain = finalVolume * 0.3;
 
     var attackEndTime = startTime + 0.1;
     var fallOffTime = Math.max(attackEndTime, startTime + duration);
@@ -734,9 +742,9 @@ Bass.prototype.play = function(options) {
     var volume = options.volume || 1;
     var finalVolume = options.finalVolume || 0;
 
-    var attackGain = volume * 0.9;
-    var reduceGain = volume * 0.5;
-    var finalGain = finalVolume * 0.5;
+    var attackGain = volume * 0.7;
+    var reduceGain = volume * 0.3;
+    var finalGain = finalVolume * 0.3;
     var maxDurationSeconds = 3.0;
 
     var attackEndTime = startTime + 0.02;

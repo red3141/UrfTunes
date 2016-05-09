@@ -48,11 +48,11 @@ var chordRule = function (prevStates) {
     if (equals(prevStates, [0, 1, 2]))
         return [0, 0, 0, 0.8, 0, 0.2, 0];
     if (equals(prevStates, [0, 1, 3]))
-        return [0, 0, 0, 0, 0.67, 0.33, 0];
+        return [0.2, 0, 0, 0, 0.55, 0.25, 0];
     if (equals(prevStates, [0, 1, 4]))
-        return [0.35, 0, 0, 0, 0.45, 0.2, 0];
+        return [0.4, 0, 0, 0.3, 0, 0.3, 0];
     if (equals(prevStates, [0, 1, 5]))
-        return [0.5, 0, 0, 0.2, 0, 0.3, 0];
+        return [0.1, 0, 0, 0.5, 0.4, 0, 0];
     if (equals(prevStates, [0, 3]))
         return [0.4, 0, 0, 0, 0.4, 0.2, 0];
     if (equals(prevStates, [0, 3, 0]))
@@ -79,50 +79,6 @@ var chordRule = function (prevStates) {
         return [0.5, 0, 0, 0, 0.5, 0, 0];
     if (equals(prevStates, [0, 5, 4]))
         return [0.2, 0.1, 0, 0.7, 0, 0, 0];
-    /*if (prevStates.length === 0)
-        return [1];
-    if (prevStates.length === 3)
-        return [0, 0, 0, 0, 1];
-    if (equals(prevStates, [0]))
-        return [0, 0.09, 0, 0.28, 0.48, 0.15, 0];
-    if (equals(prevStates, [0, 1]))
-        return [0.3, 0, 0.3, 0.4, 0.0, 0.0, 0];
-    if (equals(prevStates, [0, 1, 0]))
-        return [0, 0.54, 0, 0.18, 0.22, 0.06, 0];
-    if (equals(prevStates, [0, 1, 2]))
-        return [0, 0, 0, 0.8, 0, 0.0, 0];
-    if (equals(prevStates, [0, 1, 3]))
-        return [0, 0, 0, 0, 0.67, 0.33, 0];
-    if (equals(prevStates, [0, 1, 4]))
-        return [0.35, 0, 0, 0, 0.45, 0.2, 0];
-    if (equals(prevStates, [0, 1, 5]))
-        return [0.5, 0, 0, 0.2, 0, 0.3, 0];
-    if (equals(prevStates, [0, 3]))
-        return [1, 0, 0, 0, 0.0, 0.0, 0];
-    if (equals(prevStates, [0, 3, 0]))
-        return [0, 0, 0, 0.6, 0.4, 0, 0];
-    if (equals(prevStates, [0, 3, 4]))
-        return [0.4, 0, 0, 0.2, 0, 0.4, 0];
-    if (equals(prevStates, [0, 3, 5]))
-        return [0.1, 0, 0, 0.2, 0.7, 0, 0];
-    if (equals(prevStates, [0, 4]))
-        return [0.6, 0.4, 0, 0.0, 0, 0.0, 0];
-    if (equals(prevStates, [0, 4, 0]))
-        return [0, 0, 0, 0.5, 0.5, 0, 0];
-    if (equals(prevStates, [0, 4, 1]))
-        return [0, 0, 0, 0.7, 0, 0.3, 0];
-    if (equals(prevStates, [0, 4, 3]))
-        return [0.5, 0, 0, 0, 0.25, 0.25, 0];
-    if (equals(prevStates, [0, 4, 5]))
-        return [0, 0, 0, 0.8, 0.2, 0, 0];
-    if (equals(prevStates, [0, 5]))
-        return [1, 0, 0, 0.0, 0.0, 0, 0];
-    if (equals(prevStates, [0, 5, 0]))
-        return [0, 0, 0, 0.3, 0.1, 0.6, 0];
-    if (equals(prevStates, [0, 5, 3]))
-        return [0.5, 0, 0, 0, 0.5, 0, 0];
-    if (equals(prevStates, [0, 5, 4]))
-        return [0.2, 0.1, 0, 0.7, 0, 0, 0];*/
 }
 
 // Rhythm rules
@@ -197,7 +153,7 @@ var introBassDrumRhythmRule = function (beat, measure, prevRhythm) {
             ];
         case 2:
             return [
-                { value: { duration: 2, isRest: measure >= 4 }, probability: 0.7 },
+                { value: { duration: 2, isRest: measure >= 4 }, probability: 1 },
             ];
         default:
             // Shouldn't happen
@@ -793,7 +749,7 @@ var melodyPitchRule = function (prevNote, currentBeat, measure, chord) {
         case 1:
             // Ensure that strong beats land on 1, 3, or 5 in the chord
             if (isStrongBeat)
-                stateMap = [0.6, 0, 0.3, 0, 0.1, 0, 0, 0];
+                stateMap = [0.7, 0, 0.3, 0, 0, 0, 0, 0];
             else
                 stateMap = [0.3, 0.4, 0.2, 0.1, 0.0, 0.0, 0.0, 0.0];
             break;

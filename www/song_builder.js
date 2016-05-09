@@ -97,7 +97,19 @@ var songBuilder = (function (seedrandom) {
             'nautilus',
             'nidalee',
             'nocturne',
-            'nunu'
+            'nunu',
+            'volibear',
+            'warwick',
+            'wukong',
+            'xerath',
+            'xinzhao',
+            'yasuo',
+            'yorick',
+            'zac',
+            'zed',
+            'ziggs',
+            'zilean',
+            'zyra'
         ];
         prng = seedrandom(getSeed(bassSeedInputs), { global: false });
         // Generate a chord progression (0=C, 1=Dm, 2=Em, 3=F, etc.)
@@ -183,7 +195,18 @@ var songBuilder = (function (seedrandom) {
             'thresh',
             'tristana',
             'trundle',
-            'tryndamere'
+            'tryndamere',
+            'twistedfate',
+            'twitch',
+            'udyr',
+            'urgot',
+            'varus',
+            'vayne',
+            'veigar',
+            'velkoz',
+            'vi',
+            'viktor',
+            'vladimir',
         ];
         prng = seedrandom(getSeed(melodySeedInputs), { global: false });
 

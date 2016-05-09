@@ -1,11 +1,35 @@
 body {
-    background-color: #090909;
-    color: #DDE;
+    background-color: #09090F;
+    color: #DDDDE0;
     margin: 0;
 }
+
 h1 {
     margin: 0;
 }
+
+h3 {
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+h3.panel-title {
+    text-align: center;
+    font-size: 20pt;
+}
+
+.panel-title > a {
+    display: block;
+}
+.panel-title > a:hover {
+    text-decoration: none;
+    color:#FFF;
+}
+.panel-title > a:focus {
+    text-decoration: none;
+}
+
 button, button:focus {
     outline: 0 !important;
 }
@@ -29,12 +53,28 @@ div.champRow {
     text-align: center;
 }
 
+div.panel-heading {
+    background-color: #191920 !important;
+    color: #DDDDE0 !important;
+}
+
+div.panel-collapse {
+    background-color: #191920 !important;
+    color: #DDDDE0 !important;
+}
+
+div.panel-group {
+    width: 850px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .btn-default[disabled] {
     color: #999;
 }
 
 .header {
-    background-color: #191919;
+    background-color: #191920;
     padding: 2rem;
     border-bottom: #EEF 4px solid;
     border-bottom-left-radius: 15px;

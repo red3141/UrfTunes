@@ -249,7 +249,10 @@
                             consistent data, the same "random" numbers are produced for the same Champion Mastery data, which means you get the same song every time.
                         </p>
                         <p>
-                            Second, we look at the total levels of some groups of champions to determine which type of introduction your song gets. Third, the sound of the primary melody instruments is created by
+                            Second, we look at the total levels of some groups of champions to determine which type of introduction your song gets.
+                        </p>
+                        <p>
+                            Third, the sound of the primary melody instruments is created by
                             directly using Champion Mastery levels; we'll get into this a bit more in a later question, as it's really fundamental to the project.
                         </p>
                         <p>
@@ -265,7 +268,7 @@
                             is certainly more difficult than just using random numbers directly. We spent a lot of time fine-tuning our Markov chains to make sure they generate sweet beats.
                         </p>
                         <p>
-                            Another cool thing is that we use <i>multiple</i> Markov chains, and differently seeded pseudorandom number generators for each, so that leveling up a single champion results in changing only
+                            Another cool thing is that we use <i>multiple</i> Markov chains and a differently seeded pseudorandom number generators for each one, so leveling up a single champion results in changing only
                             one aspect of the song. This gives a similar, but still noticeably different, song, which gives a nice sense of progression as you level up champions. Another advantage of using this system is that
                             everyone, no matter how much or how little they've played League, has an interesting song.
                         </p>
@@ -287,8 +290,8 @@
                             the <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform" target="_blank">Fast Fourier transform</a>. Basically, the Fast Fourier transform takes the sound wave and extracts the powers of the harmonics
                             from the sound. We take this data and display it in the visualizer. You might notice that some patterns in the visualizer correspond to particular instruments. As we mentioned before, the bass and bass drum
                             are pretty skewed towards the left side, and the snare drum is at equal height across the entire visualizer (this is because it's basically just white noise). The spikes you see are your Champion
-                            Mastery levels. We also show the Champion Mastery levels using the champion icons below the visualizer so you can easily identify which champions are used in the current instrument. We also dim the
-                            images for lower Champion Mastery levels to make it easier to pick up on which champions correspond to which visualizer spikes.
+                            Mastery levels. We also show the Champion Mastery levels using the champion icons below the visualizer so you can easily identify which champions are used in the current instrument. The
+                            images are dimmed for lower Champion Mastery levels to make it easier to pick up on which champions correspond to which visualizer spikes.
                         </p>
                         <h3>Cool, I think I understand the basics of how Urf Tunes works now. Maybe you could tell me about how you came up with the idea?</h3>
                         <p>
@@ -303,22 +306,24 @@
                             When we entered into the API Challenge last year, we went into it with a clear idea of what we were aiming for, and how to accomplish it.
                             For Urf Tunes, however, we had none of that. Before this project, we knew nothing about procedural music generation and little about how sound worked, we didn't know what tools and libraries were available,
                             and we only had a vague idea of what the end result would look like. Basically, the biggest challenge was overcoming the uncertainty of how to teach a computer how music works.
-                            We're glad (in hindsight) that we chose to go with this project inspite of the uncertainty - we learned a lot in only a couple of weeks, and we managed to make some music that doesn't sound completely awful!
+                            We're glad (in hindsight) that we chose to go with this project in spite of the uncertainty - we learned a lot in only a couple of weeks, and we managed to make some music that doesn't sound completely awful!
                         </p>
                         <h3>Speaking of tools and libraries, which ones did you use in this project?</h3>
                         <p>
-                            The most important tool we used was the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" target="_blank">Web Audio API</a>. This is how we make all of sound that you hear and how the
-                            visualization you see. It's also built-in to your browser; nothing to download or set up, just learn how it works and go!
+                            The most important tool we used was the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" target="_blank">Web Audio API</a>. This is how we make all of the sound that you hear and the
+                            visualization that you see. It's really well documented, it's easy to use, and it's built-in to your browser already! Unfortunately, as we found out, it doesn't have complete support in all browsers. The only
+                            browsers we found that fully supported everything we used were Chrome and Opera.
                         </p>
                         <p>
-                            For the recording, we used <a href="https://github.com/higuma/web-audio-recorder-js" target="_blank">WebAudioRecorder.js</a> by GitHub user higuma.
+                            For the recording, we used <a href="https://github.com/higuma/web-audio-recorder-js" target="_blank">WebAudioRecorder.js</a> by GitHub user higuma. It's built specifically for use with the Web Audio API, and it
+                            was really easy to use.
                         </p>
                         <p>
                             For creating the website, we also used <a href="https://jquery.com/" target="_blank">jQuery</a> and <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a>.
                         </p>
                         <p>
                             Though not a development tool or library, we found <a href="http://www.hooktheory.com/trends#" target="_blank">this music theory website</a> really helpful. It lets you look through chord progressions in popular songs
-                            and see how frequently they're used, and that data translated really well into rules for our Markov chains.
+                            and see how frequently they're used. That data translated really well into rules for our Markov chains.
                         </p>
                         <h3>Is there anything you wish you could have done, but didn't have time to do?</h3>
                         <p>
@@ -328,7 +333,7 @@
                             and that's a bit too much for two weeks.
                         </p>
                         <p>
-                            We also had some ideas for features we wish we could've added to the site. For example, it would be cool to have a playlist feature, so you could enter a bunch of Summoner names and have
+                            We also had some ideas for features we wish we could've added to the site. For example, it would be cool to have a playlist feature so you could enter a bunch of Summoner names and have
                             their songs play one after another. It would also be nice to be able to download the song immediately instead of waiting for the whole song to finish playing.
                         </p>
                         <h3>Why is the download button disabled most of the time?</h3>
@@ -338,12 +343,12 @@
                         </p>
                         <h3>I can't hear any sound / the sound is awful / the Pause and Stop buttons don't work! Help?</h3>
                         <p>
-                            Urf Tunes works best in Google Chrome. Although we've tried to make things work, we couldn't get everything working in every browser. In particular, the sound quality in FireFox is, in our
+                            Urf Tunes works best in Google Chrome. Although we tried, we couldn't get everything working in every browser. In particular, the sound quality in FireFox is, in our
                             experience, much worse than in Chrome.
                         </p>
                         <h3>Do you have any favourite songs you'd like to share?</h3>
                         <p>
-                            Yeah, we do! You should check out:
+                            We do! You should check out:
                             <ul>
                                 <li><a href="?summoner=RndmInternetMan&region=na">RndmInternetMan</a></li>
                                 <li><a href="?summoner=KirkBerkley&region=na">KirkBerkley</a></li>

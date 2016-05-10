@@ -1,8 +1,8 @@
 # UrfTunes
 
-Created for the Riot Games API Challenge in April/May 2016
+Uses your Champion Mastery levels to procedurally generate a song. 
 
-Urf Tunes uses your Champion Mastery levels to procedurally generate a song. 
+Created for the Riot Games API Challenge in April/May 2016.
 
 Our project was inspired by the fact that there are over 1.4 * 10^101 different combinations of Champion Mastery levels, so pretty much every active summoner will have a unique "fingerprint" of levels. We thought of how that "fingerprint" could be represented, and eventually settled on music, since music is a prevalent part of the League of Legends community. 
 

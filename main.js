@@ -1,11 +1,17 @@
 // Example server call: http://172.81.178.14:8080/na/rndminternetman/
 (function() {
     function parseSearch(search) {
+        // Try to parse parameters in the query string.
         var args = {};
         if (!search)
             return args;
+        // Sometimes a '/' gets added to the end of the query string - if so, remove it.
+        var search = location.search.trim();
+        if (search && search.lastIndexOf('/') === search.length - 1)
+            search = search.substring(0, search.length - 1);
         if (search.indexOf('?') === 0)
             search = search.substr(1);
+            
         var items = search.split('&');
         for (var i = 0; i < items.length; ++i) {
             var split = items[i].split('=');
@@ -28,13 +34,8 @@
             + encodeURIComponent(href) + "&layout=button&locale=en_US&sdk=joey");
     }
     
+    // Update the current song when the user presses the back button
     $(window).on('popstate', function(e) {
-        // Try to parse parameters in the query string.
-        // Sometimes a '/' gets added to the end of the query string - if so, remove it.
-        var search = location.search.trim();
-        if (search && search.lastIndexOf('/') === search.length - 1)
-            search = search.substring(0, search.length - 1);
-            
         var args = parseSearch(search);
         if (args.summoner) {
             songBuilder.stop();
@@ -69,6 +70,8 @@
                 $('#summonerName').focus();
             }
         }
+        // Only Chome and Opera have full support of the Web Audio API. 
+        // Most other browsers don't support suspend/resume/close. FireFox just makes the songs sound really bad.
         if (navigator.userAgent.indexOf('Chrome') === -1 || navigator.userAgent.indexOf('Edge') !== -1) {
             $('#browserErrorMessage').show();
         }

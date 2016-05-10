@@ -1,7 +1,5 @@
 var BASICALLY_ZERO = 0.001; // Used when dropping gain to basically zero, since we can't exponentially drop to zero.
 
-var currentChampionSet = -1;
-
 window.addEventListener('load', init, false);
 function init() {
     try {
@@ -10,25 +8,6 @@ function init() {
         alert('Your browser does not support URF Tunes; we recommend using Google Chrome.');
     }
 };
-
-function displayChampionSet(n) {
-    if (n === currentChampionSet)
-        return;
-    currentChampionSet = n;
-    for (var i = 0; i < 5; ++i)
-        $('#champions' + i)
-            .toggle(i === n)
-            .css('visibility', 'visible');
-}
-
-function clearChampionSet() {
-    currentChampionSet = -1;
-    $('#champions0')
-        .css('visibility', 'hidden')
-        .show();
-    for (var i = 1; i < 5; ++i)
-        $('#champions' + i).toggle(i === n);
-}
 
 // Runs a function before the specified time is reached in the AudioContext
 // Some devices (like phones) can't handle too many nodes at once, so we use this function to delay the creation of those nodes.
@@ -114,8 +93,7 @@ BassDrum.prototype.play = function(options) {
         source.oscillator.frequency.setValueAtTime(_this.pitch, startTime + 0.01);
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-        source.gain.gain.exponentialRampToValueAtTime(2.5, startTime + 0.01);
-        source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.02);
+        source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.01);
         source.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
         source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
         
@@ -280,7 +258,7 @@ SineTooth.prototype.play = function(options) {
         var mode = _this.mode;
         
         $(source.oscillator).on('ended', function() {
-            displayChampionSet(mode);
+            visualization.displayChampionSet(mode);
         });
         
         return source.oscillator;
@@ -554,6 +532,7 @@ Guitar.prototype.play = function(options) {
     });
 };
 
+// From http://stackoverflow.com/a/22313408/1299394
 function makeDistortionCurve(amount) {
     var k = typeof amount === 'number' ? amount : 50,
         n_samples = 44100,
@@ -988,48 +967,3 @@ TimerInstrument.prototype.play = function(options) {
     source.oscillator.stop(endTime);
     return source.oscillator;
 };
-
-var isVisualizationStopped = true;
-
-function doVisualization(analyzer) {
-    isVisualizationStopped = false;
-    var canvas = document.getElementById('visualizationArea');
-    var canvasContext = canvas.getContext('2d');
-    canvas.width = 0;
-    canvas.width = Math.max(512, $(document).width());
-    
-    var width = canvas.width;
-    var height = canvas.height;
-    analyzer.fftSize = 1024;
-    var bufferLength = analyzer.frequencyBinCount;
-    var dataArray = new Uint8Array(bufferLength);
-
-    var draw = function() {
-    
-        analyzer.getByteFrequencyData(dataArray);
-        
-        canvasContext.clearRect(0, 0, width, height);
-        
-        var barWidth = (width / bufferLength);
-        var barHeight;
-        var x = 0;
-        
-        for (var i = 0; i < bufferLength; ++i) {
-            barHeight = dataArray[i];
-            
-            canvasContext.fillStyle = 'rgb(0,' + barHeight + ',' + (255 - barHeight) + ')';
-            canvasContext.fillRect(x, height-barHeight, barWidth, barHeight);
-            
-            x += barWidth + 1;
-        }
-        
-        if (!isVisualizationStopped)
-            window.requestAnimationFrame(draw);
-    };
-    
-    draw();
-}
-
-function stopVisualization() {
-    isVisualizationStopped = true;
-}

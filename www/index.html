@@ -232,18 +232,16 @@
                 </div>
                 <div id="collapse1" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <h3>Who made this thing, and why?</h3>
-                        <p>
-                            Hey! We're KirkBerkley and RndmInternetMan, two League of Legends players on the NA server. We created Urf Tunes for the 
-                            <a href="https://developer.riotgames.com/discussion/announcements/show/eoq3tZd1" target="_blank">Riot Games API Challenge 2016</a>. If you've seen 
-                            the winning entries from the previous API Challenges, you might remember us as the creators of <a href="http://red3141.github.io/UrfChallenge2015/" target="_blank">Summonurf's Rift</a>
-                            from the April 2015 Riot Games API Challenge.
-                        </p>
-                        <h3>Cool! So what is Urf Tunes?</h3>
+                        <h3>What is Urf Tunes?</h3>
                         <p>
                             Urf Tunes is a procedural music generator that uses your League of Legends Champion Mastery levels to generate a song unique to your data.
                         </p>
-                        <h3>How does that data affect the music?</h3>
+                        <h3>Who made it, and why?</h3>
+                        <p>
+                            We're KirkBerkley and RndmInternetMan, two League of Legends players on the NA server. We created Urf Tunes for the 
+                            <a href="https://developer.riotgames.com/discussion/announcements/show/eoq3tZd1" target="_blank">Riot Games API Challenge 2016</a>.
+                        </p>
+                        <h3>How does the data affect the music?</h3>
                         <p>
                             There are a few ways we use the Champion Mastery data to alter the song. First, we use pseudorandom number generators to determine things like the form of the song, the chord progressions,
                             the pitches of the notes, the drum patterns, and so forth. We don't want the songs to be random, though - we want them to be deterministic, so your song never changes (until you level up a
@@ -258,22 +256,22 @@
                             If you're interested in knowing what parts of the song are affected by a particular champion, you can search for the champion's name in our 
                             <a href="https://github.com/red3141/UrfTunes" target="_blank">code</a>; we intentionally use champion names to index into the champion mastery data to make it easier to do this.
                         </p>
-                        <h3>Hold on a second. You're saying that most of this project is just seeding a pseudorandom number generator, getting some numbers out of it, and there's your song? Isn't that kind of trivial?</h3>
+                        <h3>Hold on a second. You're saying that your project is just generating some random numbers, and there's your song? Isn't that kind of trivial?</h3>
                         <p>
                             Not quite. We're not just playing random notes in a random order and hoping for the best. We use the numbers to move through 
                             <a href="https://en.wikipedia.org/wiki/Markov_chain" target="_blank">Markov chains</a> to choose the structure of the song, rhythms for the drums, pitches and durations of the melody notes, etc. 
                             In short, Markov chains are a sort of "map;" for every possible state you could be in, it defines which states you can go to next, and what the probability of moving to each of those 
                             states is. The values the pseudorandom number generator gives us define how we move through the "map." Setting up the Markov chains to produce something that sounds good can be tricky, and
-                            is certainly more difficult than just using random numbers directly. We spent a lot of time fine-tuning our Markov chains to make sure it generates sweet beats.
+                            is certainly more difficult than just using random numbers directly. We spent a lot of time fine-tuning our Markov chains to make sure they generate sweet beats.
                         </p>
                         <p>
                             Another cool thing is that we use <i>multiple</i> Markov chains, and differently seeded pseudorandom number generators for each, so that leveling up a single champion results in changing only
-                            one part of the song. This gives a similar, but still noticeably different, song, which gives a nice sense of progression as you level up champions. Another advantage of using this system is that
+                            one aspect of the song. This gives a similar, but still noticeably different, song, which gives a nice sense of progression as you level up champions. Another advantage of using this system is that
                             everyone, no matter how much or how little they've played League, has an interesting song.
                         </p>
-                        <h3>Alright, that makes sense. So what about the "sound of the primary melody instruments" thing you mentioned earlier. Tell me more about that.</h3>
+                        <h3>So what about the "sound of the primary melody instruments" thing you mentioned earlier? Tell me more about that.</h3>
                         <p>
-                            Like we said before, this is really fundamental to the project. So far, we've talked about how we use the Champion Mastery levels in ways that aren't really reversible: you can't tell
+                            So far, we've talked about how we use the Champion Mastery levels in ways that aren't really reversible: you can't tell
                             what Champion Mastery level you have on a particular champion just by listening to the song. However, we also use the Champion Mastery levels to generate some special waveforms for the melody instruments.
                             Basically, this means that the sound of the melody itself contains the mastery data - those bars you see in the visualizer are actually champion mastery levels (except the bars on the far left - 
                             those are low-frequency instruments like the bass).
@@ -292,11 +290,6 @@
                             Mastery levels. We also show the Champion Mastery levels using the champion icons below the visualizer so you can easily identify which champions are used in the current instrument. We also dim the
                             images for lower Champion Mastery levels to make it easier to pick up on which champions correspond to which visualizer spikes.
                         </p>
-                        <h3>Why'd you only use 26 champions per instrument? Why not use all 130 on the same one?</h3>
-                        <div>
-                            Actually, we tried that. You might notice that when the notes get lower, the spikes bunch up to the left of the visualizer, and when the notes get higher, they spread out a lot. In order to show all
-                            of the data at once with the single instrument, we'd be restricted to extremely low notes, which wouldn't sound good at all.
-                        </div>
                         <h3>Cool, I think I understand the basics of how Urf Tunes works now. Maybe you could tell me about how you came up with the idea?</h3>
                         <p>
                             When the API Challenge was announced, we thought about the number of different possible sets of Champion Mastery levels there are. Each champion can have six different levels (including level 0)
@@ -305,12 +298,12 @@
                             This makes your Champion Mastery levels a sort of "fingerprint" - something that's unique to you. We thought it would be interesting to present that "fingerprint" in a unique way,
                             and the most unique way we thought of was music.
                         </p>
-                        <h3>What are you most proud of with this project?</h3>
+                        <h3>What were the biggest challenges you faced with this project?</h3>
                         <p>
-                            When we made Summonurf's Rift last year, we went into it with a clear idea of what we were aiming for, we knew what tools and libraries we wanted to use, and we had some idea of what we were doing.
-                            For Urf Tunes, we had none of that. Before this project, we knew nothing about procedural music generation and little about how sound worked, we didn't know what tools and libraries were available,
-                            and we only had a vague idea of what the end result would look like. We didn't even know if could figure out how to do what we wanted in only two weeks. We're glad (in hindsight) that we chose to go with
-                            this project inspite of the uncertainty - we learned a lot in only a couple of weeks, and we managed to make some music that doesn't sound completely awful!
+                            When we entered into the API Challenge last year, we went into it with a clear idea of what we were aiming for, and how to accomplish it.
+                            For Urf Tunes, however, we had none of that. Before this project, we knew nothing about procedural music generation and little about how sound worked, we didn't know what tools and libraries were available,
+                            and we only had a vague idea of what the end result would look like. Basically, the biggest challenge was overcoming the uncertainty of how to teach a computer how music works.
+                            We're glad (in hindsight) that we chose to go with this project inspite of the uncertainty - we learned a lot in only a couple of weeks, and we managed to make some music that doesn't sound completely awful!
                         </p>
                         <h3>Speaking of tools and libraries, which ones did you use in this project?</h3>
                         <p>
@@ -326,21 +319,6 @@
                         <p>
                             Though not a development tool or library, we found <a href="http://www.hooktheory.com/trends#" target="_blank">this music theory website</a> really helpful. It lets you look through chord progressions in popular songs
                             and see how frequently they're used, and that data translated really well into rules for our Markov chains.
-                        </p>
-                        <h3>You've mentioned Summonurf's Rift a couple of times now. What did you learn from that project that helped with this one?</h3>
-                        <p>
-                            There are two main things we learned from Summonurf's Rift.
-                        </p>
-                        <p>
-                            First, doing something unique for every champion isn't necessarily the best use of time. In Summonurf's Rift, it took RndmInternetMan
-                            the better part of the first week just to make the images needed for the game. This time around, we decided that wasn't going to be a great approach, so we found different ways to use each
-                            champion's data, rather than create a special sound for each champion. This saved us a bunch of time and forced us to think outside the box for how we could use each champion's data in an
-                            interesting way.
-                        </p>
-                        <p>
-                            Second, when we made Summonurf's Rift, we were really focused on just making the best end result. This resulted in each of us working only on the parts of the project that we already knew how
-                            to do, so we didn't learn as much as we could have. For Urf Tunes, we still tried to make a great end result, but we also put a priority on our own learning, even if it meant taking a bit
-                            more time to finish a part of the project.
                         </p>
                         <h3>Is there anything you wish you could have done, but didn't have time to do?</h3>
                         <p>
@@ -358,6 +336,11 @@
                             You have to wait until the end of the song before you can download it.
                             We're actually building the song dynamically as it plays in your web browser - that means the song isn't fully written until it finishes playing.
                         </p>
+                        <h3>I can't hear any sound / the sound is awful / the Pause and Stop buttons don't work! Help?</h3>
+                        <p>
+                            Urf Tunes works best in Google Chrome. Although we've tried to make things work, we couldn't get everything working in every browser. In particular, the sound quality in FireFox is, in our
+                            experience, much worse than in Chrome.
+                        </p>
                         <h3>Do you have any favourite songs you'd like to share?</h3>
                         <p>
                             Yeah, we do! You should check out:
@@ -368,11 +351,6 @@
                                 <li><a href="?summoner=Tuxedo&region=na">Tuxedo</a></li>
                                 <li><a href="?summoner=Krepo&region=euw">Krepo</a></li>
                             </ul>
-                        </p>
-                        <h3>Last question! I can't hear any sound / the sound is awful / the Pause and Stop buttons don't work! Help?</h3>
-                        <p>
-                            Urf Tunes works best in Google Chrome. Although we've tried to make things work, we couldn't get everything working in every browser. In particular, the sound quality in FireFox is, in our
-                            experience, much worse than in Chrome.
                         </p>
                     </div>
                 </div>

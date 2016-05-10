@@ -114,8 +114,7 @@ BassDrum.prototype.play = function(options) {
         source.oscillator.frequency.setValueAtTime(_this.pitch, startTime + 0.01);
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, 0);
         source.gain.gain.setValueAtTime(BASICALLY_ZERO, startTime);
-        source.gain.gain.exponentialRampToValueAtTime(2.5, startTime + 0.01);
-        source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.02);
+        source.gain.gain.exponentialRampToValueAtTime(2, startTime + 0.01);
         source.oscillator.frequency.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
         source.gain.gain.exponentialRampToValueAtTime(BASICALLY_ZERO, endTime);
         

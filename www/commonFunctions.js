@@ -1,3 +1,4 @@
+// These functions are adapted from the angularjs source code
 function equals(o1, o2) {
   if (o1 === o2) return true;
   if (o1 === null || o2 === null) return false;

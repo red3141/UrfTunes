@@ -296,7 +296,7 @@ var songBuilder = (function (seedrandom) {
         if (context) {
             // Audio context already exists. Resume instead of creating a new one.
             context.resume();
-            doVisualization(analyzer);
+            visualization.start(analyzer);
             return;
         }
         song = song || currentSong;
@@ -308,7 +308,7 @@ var songBuilder = (function (seedrandom) {
         context = new (window.AudioContext || window.webkitAudioContext)();
         analyzer = context.createAnalyser();
         analyzer.connect(context.destination);
-        doVisualization(analyzer);
+        visualization.start(analyzer);
 
         audioRecorder = new WebAudioRecorder(analyzer, {
             workerDir: "./",
@@ -646,7 +646,7 @@ var songBuilder = (function (seedrandom) {
         if (context)
             context.suspend();
         $('#play').text('Play');
-        stopVisualization();
+        visualization.stop();
     }
 
     function playOrPause() {
@@ -670,7 +670,7 @@ var songBuilder = (function (seedrandom) {
         if (context.close)
             context.close();
         context = null;
-        stopVisualization();
+        visualization.stop();
 
         // Clear the visualization canvas and the displayed champion set
         window.requestAnimationFrame(function () {
@@ -678,7 +678,7 @@ var songBuilder = (function (seedrandom) {
             var canvasContext = canvas.getContext('2d');
             canvasContext.clearRect(0, 0, canvas.width, canvas.height);
         });
-        clearChampionSet();
+        visualization.clearChampionSet();
     }
 
     return {

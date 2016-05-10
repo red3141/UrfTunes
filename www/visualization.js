@@ -25,15 +25,21 @@ var visualization = (function() {
 
     var isVisualizationStopped = true;
 
+    function updateCanvasSize() {
+        var canvas = document.getElementById('visualizationArea');
+        canvas.width = 0;
+        canvas.width = Math.max(512, $(document).width());
+    }
+    
     // Starts or resumes the visualization
     function start(analyzer) {
         isVisualizationStopped = false;
         var canvas = document.getElementById('visualizationArea');
         var canvasContext = canvas.getContext('2d');
-        canvas.width = 0;
-        canvas.width = Math.max(512, $(document).width());
+        updateCanvasSize();
+        $(window).off('resize', updateCanvasSize);
+        $(window).on('resize', updateCanvasSize);
         
-        var width = canvas.width;
         var height = canvas.height;
         analyzer.fftSize = 1024;
         var bufferLength = analyzer.frequencyBinCount;
@@ -43,6 +49,7 @@ var visualization = (function() {
         
             analyzer.getByteFrequencyData(dataArray);
             
+            var width = canvas.width;
             canvasContext.clearRect(0, 0, width, height);
             
             var barWidth = (width / bufferLength);
@@ -67,6 +74,7 @@ var visualization = (function() {
 
     // Stops or pauses the visualization to free up resources
     function stop() {
+        $(window).off('resize', updateCanvasSize);
         isVisualizationStopped = true;
     }
     

@@ -82,11 +82,10 @@ Ways to make songs more interesting / varying
 TODO before cutoff date:
 Must have:
 - Write-up of what it does & development process
-- Test on less powerful computer
-Nice to have:
-- Make it work on smart phones
-- Fix background sounds
+- Update server
 - Fix seeding so each champion is only part of one seed?
-- Variation on drum beat
+- Highlight some songs
+Nice to have:
+- Different endings
 - Special section types
 - Special transitions

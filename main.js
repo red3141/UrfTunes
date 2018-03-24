@@ -103,17 +103,19 @@
         var summonerNotFound = false;
         $('#notFoundErrorMessage').hide();
         $('#serverDownErrorMessage').hide();
-        $.ajax({
+        // These lines are commented because the server is down For an intefinite period of time. Skip straight to the JSOn request to improve load time.
+        /*$.ajax({
             url: 'http://172.81.178.14:8080/' + region + '/' + normalizedSummonerName,
             dataType: 'json'
-        }).then(null, function(response) {
+        }).then(null, function(response) {*/
             // If the request failed, maybe the server is down. Try to get pre-cached data.
-            summonerNotFound = response && response.readyState === 4 && response.status === 404;
+            //summonerNotFound = response && response.readyState === 4 && response.status === 404;
             return $.ajax({
                 url: 'json/' + normalizedSummonerName + '-' + region + ".json",
                 dataType: 'json'
-            });
-        }).then(function(championMasteryLevels) {
+            })
+        //})
+        .then(function(championMasteryLevels) {
             for (var i = 0; i < championNames.length; ++i) {
                 if (!championMasteryLevels[championNames[i]]) {
                     championMasteryLevels[championNames[i]] = 0;

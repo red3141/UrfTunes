@@ -168,7 +168,7 @@ class LastUpdatedOrderedDict(OrderedDict):
             del self[key]
         elif len(self) >= self.maxSize:
             # Remove the least recently used cached data
-            OrderedDict.popitem(last=False)
+            self.popitem(last=False)
         OrderedDict.__setitem__(self, key, value)
 
 # This least-recently-used cache will store retrieved champion mastery levels in the form:
@@ -249,7 +249,7 @@ class Handler(BaseHTTPRequestHandler):
         f = urllib2.urlopen("https://" + region + ".api.pvp.net/championmastery/location/" + regionToLocationMap[region] +
             "/player/" + str(summonerId) + "/champions?api_key=" + key)
         j = json.loads(f.read())
-        return {championIdToNameMap[x["championId"]] : x["championLevel"] for x in j}
+        return {championIdToNameMap[x["championId"]] : x["championLevel"] for x in j if x["championId"] in championIdToNameMap}
         
 
 class GetChampionMasteryLevelsServer(ThreadingMixIn, HTTPServer):
